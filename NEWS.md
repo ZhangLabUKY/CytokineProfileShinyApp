@@ -1,8 +1,18 @@
+# CytokineProfileShinyApp 0.0.2
+
+- The development and deployment renv environment now uses R 4.6.1 and Bioconductor 3.23. The declared R minimum is 4.4; older R installations need compatible dependency versions and separate compatibility validation.
+- Changing source data, filters, row deletions, applied column types, or transformations now clears stale imputation and asks users to reapply it. Navigation preserves valid imputation.
+- Switching built-in datasets or replacing an upload now verifies the staged source before reading it, preventing downstream steps from using the previous dataset.
+- Grouped results use unique internal plot IDs, including when labels differ only by punctuation or contain Unicode.
+- Repeated sPLS-DA runs replace obsolete interactive-modal observers.
+- Result displays refresh after an analysis completes, including when the previous cached display was empty.
+- XGBoost now supports a single numeric predictor, stratifies the holdout split by outcome group, and validates predictor types, group sizes, and CV folds before fitting. Validation guidance remains visible in the app.
+- Browser recordings remain local with the developer's Chrome pin and reviewed snapshot baselines. GitHub skips browser startup while retaining package, server, analysis, coverage, and locked-environment checks.
+- Connect Cloud deployments use renv.lock directly, with the locked R/Bioconductor environment checked in CI. One-time migration/publishing wrappers have been removed.
+- Privacy and tutorial pages are included in installed apps; generated plot PDFs are excluded from packages and deployment.
+- Runtime dependencies and test-only dependencies are declared separately. Ordinary startup only activates renv.
+
 # CytokineProfileShinyApp 0.0.1
-
-*To be updated.*
-
-# CytokineProfileShinyApp 0.0.0.9000
 
 This development build focuses on making the app easier to use, easier to read, and more reliable.
 

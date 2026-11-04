@@ -137,6 +137,7 @@ mod_navigation_server <- function(input, output, session, app_ctx) {
   })
 
   resetState <- function() {
+    imputation_guard$clear(notify = FALSE)
     # General state
     userState$selected_columns = NULL
     userState$selected_categorical_cols = NULL
@@ -1691,7 +1692,7 @@ mod_navigation_server <- function(input, output, session, app_ctx) {
   })
   # C) Base reactive to apply row deletions and categorical filters
   # 1. Always keep the filtered-but-raw data
-  raw_filtered <- shiny::reactive({
+  raw_filtered_now <- shiny::reactive({
     df <- step2_typed_data()
     col_info <- step2_typed_col_info()
     # (1) apply any row deletions
@@ -1712,8 +1713,8 @@ mod_navigation_server <- function(input, output, session, app_ctx) {
       }
     }
     df
-  }) |>
-    shiny::debounce(500)
+  })
+  raw_filtered <- shiny::debounce(raw_filtered_now, 500)
 
   step2_scale_label <- function(scale_choice) {
     switch(
@@ -1725,8 +1726,7 @@ mod_navigation_server <- function(input, output, session, app_ctx) {
     )
   }
 
-  data_after_filters <- shiny::reactive({
-    df <- raw_filtered()
+  preprocess_filtered_data <- function(df) {
     shiny::req(df)
     scale_choice <- input$step2_scale %||% "none"
     if (!identical(scale_choice, "none")) {
@@ -1752,12 +1752,37 @@ mod_navigation_server <- function(input, output, session, app_ctx) {
       }
     }
     df
+  }
+
+  data_after_filters <- shiny::reactive({
+    preprocess_filtered_data(raw_filtered())
   }) |>
     shiny::debounce(500)
 
+  imputation_source <- shiny::reactive({
+    list(
+      data = preprocess_filtered_data(raw_filtered_now()),
+      upload = input$datafile,
+      bioplex_upload = input$bioplex_file,
+      sheet = input$sheet_name,
+      builtin = list(input$use_builtin, input$built_in_choice),
+      types = app_ctx$step2_applied_type_state(),
+      scale = input$step2_scale %||% "none",
+      numeric_columns = input$selected_numerical_cols,
+      categorical_columns = input$selected_categorical_cols,
+      filters = lapply(input$selected_categorical_cols, function(col) {
+        input[[paste0("filter_", col)]]
+      }),
+      deleted_rows = userState$deleted_row_ids
+    )
+  })
+  imputation_guard <- app_imputation_guard(
+    imputation_source, imputed_data, userState, session
+  )
+
   data_after_imputation <- shiny::reactive({
     dat <- data_after_filters()
-    imp <- imputed_data()
+    imp <- imputation_guard$current()
     if (!is.null(imp)) {
       return(imp)
     }
@@ -1765,9 +1790,7 @@ mod_navigation_server <- function(input, output, session, app_ctx) {
   }) |>
     shiny::debounce(500)
 
-  # D) The main filteredData() used by DT
-  filteredData <- shiny::reactive({
-    df <- data_after_imputation()
+  select_working_columns <- function(df) {
     shiny::req(df)
     cols_to_keep <-
       if (currentStep() >= 3) {
@@ -1781,6 +1804,19 @@ mod_navigation_server <- function(input, output, session, app_ctx) {
     # Always keep the internal ID for deletes
     final_cols <- union(cols_to_keep, "..cyto_id..")
     df[, intersect(names(df), final_cols), drop = FALSE]
+  }
+
+  # The preview remains debounced. Analyses use the current source snapshot so
+  # a quick Run click cannot capture a preview from before imputation cleared.
+  analysis_data <- shiny::reactive({
+    df <- imputation_guard$current()
+    if (is.null(df)) df <- imputation_source()$data
+    select_working_columns(df)
+  })
+
+  # D) The main filteredData() used by DT
+  filteredData <- shiny::reactive({
+    select_working_columns(data_after_imputation())
   }) |>
     shiny::debounce(500)
 
@@ -2145,7 +2181,8 @@ mod_navigation_server <- function(input, output, session, app_ctx) {
   }
   shiny::observeEvent(input$apply_impute, {
     impute_method <- input[[ui_imputation_method_input_id()]]
-    df <- data_after_filters() # <-- impute the *filtered* data
+    source_snapshot <- imputation_source()
+    df <- source_snapshot$data
     sel <- input$imp_cols
     sel <- intersect(sel, names(df))
     numeric_sel <- sel[vapply(df[sel], is.numeric, logical(1))]
@@ -2191,13 +2228,12 @@ mod_navigation_server <- function(input, output, session, app_ctx) {
     if (is.null(dat_imp)) {
       return()
     }
-    imputed_data(dat_imp)
-    userState$impute_meta <- list(
+    imputation_guard$store(dat_imp, list(
       method = impute_method,
       k = input$imp_k %||% 5,
       cols = sel,
       scaled = isTRUE(input$imp_scale)
-    )
+    ), snapshot = source_snapshot)
     shiny::removeModal()
   })
 

@@ -10,7 +10,7 @@ Commit](https://img.shields.io/github/last-commit/ZhangLabUKY/CytokineProfileShi
 [![R-CMD-check](https://github.com/ZhangLabUKY/CytokineProfileShinyApp/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ZhangLabUKY/CytokineProfileShinyApp/actions/workflows/R-CMD-check.yaml)
 
 **Development Version:**
-[![](https://img.shields.io/badge/devel%20version-0.0.1.9000-green.svg)](https://github.com/ZhangLabUKY/CytokineProfileShinyApp/tree/devel)
+[![](https://img.shields.io/badge/devel%20version-0.0.2-green.svg)](https://github.com/ZhangLabUKY/CytokineProfileShinyApp/tree/devel)
 [![R-CMD-check.yaml](https://github.com/ZhangLabUKY/CytokineProfileShinyApp/actions/workflows/R-CMD-check.yaml/badge.svg?branch=devel)](https://github.com/ZhangLabUKY/CytokineProfileShinyApp/actions/workflows/R-CMD-check.yaml)
 [![Last
 Commit](https://img.shields.io/github/last-commit/ZhangLabUKY/CytokineProfileShinyApp/devel.svg)](https://github.com/ZhangLabUKY/CytokineProfileShinyApp/commits/devel)

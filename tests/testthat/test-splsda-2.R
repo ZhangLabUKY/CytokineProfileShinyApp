@@ -1,16 +1,15 @@
-library(shinytest2)
-
 test_that("{shinytest2} recording: sPLSDA-Group-Treatment", {
     skip_on_cran()
     skip_if_appdriver_disabled()
-    app_dir <- testthat::test_path("../../inst/app")
-    app <- AppDriver$new(
+    app_dir <- appdriver_app_dir()
+    app <- shinytest2::AppDriver$new(
         app_dir,
-        variant = platform_variant(),
+        variant = app_snapshot_variant(),
         name = "splsda-group-trt",
         load_timeout = 30000,
         timeout = 30000
     )
+    withr::defer(app$stop())
     app$click("nav_start_home")
     app$wait_for_idle(4000)
 
@@ -72,6 +71,6 @@ test_that("{shinytest2} recording: sPLSDA-Group-Treatment", {
     app$wait_for_idle(4000)
     app$click("next4", timeout_ = 60000)
     app$wait_for_idle(15000)
-    app$expect_screenshot(name = "results_group_treatment")
+    app$expect_screenshot(name = "results")
     app$stop()
 })

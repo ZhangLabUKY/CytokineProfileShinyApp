@@ -34,11 +34,11 @@ cyt_xgb(
 }
 \arguments{
 \item{data}{A data frame containing numeric predictor variables and one
-grouping column.  Non-numeric predictor columns will be coerced to
-numeric if possible.}
+grouping column. Remove non-numeric predictor columns before fitting.}
 
 \item{group_col}{Character string naming the column that contains the class
-labels (target variable).  Required.}
+labels (target variable). Required. All other columns must be numeric;
+remove categorical metadata columns before fitting.}
 
 \item{train_fraction}{Numeric between 0 and 1 specifying the proportion of
 samples used for model training.  Default is \code{0.7}.}

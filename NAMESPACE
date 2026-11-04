@@ -26,129 +26,172 @@ export(run_app)
 import(dplyr)
 import(ggcorrplot)
 import(ggplot2)
-import(shinytest2)
 importFrom(Ckmeans.1d.dp,Ckmeans.1d.dp)
-importFrom(DT,DTOutput)
-importFrom(DT,JS)
-importFrom(DT,dataTableOutput)
-importFrom(DT,dataTableProxy)
-importFrom(DT,datatable)
-importFrom(DT,renderDT)
-importFrom(DT,renderDataTable)
-importFrom(DT,replaceData)
-importFrom(bslib,accordion)
-importFrom(bslib,accordion_panel)
-importFrom(bslib,bs_theme)
-importFrom(bslib,bs_theme_update)
-importFrom(bslib,card)
-importFrom(bslib,card_body)
-importFrom(bslib,card_footer)
-importFrom(bslib,card_header)
-importFrom(bslib,font_google)
-importFrom(bslib,nav_panel)
-importFrom(bslib,navset_card_tab)
-importFrom(bslib,popover)
-importFrom(caret,confusionMatrix)
-importFrom(caret,createDataPartition)
-importFrom(caret,train)
-importFrom(caret,trainControl)
+importFrom(DT,
+  DTOutput,
+  JS,
+  dataTableOutput,
+  dataTableProxy,
+  datatable,
+  renderDT,
+  renderDataTable,
+  replaceData
+)
+importFrom(bslib,
+  accordion,
+  accordion_panel,
+  bs_theme,
+  bs_theme_update,
+  card,
+  card_body,
+  card_footer,
+  card_header,
+  font_google,
+  nav_panel,
+  navset_card_tab,
+  popover
+)
+importFrom(caret,
+  confusionMatrix,
+  createDataPartition,
+  train,
+  trainControl
+)
 importFrom(config,get)
 importFrom(data.table,copy)
-importFrom(dplyr,arrange)
-importFrom(dplyr,desc)
-importFrom(dplyr,mutate)
-importFrom(dplyr,row_number)
-importFrom(e1071,kurtosis)
-importFrom(e1071,skewness)
+importFrom(dplyr,
+  arrange,
+  desc,
+  mutate,
+  row_number
+)
+importFrom(e1071,
+  kurtosis,
+  skewness
+)
 importFrom(fontawesome,fa)
 importFrom(ggrepel,geom_text_repel)
-importFrom(grDevices,colorRampPalette)
-importFrom(grDevices,dev.off)
-importFrom(grDevices,pdf)
-importFrom(grDevices,rainbow)
-importFrom(grDevices,recordPlot)
-importFrom(grDevices,replayPlot)
-importFrom(graphics,legend)
-importFrom(graphics,mtext)
-importFrom(graphics,plot.new)
-importFrom(graphics,title)
+importFrom(grDevices,
+  colorRampPalette,
+  dev.off,
+  pdf,
+  rainbow,
+  recordPlot,
+  replayPlot
+)
+importFrom(graphics,
+  legend,
+  mtext,
+  plot.new,
+  title
+)
 importFrom(gridExtra,grid.arrange)
 importFrom(impute,impute.knn)
 importFrom(lifecycle,deprecated)
-importFrom(mixOmics,auroc)
-importFrom(mixOmics,background.predict)
-importFrom(mixOmics,cim)
-importFrom(mixOmics,mint.splsda)
-importFrom(mixOmics,pca)
-importFrom(mixOmics,perf)
-importFrom(mixOmics,plotIndiv)
-importFrom(mixOmics,plotLoadings)
-importFrom(mixOmics,plotVar)
-importFrom(mixOmics,pls)
-importFrom(mixOmics,spls)
-importFrom(mixOmics,splsda)
-importFrom(mixOmics,vip)
-importFrom(pROC,auc)
-importFrom(pROC,ggroc)
-importFrom(pROC,roc)
-importFrom(patchwork,plot_annotation)
-importFrom(patchwork,wrap_plots)
+importFrom(mixOmics,
+  auroc,
+  background.predict,
+  cim,
+  mint.splsda,
+  pca,
+  perf,
+  plotIndiv,
+  plotLoadings,
+  plotVar,
+  pls,
+  spls,
+  splsda,
+  vip
+)
+importFrom(pROC,
+  auc,
+  ggroc,
+  roc
+)
+importFrom(patchwork,
+  plot_annotation,
+  wrap_plots
+)
 importFrom(pheatmap,pheatmap)
 importFrom(plot3D,scatter3D)
-importFrom(randomForest,importance)
-importFrom(randomForest,randomForest)
-importFrom(randomForest,rfcv)
-importFrom(readxl,excel_sheets)
-importFrom(readxl,read_excel)
-importFrom(recipes,bake)
-importFrom(recipes,prep)
-importFrom(recipes,recipe)
-importFrom(recipes,step_impute_knn)
-importFrom(recipes,step_normalize)
+importFrom(randomForest,
+  importance,
+  randomForest,
+  rfcv
+)
+importFrom(readxl,
+  excel_sheets,
+  read_excel
+)
+importFrom(recipes,
+  bake,
+  prep,
+  recipe,
+  step_impute_knn,
+  step_normalize
+)
 importFrom(reshape2,melt)
-importFrom(rlang,"%||%")
-importFrom(rlang,.data)
-importFrom(shinyFeedback,feedbackWarning)
-importFrom(shinyFeedback,hideFeedback)
-importFrom(shinyWidgets,progressBar)
-importFrom(shinyWidgets,updateProgressBar)
+importFrom(rlang,
+  "%||%",
+  .data
+)
+importFrom(shinyFeedback,
+  feedbackWarning,
+  hideFeedback
+)
+importFrom(shinyWidgets,
+  progressBar,
+  updateProgressBar
+)
 importFrom(shinycssloaders,withSpinner)
-importFrom(shinyhelper,helper)
-importFrom(shinyhelper,observe_helpers)
-importFrom(shinyjs,addClass)
-importFrom(shinyjs,hidden)
-importFrom(shinyjs,hide)
-importFrom(shinyjs,removeClass)
-importFrom(shinyjs,runjs)
-importFrom(shinyjs,show)
-importFrom(shinyjs,toggle)
-importFrom(shinyjs,useShinyjs)
+importFrom(shinyhelper,
+  helper,
+  observe_helpers
+)
+importFrom(shinyjs,
+  addClass,
+  hidden,
+  hide,
+  removeClass,
+  runjs,
+  show,
+  toggle,
+  useShinyjs
+)
 importFrom(skimr,skim)
-importFrom(stats,TukeyHSD)
-importFrom(stats,aov)
-importFrom(stats,as.formula)
-importFrom(stats,kruskal.test)
-importFrom(stats,mad)
-importFrom(stats,median)
-importFrom(stats,na.omit)
-importFrom(stats,p.adjust)
-importFrom(stats,predict)
-importFrom(stats,reorder)
-importFrom(stats,sd)
-importFrom(stats,setNames)
-importFrom(stats,shapiro.test)
-importFrom(stats,t.test)
-importFrom(stats,wilcox.test)
-importFrom(tidyr,pivot_longer)
-importFrom(tidyr,pivot_wider)
-importFrom(utils,capture.output)
-importFrom(utils,getFromNamespace)
-importFrom(utils,head)
-importFrom(utils,tail)
+importFrom(stats,
+  TukeyHSD,
+  aov,
+  as.formula,
+  kruskal.test,
+  mad,
+  median,
+  na.omit,
+  p.adjust,
+  predict,
+  reorder,
+  sd,
+  setNames,
+  shapiro.test,
+  t.test,
+  wilcox.test
+)
+importFrom(tidyr,
+  pivot_longer,
+  pivot_wider
+)
+importFrom(utils,
+  capture.output,
+  getFromNamespace,
+  head,
+  tail
+)
 importFrom(vroom,vroom)
-importFrom(xgboost,getinfo)
-importFrom(xgboost,xgb.DMatrix)
-importFrom(xgboost,xgb.cv)
-importFrom(xgboost,xgb.ggplot.importance)
-importFrom(xgboost,xgb.importance)
-importFrom(xgboost,xgb.train)
+importFrom(xgboost,
+  getinfo,
+  xgb.DMatrix,
+  xgb.cv,
+  xgb.ggplot.importance,
+  xgb.importance,
+  xgb.train
+)

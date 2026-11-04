@@ -4,6 +4,7 @@ on:
   push:
     branches: [main, master, devel]
   pull_request:
+  workflow_dispatch:
   schedule:
     - cron: '0 10 * * 1'
 
@@ -15,6 +16,8 @@ jobs:
   test-coverage:
     runs-on: ubuntu-latest
     env:
+      RENV_CONFIG_AUTOLOADER_ENABLED: 'false'
+      CYTOKINEPROFILE_RUN_APPDRIVER: 'false'
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:

@@ -1,16 +1,15 @@
-library(shinytest2)
-
 test_that("{shinytest2} recording: sPLSDA-group", {
     skip_on_cran()
     skip_if_appdriver_disabled()
-    app_dir <- testthat::test_path("../../inst/app")
-    app <- AppDriver$new(
+    app_dir <- appdriver_app_dir()
+    app <- shinytest2::AppDriver$new(
         app_dir,
-        variant = platform_variant(),
+        variant = app_snapshot_variant(),
         name = "splsda-group",
         load_timeout = 30000,
         timeout = 30000
     )
+    withr::defer(app$stop())
     app$click("nav_start_home")
     app$wait_for_idle(4000)
 

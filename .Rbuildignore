@@ -28,7 +28,6 @@
 ^benchmark_shiny_app\.R$
 ^ShinyLoadTest$
 ^app\.R$
-^TUTORIALS.md$
 ^config.yml$
 ^benchmark-results$
 _\.new\.png$
@@ -39,3 +38,8 @@ _\.new\.png$
 ^app_server_stages\.baseline\.R$
 ^notes$
 ^codecov\.yml$
+^\.upgrade-backup$
+^\.upgrade-library$
+\.r453\.bak$
+(^|/)Rplots\.pdf$
+(^|/)debug\.log$

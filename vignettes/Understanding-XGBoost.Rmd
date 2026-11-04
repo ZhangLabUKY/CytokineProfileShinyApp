@@ -34,6 +34,8 @@ XGBoost is usually not the best first choice when:
 
 This example uses the `ExampleData1` dataset after filtering to subjects with Pre-Diabetes (PreT2D) and Type 2 Diabetes (T2D).
 
+Before running XGBoost, keep the outcome group and numeric predictor columns selected in Step 2. Deselect other categorical metadata columns. Each outcome group must have samples in both the training and test sets. If the app rejects a small group, reduce the training fraction or add samples; the number of CV folds must not exceed the training sample count in the smallest group.
+
 ## Which app arguments matter most
 
 The arguments that most affect interpretation are:

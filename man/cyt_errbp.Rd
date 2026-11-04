@@ -90,7 +90,7 @@ Default is \code{4}.}
 \item{fill_palette}{Character vector of colors for the group bars. If
 \code{NULL} (default), all bars are filled with \code{"gray80"}.
 Supply one color per group level (e.g. \code{c("#4E79A7", "#F28E2B",
-  "#E15759")}).}
+"#E15759")}).}
 
 \item{font_settings}{Optional named list of font sizes for supported plot
 text elements.}

@@ -31,11 +31,13 @@ app_content_file <- function(...) {
   candidates <- unique(c(
     file.path(app_source_root(), rel_path),
     file.path(getwd(), rel_path),
-    app_source_app_file(rel_path)
+    app_source_app_file(rel_path),
+    app_installed_file(rel_path),
+    system.file(rel_path, package = app_package_name())
   ))
 
   for (candidate in candidates) {
-    if (file.exists(candidate)) {
+    if (nzchar(candidate) && file.exists(candidate)) {
       return(normalizePath(candidate, winslash = "/", mustWork = TRUE))
     }
   }
@@ -152,7 +154,7 @@ app_description_field <- function(field, default = NULL) {
 }
 
 app_version_string <- function() {
-  as.character(app_description_field("Version", default = "0.0.0.9000"))
+  as.character(app_description_field("Version", default = "0.0.2"))
 }
 
 app_temp_root_name <- function() {

@@ -6,10 +6,10 @@
 #' and visualizes feature importance.
 #'
 #' @param data A data frame containing numeric predictor variables and one
-#'   grouping column.  Non-numeric predictor columns will be coerced to
-#'   numeric if possible.
+#'   grouping column. Remove non-numeric predictor columns before fitting.
 #' @param group_col Character string naming the column that contains the class
-#'   labels (target variable).  Required.
+#'   labels (target variable). Required. All other columns must be numeric;
+#'   remove categorical metadata columns before fitting.
 #' @param train_fraction Numeric between 0 and 1 specifying the proportion of
 #'   samples used for model training.  Default is \code{0.7}.
 #' @param nrounds Integer specifying the number of boosting rounds.  Default
@@ -112,6 +112,7 @@ cyt_xgb <- function(
   font_settings = NULL,
   progress = NULL
 ) {
+  invalid_input <- function(message) stop(app_user_safe_error(message))
   format_class_balance <- function(values, labels = NULL) {
     factor_values <- if (is.null(labels)) {
       droplevels(as.factor(values))
@@ -135,8 +136,12 @@ cyt_xgb <- function(
     progress$set(message = "Running XGBoost...", value = 0)
   }
 
-  names(data) <- make.names(names(data), unique = TRUE)
   data <- as.data.frame(data)
+  original_names <- names(data)
+  names(data) <- make.names(original_names, unique = TRUE)
+  if (length(group_col) == 1L && group_col %in% original_names) {
+    group_col <- names(data)[match(group_col, original_names)]
+  }
   scale <- match.arg(scale)
   resolved_fonts <- normalize_font_settings(
     font_settings = font_settings,
@@ -154,7 +159,24 @@ cyt_xgb <- function(
   )
 
   if (!group_col %in% names(data)) {
-    stop(sprintf("Column '%s' not found in data.", group_col))
+    invalid_input(sprintf("Column '%s' not found in data.", group_col))
+  }
+  predictors <- setdiff(names(data), group_col)
+  if (!length(predictors)) {
+    invalid_input("Choose at least one numeric predictor column before running XGBoost.")
+  }
+  if (!all(vapply(data[predictors], is.numeric, logical(1)))) {
+    invalid_input("XGBoost needs numeric predictors. Deselect categorical columns other than the outcome in Step 2.")
+  }
+  if (anyNA(data[[group_col]])) {
+    invalid_input("Remove rows with missing outcome groups before running XGBoost.")
+  }
+  if (any(vapply(data[predictors], function(x) any(is.infinite(x)), logical(1)))) {
+    invalid_input("Replace infinite predictor values before running XGBoost.")
+  }
+  if (length(train_fraction) != 1L || !is.finite(train_fraction) ||
+      train_fraction <= 0 || train_fraction >= 1) {
+    invalid_input("Choose a training fraction strictly between 0 and 1.")
   }
 
   # 1. Scaling via shared utility
@@ -178,6 +200,12 @@ cyt_xgb <- function(
   data[[group_col]] <- as.factor(data[[group_col]])
   original_group <- droplevels(data[[group_col]])
   class_labels <- levels(original_group)
+  if (length(class_labels) < 2L) {
+    invalid_input("Grouping variable must have at least two levels.")
+  }
+  if (any(table(original_group) < 2L)) {
+    invalid_input("Each outcome group needs at least two samples for a train/test split.")
+  }
   class_mapping <- stats::setNames(seq_along(class_labels) - 1L, class_labels)
 
   if (print_results) {
@@ -200,14 +228,25 @@ cyt_xgb <- function(
     progress$inc(0.05, detail = "Splitting data into training and test sets")
   }
   set.seed(seed)
-  train_idx <- caret::createDataPartition(y, p = train_fraction, list = FALSE)
-  X_train <- X[train_idx, ]
+  train_idx <- as.integer(caret::createDataPartition(
+    original_group, p = train_fraction, list = FALSE
+  ))
+  X_train <- X[train_idx, , drop = FALSE]
   y_train <- y[train_idx]
-  X_test <- X[-train_idx, ]
+  X_test <- X[-train_idx, , drop = FALSE]
   y_test <- y[-train_idx]
   total_samples <- nrow(X)
   train_samples <- nrow(X_train)
   test_samples <- nrow(X_test)
+  class_levels <- seq_along(class_labels) - 1L
+  if (!all(class_levels %in% y_train) || !all(class_levels %in% y_test)) {
+    invalid_input("Every group must appear in training and test data. Reduce the training fraction or add samples to small groups.")
+  }
+  if (isTRUE(cv) && (length(nfold) != 1L || !is.finite(nfold) ||
+      nfold < 2 || nfold != as.integer(nfold) ||
+      nfold > min(table(factor(y_train, levels = class_levels))))) {
+    invalid_input("Choose at least two CV folds and no more than the training samples in the smallest group.")
+  }
 
   dtrain <- xgboost::xgb.DMatrix(data = X_train, label = y_train)
   dtest <- xgboost::xgb.DMatrix(data = X_test, label = y_test)
@@ -279,7 +318,8 @@ cyt_xgb <- function(
     progress$inc(0.05, detail = "Building feature importance plot")
   }
   importance_matrix <- xgboost::xgb.importance(
-    feature_names = colnames(X_train),
+    # Keep a length-one feature vector as a JSON array in XGBoost 3.x.
+    feature_names = I(colnames(X_train)),
     model = xgb_model
   )
   top_features <- utils::head(importance_matrix, top_n_features)
@@ -409,6 +449,7 @@ cyt_xgb <- function(
       data = dtrain,
       nrounds = nrounds,
       nfold = nfold,
+      stratified = TRUE,
       early_stopping_rounds = early_stopping_rounds,
       verbose = verbose,
       prediction = TRUE

@@ -26,8 +26,11 @@ server.R
 benchmark-results/
 # {shinytest2}: Ignore new debug snapshots for `$expect_values()`
 *_.new.png
-.Rprofile
 .posit
-/scripts
-notes
+/scripts/*
+notes/
+/.upgrade-backup/
+/.upgrade-library/
+/manifest.json
+*.r453.bak
 app_server_stages.baseline.R

@@ -133,3 +133,6 @@ After this overview, the next useful articles are:
 
 ------------------------------------------------------------------------
 *Last updated:* `r format(Sys.Date(), "%B %d, %Y")`
+
+
+If you apply imputation and then change the source data or preprocessing choices, the app clears the imputed data and asks you to apply imputation again. Moving between wizard steps preserves imputation when the data and preprocessing are unchanged.

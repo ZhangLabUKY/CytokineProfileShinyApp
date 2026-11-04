@@ -22,6 +22,5 @@
 #' @importFrom skimr skim
 #' @importFrom vroom vroom
 #' @importFrom utils getFromNamespace
-#' @import shinytest2
 ## usethis namespace: end
 NULL

@@ -1,7 +1,8 @@
 mod_analysis_results_server <- function(input, output, session, app_ctx) {
   stage_env <- app_stage_init(app_ctx)
   userState <- app_ctx$userState
-  filteredData <- app_ctx$filteredData
+  result_observers <- app_result_observers(session)
+  filteredData <- app_ctx$analysis_data %||% app_ctx$filteredData
   selected_function <- app_ctx$selected_function
   userData <- app_ctx$userData
   get_analysis_font_spec <- app_ctx$get_analysis_font_spec
@@ -15,6 +16,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
   errorMessage <- shiny::reactiveVal(NULL)
   technicalErrorMessage <- shiny::reactiveVal(NULL)
   warningMessage <- shiny::reactiveVal(character())
+  analysis_revision <- shiny::reactiveVal(0L)
 
   parse_numeric_input <- function(x) {
     if (is.null(x) || !nzchar(trimws(x))) {
@@ -1098,12 +1100,13 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
   })
 
   shiny::observeEvent(analysisResult(), {
+    analysis_revision(shiny::isolate(analysis_revision()) + 1L)
     shiny::req(analysisResult())
     if (!shiny::isTruthy(errorMessage())) {
       currentPage("step5")
       currentStep(5)
     }
-  })
+  }, ignoreNULL = FALSE, priority = 100)
 
   shiny::observeEvent(errorMessage(), {
     err <- errorMessage()
@@ -1420,7 +1423,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                           "sPLS-DA Plot",
                           shinycssloaders::withSpinner(
                             shiny::plotOutput(
-                              paste0("splsda_overallIndivPlot_", trt),
+                              paste0("splsda_overallIndivPlot_", app_label_id(trt)),
                               height = "500px"
                             ),
                             type = 8
@@ -1429,14 +1432,14 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                         shiny::tabPanel(
                           "Loadings",
                           shinycssloaders::withSpinner(
-                            shiny::uiOutput(paste0("splsda_loadingsUI_", trt)),
+                            shiny::uiOutput(paste0("splsda_loadingsUI_", app_label_id(trt))),
                             type = 8
                           )
                         ),
                         shiny::tabPanel(
                           "VIP Scores",
                           shinycssloaders::withSpinner(
-                            shiny::uiOutput(paste0("splsda_vipScoresUI_", trt)),
+                            shiny::uiOutput(paste0("splsda_vipScoresUI_", app_label_id(trt))),
                             type = 8
                           )
                         ),
@@ -1445,7 +1448,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                             "VIP Model Plot",
                             shinycssloaders::withSpinner(
                               shiny::plotOutput(
-                                paste0("splsda_vipIndivPlot_", trt),
+                                paste0("splsda_vipIndivPlot_", app_label_id(trt)),
                                 height = "500px"
                               ),
                               type = 8
@@ -1458,7 +1461,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                             shinycssloaders::withSpinner(
                               shiny::uiOutput(paste0(
                                 "splsda_vipLoadingsUI_",
-                                trt
+                                app_label_id(trt)
                               )),
                               type = 8
                             )
@@ -1469,14 +1472,14 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                             "3D Plot",
                             shinycssloaders::withSpinner(
                               shiny::plotOutput(
-                                paste0("splsda_overall3DPlot_", trt),
+                                paste0("splsda_overall3DPlot_", app_label_id(trt)),
                                 height = "500px"
                               ),
                               type = 8
                             ),
                             shiny::br(),
                             shiny::actionButton(
-                              paste0("splsda_show3d_interactive_", trt),
+                              paste0("splsda_show3d_interactive_", app_label_id(trt)),
                               "Interactive 3D",
                               icon = shiny::icon("fas fa-cube")
                             ),
@@ -1488,14 +1491,14 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                             "3D Plot (VIP>1)",
                             shinycssloaders::withSpinner(
                               shiny::plotOutput(
-                                paste0("splsda_vip3DPlot_", trt),
+                                paste0("splsda_vip3DPlot_", app_label_id(trt)),
                                 height = "500px"
                               ),
                               type = 8
                             ),
                             shiny::br(),
                             shiny::actionButton(
-                              paste0("splsda_show3d_interactive_vip_", trt),
+                              paste0("splsda_show3d_interactive_vip_", app_label_id(trt)),
                               "Interactive 3D (VIP)",
                               icon = shiny::icon("fas fa-cube")
                             ),
@@ -1509,7 +1512,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                               shiny::plotOutput(
                                 paste0(
                                   "splsda_overallRocPlot_",
-                                  trt
+                                  app_label_id(trt)
                                 ),
                                 height = "400px",
                               ),
@@ -1524,7 +1527,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                               shiny::plotOutput(
                                 paste0(
                                   "splsda_overallCvPlot_",
-                                  trt
+                                  app_label_id(trt)
                                 ),
                                 height = "400px"
                               ),
@@ -1537,7 +1540,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                             "Confusion Matrix",
                             shinycssloaders::withSpinner(
                               shiny::uiOutput(
-                                paste0("splsda_confMatrix_", trt)
+                                paste0("splsda_confMatrix_", app_label_id(trt))
                               ),
                               type = 8
                             )
@@ -1642,7 +1645,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                           shinycssloaders::withSpinner(
                             shiny::plotOutput(paste0(
                               "mint_splsda_global_",
-                              trt
+                              app_label_id(trt)
                             )),
                             type = 8
                           )
@@ -1652,7 +1655,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                           shinycssloaders::withSpinner(
                             shiny::plotOutput(paste0(
                               "mint_splsda_partial_",
-                              trt
+                              app_label_id(trt)
                             )),
                             type = 8
                           )
@@ -1662,7 +1665,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                           shinycssloaders::withSpinner(
                             shiny::uiOutput(paste0(
                               "mint_splsda_loadings_",
-                              trt
+                              app_label_id(trt)
                             )),
                             type = 8
                           )
@@ -1672,7 +1675,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                           shinycssloaders::withSpinner(
                             shiny::plotOutput(paste0(
                               "mint_splsda_corr_",
-                              trt
+                              app_label_id(trt)
                             )),
                             type = 8
                           )
@@ -1682,7 +1685,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                             "CIM",
                             shinycssloaders::withSpinner(
                               shiny::plotOutput(
-                                paste0("mint_splsda_cim_", trt),
+                                paste0("mint_splsda_cim_", app_label_id(trt)),
                                 height = "600px"
                               ),
                               type = 8
@@ -1695,7 +1698,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                             shinycssloaders::withSpinner(
                               shiny::plotOutput(paste0(
                                 "mint_splsda_roc_",
-                                trt
+                                app_label_id(trt)
                               )),
                               type = 8
                             )
@@ -1787,7 +1790,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                           "PCA Plot",
                           shinycssloaders::withSpinner(
                             shiny::plotOutput(
-                              paste0("pca_indivPlot_", trt),
+                              paste0("pca_indivPlot_", app_label_id(trt)),
                               height = "400px"
                             ),
                             type = 8
@@ -1797,7 +1800,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                           "Scree Plot",
                           shinycssloaders::withSpinner(
                             shiny::plotOutput(
-                              paste0("pca_screePlot_", trt),
+                              paste0("pca_screePlot_", app_label_id(trt)),
                               height = "400px"
                             ),
                             type = 8
@@ -1806,7 +1809,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                         shiny::tabPanel(
                           "Loadings Plots",
                           shinycssloaders::withSpinner(
-                            shiny::uiOutput(paste0("pca_loadingsUI_", trt)),
+                            shiny::uiOutput(paste0("pca_loadingsUI_", app_label_id(trt))),
                             type = 8
                           )
                         ),
@@ -1814,7 +1817,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                           "Biplot",
                           shinycssloaders::withSpinner(
                             shiny::plotOutput(
-                              paste0("pca_biplot_", trt),
+                              paste0("pca_biplot_", app_label_id(trt)),
                               height = "400px"
                             ),
                             type = 8
@@ -1824,7 +1827,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                           "Correlation Circle",
                           shinycssloaders::withSpinner(
                             shiny::plotOutput(
-                              paste0("pca_corrCircle_", trt),
+                              paste0("pca_corrCircle_", app_label_id(trt)),
                               height = "400px"
                             ),
                             type = 8
@@ -1835,7 +1838,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                             "3D Plot",
                             shinycssloaders::withSpinner(
                               shiny::plotOutput(
-                                paste0("pca_3DPlot_", trt),
+                                paste0("pca_3DPlot_", app_label_id(trt)),
                                 height = "400px"
                               ),
                               type = 8
@@ -2439,6 +2442,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
     )
   }) |>
     shiny::bindCache(
+      analysis_revision(), selected_function(), errorMessage(),
       shiny::reactiveValuesToList(userState, all.names = TRUE),
       userData(),
       cache = "session"
@@ -2460,6 +2464,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
     }
   }) |>
     shiny::bindCache(
+      analysis_revision(), selected_function(), errorMessage(),
       shiny::reactiveValuesToList(userState, all.names = TRUE),
       userData(),
       cache = "session"
@@ -2484,6 +2489,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
   })
 
   shiny::observeEvent(analysisResult(), {
+    result_observers$clear()
     # Get results and function name
     res <- analysisResult()
     func_name <- selected_function()
@@ -2578,13 +2584,13 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
 
             output[[paste0(
               "splsda_overallIndivPlot_",
-              current_trt
+              app_label_id(current_trt)
             )]] <- shiny::renderPlot({
               grDevices::replayPlot(sub_res$overall_indiv_plot)
             })
             output[[paste0(
               "splsda_vipIndivPlot_",
-              current_trt
+              app_label_id(current_trt)
             )]] <- shiny::renderPlot(
               {
                 if (!is.null(sub_res$vip_indiv_plot)) {
@@ -2595,12 +2601,12 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
 
             output[[paste0(
               "splsda_loadingsUI_",
-              current_trt
+              app_label_id(current_trt)
             )]] <- shiny::renderUI({
               shiny::req(sub_res$loadings)
               lapply(seq_along(sub_res$loadings), function(i) {
                 shiny::plotOutput(
-                  paste0("splsda_loading_plot_", current_trt, "_", i),
+                  paste0("splsda_loading_plot_", app_label_id(current_trt), "_", i),
                   height = "400px"
                 )
               })
@@ -2608,7 +2614,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
             lapply(seq_along(sub_res$loadings), function(i) {
               output[[paste0(
                 "splsda_loading_plot_",
-                current_trt,
+                app_label_id(current_trt),
                 "_",
                 i
               )]] <- shiny::renderPlot({
@@ -2618,12 +2624,12 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
 
             output[[paste0(
               "splsda_vipScoresUI_",
-              current_trt
+              app_label_id(current_trt)
             )]] <- shiny::renderUI({
               shiny::req(sub_res$vip_scores)
               lapply(seq_along(sub_res$vip_scores), function(i) {
                 shiny::plotOutput(
-                  paste0("splsda_vip_plot_", current_trt, "_", i),
+                  paste0("splsda_vip_plot_", app_label_id(current_trt), "_", i),
                   height = "400px"
                 )
               })
@@ -2631,7 +2637,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
             lapply(seq_along(sub_res$vip_scores), function(i) {
               output[[paste0(
                 "splsda_vip_plot_",
-                current_trt,
+                app_label_id(current_trt),
                 "_",
                 i
               )]] <- shiny::renderPlot({
@@ -2641,12 +2647,12 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
 
             output[[paste0(
               "splsda_vipLoadingsUI_",
-              current_trt
+              app_label_id(current_trt)
             )]] <- shiny::renderUI({
               shiny::req(sub_res$vip_loadings)
               lapply(seq_along(sub_res$vip_loadings), function(i) {
                 shiny::plotOutput(
-                  paste0("splsda_vip_loading_plot_", current_trt, "_", i),
+                  paste0("splsda_vip_loading_plot_", app_label_id(current_trt), "_", i),
                   height = "400px"
                 )
               })
@@ -2654,7 +2660,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
             lapply(seq_along(sub_res$vip_loadings), function(i) {
               output[[paste0(
                 "splsda_vip_loading_plot_",
-                current_trt,
+                app_label_id(current_trt),
                 "_",
                 i
               )]] <- shiny::renderPlot({
@@ -2663,7 +2669,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
             })
             output[[paste0(
               "splsda_overall3DPlot_",
-              current_trt
+              app_label_id(current_trt)
             )]] <- shiny::renderPlot({
               if (!is.null(sub_res$overall_3D)) {
                 grDevices::replayPlot(sub_res$overall_3D)
@@ -2671,64 +2677,66 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
             })
             output[[paste0(
               "splsda_vip3DPlot_",
-              current_trt
+              app_label_id(current_trt)
             )]] <- shiny::renderPlot({
               if (!is.null(sub_res$vip_3D)) {
                 grDevices::replayPlot(sub_res$vip_3D)
               }
             })
             # ----- Interactive OVERALL 3D per-trt: open modal -----
-            shiny::observeEvent(
-              input[[paste0("splsda_show3d_interactive_", current_trt)]],
+            result_observers$add(shiny::observeEvent(
+              input[[paste0("splsda_show3d_interactive_", app_label_id(current_trt))]],
               {
                 shiny::showModal(shiny::modalDialog(
                   plotly::plotlyOutput(
-                    paste0("splsda_interactive_plot_", current_trt),
+                    paste0("splsda_interactive_plot_", app_label_id(current_trt)),
                     width = "100%",
                     height = "600px"
                   ),
                   easyClose = TRUE,
                   size = "l"
                 ))
-              }
-            )
+              },
+              ignoreInit = TRUE
+            ))
 
             # ----- Interactive OVERALL 3D per-trt: render Plotly -----
             output[[paste0(
               "splsda_interactive_plot_",
-              current_trt
+              app_label_id(current_trt)
             )]] <- plotly::renderPlotly({
               shiny::req(sub_res$overall_3D_interactive)
               sub_res$overall_3D_interactive
             })
 
             # ----- Interactive VIP 3D per-trt: open modal -----
-            shiny::observeEvent(
-              input[[paste0("splsda_show3d_interactive_vip_", current_trt)]],
+            result_observers$add(shiny::observeEvent(
+              input[[paste0("splsda_show3d_interactive_vip_", app_label_id(current_trt))]],
               {
                 shiny::showModal(shiny::modalDialog(
                   plotly::plotlyOutput(
-                    paste0("splsda_interactive_plot_vip_", current_trt),
+                    paste0("splsda_interactive_plot_vip_", app_label_id(current_trt)),
                     width = "100%",
                     height = "75vh"
                   ),
                   easyClose = TRUE,
                   size = "l"
                 ))
-              }
-            )
+              },
+              ignoreInit = TRUE
+            ))
 
             # ----- Interactive VIP 3D per-trt: render Plotly -----
             output[[paste0(
               "splsda_interactive_plot_vip_",
-              current_trt
+              app_label_id(current_trt)
             )]] <- plotly::renderPlotly({
               shiny::req(sub_res$vip_3D_interactive)
               sub_res$vip_3D_interactive
             })
             output[[paste0(
               "splsda_overallRocPlot_",
-              current_trt
+              app_label_id(current_trt)
             )]] <- shiny::renderPlot({
               if (!is.null(sub_res$overall_ROC)) {
                 grDevices::replayPlot(sub_res$overall_ROC)
@@ -2736,7 +2744,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
             })
             output[[paste0(
               "splsda_overallCvPlot_",
-              current_trt
+              app_label_id(current_trt)
             )]] <- shiny::renderPlot({
               if (!is.null(sub_res$overall_CV)) {
                 print(sub_res$overall_CV)
@@ -2744,7 +2752,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
             })
             output[[paste0(
               "splsda_confMatrix_",
-              current_trt
+              app_label_id(current_trt)
             )]] <- shiny::renderUI({
               if (!is.null(sub_res$conf_matrix)) {
                 copyable_text_block(sub_res$conf_matrix)
@@ -2826,24 +2834,24 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
             if (!is.null(sub_res)) {
               output[[paste0(
                 "mint_splsda_global_",
-                current_trt
+                app_label_id(current_trt)
               )]] <- shiny::renderPlot({
                 grDevices::replayPlot(sub_res$global_indiv_plot)
               })
               output[[paste0(
                 "mint_splsda_partial_",
-                current_trt
+                app_label_id(current_trt)
               )]] <- shiny::renderPlot({
                 grDevices::replayPlot(sub_res$partial_indiv_plot)
               })
               output[[paste0(
                 "mint_splsda_loadings_",
-                current_trt
+                app_label_id(current_trt)
               )]] <- shiny::renderUI({
                 shiny::req(sub_res$partial_loadings_plots)
                 lapply(seq_along(sub_res$partial_loadings_plots), function(i) {
                   shiny::plotOutput(
-                    paste0("mint_splsda_loading_", current_trt, "_", i),
+                    paste0("mint_splsda_loading_", app_label_id(current_trt), "_", i),
                     height = "400px"
                   )
                 })
@@ -2852,7 +2860,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
               lapply(seq_along(sub_res$partial_loadings_plots), function(i) {
                 output[[paste0(
                   "mint_splsda_loading_",
-                  current_trt,
+                  app_label_id(current_trt),
                   "_",
                   i
                 )]] <- shiny::renderPlot({
@@ -2861,13 +2869,13 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
               })
               output[[paste0(
                 "mint_splsda_corr_",
-                current_trt
+                app_label_id(current_trt)
               )]] <- shiny::renderPlot({
                 grDevices::replayPlot(sub_res$correlation_circle_plot)
               })
               output[[paste0(
                 "mint_splsda_cim_",
-                current_trt
+                app_label_id(current_trt)
               )]] <- shiny::renderPlot(
                 {
                   if (
@@ -2881,7 +2889,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
               )
               output[[paste0(
                 "mint_splsda_roc_",
-                current_trt
+                app_label_id(current_trt)
               )]] <- shiny::renderPlot({
                 if (!is.null(sub_res$roc_plot)) {
                   grDevices::replayPlot(sub_res$roc_plot)
@@ -2939,7 +2947,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
             subres <- res[[currentGroup]]
             output[[paste0(
               "pca_indivPlot_",
-              currentGroup
+              app_label_id(currentGroup)
             )]] <- shiny::renderPlot(
               {
                 if (!is.null(subres$overall_indiv_plot)) {
@@ -2947,14 +2955,14 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                 }
               }
             )
-            output[[paste0("pca_3DPlot_", currentGroup)]] <- shiny::renderPlot({
+            output[[paste0("pca_3DPlot_", app_label_id(currentGroup))]] <- shiny::renderPlot({
               if (!is.null(subres$overall_3D)) {
                 grDevices::replayPlot(subres$overall_3D)
               }
             })
             output[[paste0(
               "pca_screePlot_",
-              currentGroup
+              app_label_id(currentGroup)
             )]] <- shiny::renderPlot(
               {
                 if (!is.null(subres$overall_scree_plot)) {
@@ -2962,12 +2970,12 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                 }
               }
             )
-            output[[paste0("pca_biplot_", currentGroup)]] <- shiny::renderPlot({
+            output[[paste0("pca_biplot_", app_label_id(currentGroup))]] <- shiny::renderPlot({
               if (!is.null(subres$biplot)) grDevices::replayPlot(subres$biplot)
             })
             output[[paste0(
               "pca_corrCircle_",
-              currentGroup
+              app_label_id(currentGroup)
             )]] <- shiny::renderPlot({
               if (!is.null(subres$correlation_circle)) {
                 grDevices::replayPlot(subres$correlation_circle)
@@ -2976,11 +2984,11 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
 
             output[[paste0(
               "pca_loadingsUI_",
-              currentGroup
+              app_label_id(currentGroup)
             )]] <- shiny::renderUI({
               if (!is.null(subres$loadings)) {
                 shiny::tagList(lapply(seq_along(subres$loadings), function(i) {
-                  safeGroup <- gsub("[^A-Za-z0-9_]+", "_", currentGroup)
+                  safeGroup <- app_label_id(currentGroup)
                   shiny::plotOutput(
                     paste0("pca_loadings_", safeGroup, "_", i),
                     height = "300px"
@@ -2992,7 +3000,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
               for (i in seq_along(subres$loadings)) {
                 local({
                   local_i <- i
-                  safeGroup <- gsub("[^A-Za-z0-9_]+", "_", currentGroup)
+                  safeGroup <- app_label_id(currentGroup)
                   output[[paste0(
                     "pca_loadings_",
                     safeGroup,
@@ -3120,7 +3128,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
         shiny::tabPanel(
           title = lv,
           shiny::plotOutput(
-            paste0("corr_heatmap_grp_spear_", gsub("\\W+", "_", lv)),
+            paste0("corr_heatmap_grp_spear_", app_label_id(lv)),
             height = "600px"
           )
         )
@@ -3134,7 +3142,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
           lvl <- lv
           output[[paste0(
             "corr_heatmap_grp_spear_",
-            gsub("\\W+", "_", lvl)
+            app_label_id(lvl)
           )]] <- shiny::renderPlot({
             print(res$spearman$group_plots[[lvl]])
           })
@@ -3149,7 +3157,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
         shiny::tabPanel(
           title = lv,
           shiny::plotOutput(
-            paste0("corr_heatmap_grp_pear_", gsub("\\W+", "_", lv)),
+            paste0("corr_heatmap_grp_pear_", app_label_id(lv)),
             height = "600px"
           )
         )
@@ -3163,7 +3171,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
           lvl <- lv
           output[[paste0(
             "corr_heatmap_grp_pear_",
-            gsub("\\W+", "_", lvl)
+            app_label_id(lvl)
           )]] <- shiny::renderPlot({
             print(res$pearson$group_plots[[lvl]])
           })

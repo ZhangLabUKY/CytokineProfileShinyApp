@@ -1,16 +1,15 @@
-library(shinytest2)
-
 test_that("{shinytest2} recording: Menu Routing", {
   skip_on_cran()
   skip_if_appdriver_disabled()
-  app_dir <- testthat::test_path("../../inst/app")
-  app <- AppDriver$new(
+  app_dir <- appdriver_app_dir()
+  app <- shinytest2::AppDriver$new(
     app_dir,
-    variant = platform_variant(),
+    variant = app_snapshot_variant(),
     name = "menus",
     load_timeout = 30000,
     timeout = 30000
   )
+  withr::defer(app$stop())
 
   route_and_capture <- function(menu_id) {
     app$click(menu_id, timeout_ = 30000)

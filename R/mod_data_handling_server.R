@@ -51,47 +51,35 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
 
   main_upload_path <- shiny::reactive({
     shiny::req(input$datafile)
-    path <- app_staged_path(staged_files, "main_data_upload")
-    if (is.null(path) || !file.exists(path)) {
-      path <- stage_main_upload()
-    }
-    path
+    # Readers can run before upload observers. Always verify the source identity;
+    # the staging helper reuses an existing file only for the same source.
+    shiny::req(stage_with_notification(stage_main_upload, "Uploaded file"))
   })
 
   bioplex_upload_path <- shiny::reactive({
     shiny::req(shiny::isTruthy(input$bioplex_file))
     shiny::req(shiny::isTruthy(input$bioplex_file$datapath))
-    path <- app_staged_path(staged_files, "bioplex_upload")
-    if (is.null(path) || !file.exists(path)) {
-      path <- stage_bioplex_upload()
-    }
-    path
+    shiny::req(stage_with_notification(stage_bioplex_upload, "Bio-Plex workbook"))
   })
 
   builtin_cache_path <- shiny::reactive({
     shiny::req(isTRUE(input$use_builtin))
     shiny::req(input$built_in_choice)
-    path <- app_staged_path(staged_files, "builtin_dataset")
-    if (is.null(path) || !file.exists(path)) {
-      path <- stage_builtin_cache()
-    }
-    path
+    shiny::req(stage_with_notification(stage_builtin_cache, "Built-in dataset"))
   })
 
   stage_with_notification <- function(stage_fun, label) {
     tryCatch(
-      {
-        stage_fun()
-        TRUE
-      },
+      stage_fun(),
+      shiny.silent.error = function(e) stop(e),
       error = function(e) {
         app_note_technical_error(paste(label, "staging"), e)
         shiny::showNotification(
-          paste(label, "could not be prepared. Please try uploading it again."),
+          paste(label, "could not be prepared. Please select or upload it again."),
           type = "error",
           duration = 6
         )
-        FALSE
+        NULL
       }
     )
   }
@@ -175,7 +163,7 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
   shiny::observeEvent(
     input$datafile,
     {
-      if (!stage_with_notification(stage_main_upload, "Uploaded file")) {
+      if (is.null(stage_with_notification(stage_main_upload, "Uploaded file"))) {
         return()
       }
 
@@ -232,7 +220,7 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
   shiny::observeEvent(
     input$bioplex_file,
     {
-      if (!stage_with_notification(stage_bioplex_upload, "Bio-Plex workbook")) {
+      if (is.null(stage_with_notification(stage_bioplex_upload, "Bio-Plex workbook"))) {
         return()
       }
 

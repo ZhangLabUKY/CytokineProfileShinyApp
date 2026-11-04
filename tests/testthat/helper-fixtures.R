@@ -10,14 +10,66 @@ utils::data(
 )
 
 appdriver_ci_enabled <- function() {
+  # Local opt-in must never enable browser startup on GitHub Actions.
+  if (identical(tolower(Sys.getenv("GITHUB_ACTIONS", unset = "false")), "true")) {
+    return(FALSE)
+  }
   flag <- Sys.getenv("CYTOKINEPROFILE_RUN_APPDRIVER", unset = "false")
   tolower(flag) %in% c("1", "true", "yes", "on")
 }
 
 skip_if_appdriver_disabled <- function() {
   if (!appdriver_ci_enabled()) {
-    testthat::skip("AppDriver tests are disabled for this CI job.")
+    testthat::skip(paste(
+      "Browser tests are local only and skipped on GitHub Actions.",
+      "Enable locally with CYTOKINEPROFILE_RUN_APPDRIVER=true."
+    ))
   }
+  # A developer can opt into a specific browser without affecting app startup.
+  version <- Sys.getenv("CYTOKINEPROFILE_CHROME_VERSION", unset = "")
+  if (nzchar(version)) {
+    chromote::local_chrome_version(
+      version, binary = "chrome-headless-shell", .local_envir = parent.frame()
+    )
+  }
+}
+
+app_snapshot_variant <- function() {
+  variant <- Sys.getenv("CYTOKINEPROFILE_SNAPSHOT_VARIANT", unset = "")
+  if (nzchar(variant)) variant else shinytest2::platform_variant()
+}
+
+# R CMD install moves inst/app to app in the installed package.
+appdriver_app_dir <- function(
+  source_dir = testthat::test_path("..", "..", "inst", "app"),
+  installed_dir = system.file("app", package = "CytokineProfileShinyApp")
+) {
+  for (path in c(source_dir, installed_dir)) {
+    if (nzchar(path) && file.exists(file.path(path, "app.R"))) {
+      return(normalizePath(path, winslash = "/", mustWork = TRUE))
+    }
+  }
+  stop("Could not find the app launcher in the source checkout or installed package.",
+       call. = FALSE)
+}
+
+appdriver_expect_filtered_rows <- function(app, count) {
+  table_js <- "window.jQuery('#filtered_data_preview table').DataTable()"
+  app$wait_for_js(sprintf(
+    paste0(
+      "(() => { const table = document.querySelector('#filtered_data_preview table'); ",
+      "return !!table && !!window.jQuery && ",
+      "window.jQuery.fn.dataTable.isDataTable(table) && ",
+      "%s.page.info().recordsTotal === %d; })()"
+    ), table_js, count
+  ), timeout = 30000)
+  testthat::expect_equal(app$get_js(paste0(table_js, ".page.info().recordsTotal")), count)
+}
+
+appdriver_wait_for_input <- function(app, id) {
+  app$wait_for_js(sprintf(
+    "!!document.querySelector('#%s.shiny-bound-input')", id
+  ), timeout = 30000)
 }
 
 ex1_full <- as.data.frame(ExampleData1)

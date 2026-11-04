@@ -1,26 +1,57 @@
-library(shinytest2)
+test_that("built-in switching reaches preprocessing without reopening preview", {
+    skip_on_cran()
+    skip_if_appdriver_disabled()
+    app <- shinytest2::AppDriver$new(
+        appdriver_app_dir(), name = "builtin-switching",
+        load_timeout = 30000, timeout = 30000
+    )
+    withr::defer(app$stop())
+    appdriver_wait_for_input(app, "nav_start_home")
+    app$click("nav_start_home")
+    appdriver_wait_for_input(app, "use_builtin")
+    app$set_inputs(use_builtin = TRUE)
+    # The dataset selector is created only after the toggle reaches the server.
+    appdriver_wait_for_input(app, "built_in_choice")
+    expect_identical(app$wait_for_value(input = "built_in_choice"), "ExampleData1")
+
+    # Do not open the upload preview: preprocessing must read the new source.
+    app$set_inputs(built_in_choice = "ExampleData2")
+    appdriver_wait_for_input(app, "next1")
+    app$click("next1")
+    appdriver_expect_filtered_rows(app, 66)
+    appdriver_wait_for_input(app, "open_impute_modal")
+    app$click("open_impute_modal")
+    app$wait_for_value(output = "imp_na_before", timeout = 30000)
+    expect_match(app$get_value(output = "imp_na_before"), "3\\.00")
+    app$click(selector = ".modal.show .modal-footer button:last-child")
+})
 
 test_that("{shinytest2} recording: app-data", {
     skip_on_cran()
     skip_if_appdriver_disabled()
-    app_dir <- testthat::test_path("../../inst/app")
-    app <- AppDriver$new(
+    app_dir <- appdriver_app_dir()
+    app <- shinytest2::AppDriver$new(
         app_dir,
-        variant = platform_variant(),
+        variant = app_snapshot_variant(),
         name = "app-data",
         load_timeout = 30000,
         timeout = 30000
     )
+    withr::defer(app$stop())
 
+    appdriver_wait_for_input(app, "nav_start_home")
     app$click("nav_start_home")
     app$wait_for_idle(4000)
 
+    appdriver_wait_for_input(app, "datafile")
     app$upload_file(datafile = test_path("ExampleData1.csv"))
     app$wait_for_idle(4000)
 
+    appdriver_wait_for_input(app, "open_editor")
     app$click("open_editor")
     app$wait_for_idle(4000)
 
+    appdriver_wait_for_input(app, "bioplex_confirm_modal")
     app$click("bioplex_confirm_modal")
     app$wait_for_idle(4000)
 
@@ -37,45 +68,49 @@ test_that("{shinytest2} recording: app-data", {
     app$click("next1", timeout_ = 30000)
     app$wait_for_idle(7000)
 
+    appdriver_wait_for_input(app, "selected_categorical_cols")
     app$set_inputs(selected_categorical_cols = "Group")
-    app$set_inputs(
-        selected_numerical_cols = c(
-            "Time",
-            "IL-17F",
-            "GM-CSF",
-            "IFN-G",
-            "IL-10",
-            "CCL-20/MIP-3A",
-            "IL-12/P70",
-            "IL-13",
-            "IL-15",
-            "IL-17A",
-            "IL-22",
-            "IL-9",
-            "IL-1B",
-            "IL-33",
-            "IL-2",
-            "IL-21",
-            "IL-4",
-            "IL-23",
-            "IL-5",
-            "IL-6",
-            "IL-27",
-            "TNF-A",
-            "TNF-B"
-        )
+    # Select the current numeric choices, including names normalized by the editor.
+    appdriver_wait_for_input(app, "select_all_num")
+    app$click("select_all_num")
+    app$wait_for_idle()
+    appdriver_wait_for_input(app, "factor_cols")
+    # Editing a pending override need not update any server output yet.
+    app$set_inputs(factor_cols = "Time", wait_ = FALSE)
+    app$wait_for_js(
+        "document.querySelector('#factor_cols option[value=\"Time\"]')?.selected === true",
+        timeout = 30000
     )
-    app$set_inputs(factor_cols = "Time")
+    app$wait_for_idle()
+    expect_identical(app$get_value(input = "factor_cols"), "Time")
+    appdriver_wait_for_input(app, "apply_types")
     app$click("apply_types", timeout_ = 30000)
-    app$wait_for_idle(3000)
+    # Applying types rebuilds Step 2. Wait for the new choices before setting them.
+    app$wait_for_js(paste0(
+        "!!document.querySelector('#selected_categorical_cols.shiny-bound-input input[value=\"Time\"]') && ",
+        "!!document.querySelector('#selected_numerical_cols.shiny-bound-input') && ",
+        "!document.querySelector('#selected_numerical_cols input[value=\"Time\"]')"
+    ), timeout = 30000)
+    app$set_inputs(selected_categorical_cols = c("Group", "Time"), wait_ = FALSE)
+    app$wait_for_js(paste0(
+        "JSON.stringify(Array.from(document.querySelectorAll(",
+        "'#selected_categorical_cols input:checked'), input => input.value).sort()) === ",
+        "JSON.stringify(['Group', 'Time'])"
+    ), timeout = 30000)
+    expect_setequal(app$get_value(input = "selected_categorical_cols"), c("Group", "Time"))
+    expect_false("Time" %in% app$get_value(input = "selected_numerical_cols"))
 
     app$set_inputs(step2_scale = "log2")
-    app$set_inputs(filter_accordion = "Filter by Categorical Values")
-    app$wait_for_idle(4000)
-    app$set_inputs(filter_Time = c("20", "72"))
-    app$wait_for_idle(2000)
+    app$click(selector = "#filter_accordion .accordion-button")
+    app$wait_for_value(input = "filter_Group", timeout = 30000)
+    app$wait_for_value(input = "filter_Time", timeout = 30000)
+    app$set_inputs(filter_Time = c("20", "40", "72"))
     app$set_inputs(filter_Group = c("PreT2D", "T2D"))
-    app$wait_for_idle(4000)
+    appdriver_expect_filtered_rows(app, 198)
+    expect_setequal(app$get_value(input = "filter_Group"), c("PreT2D", "T2D"))
+    app$set_inputs(filter_Time = c("20", "72"))
+    appdriver_expect_filtered_rows(app, 132)
+    expect_setequal(app$get_value(input = "filter_Time"), c("20", "72"))
     app$expect_screenshot(name = "filtered_data")
 
     app$click("preview_transform", timeout_ = 30000)

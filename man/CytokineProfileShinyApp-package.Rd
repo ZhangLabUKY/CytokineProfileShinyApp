@@ -24,6 +24,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Shubh Saraswat \email{shubh.saraswat00@gmail.com} (\href{https://orcid.org/0009-0009-2359-1484}{ORCID}) [copyright holder]
   \item Xiaohua Douglas Zhang \email{douglas.zhang@uky.edu} (\href{https://orcid.org/0000-0002-2486-7931}{ORCID})
 }
 
