@@ -178,4 +178,9 @@ After this overview, the next useful articles are:
 
 ------------------------------------------------------------------------
 
-*Last updated:* June 01, 2026
+*Last updated:* November 04, 2026
+
+If you apply imputation and then change the source data or preprocessing
+choices, the app clears the imputed data and asks you to apply
+imputation again. Moving between wizard steps preserves imputation when
+the data and preprocessing are unchanged.

@@ -35,5 +35,8 @@ Useful links:
 
 Authors:
 
+- Shubh Saraswat <shubh.saraswat00@gmail.com>
+  ([ORCID](https://orcid.org/0009-0009-2359-1484)) \[copyright holder\]
+
 - Xiaohua Douglas Zhang <douglas.zhang@uky.edu>
   ([ORCID](https://orcid.org/0000-0002-2486-7931))
