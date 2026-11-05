@@ -23,7 +23,7 @@ test_that("built-in switching reaches preprocessing without reopening preview", 
     app$click("open_impute_modal")
     app$wait_for_value(output = "imp_na_before", timeout = 30000)
     expect_match(app$get_value(output = "imp_na_before"), "3\\.00")
-    app$click(selector = ".modal.show .modal-footer button:last-child")
+    app$click("close_impute")
 })
 
 test_that("{shinytest2} recording: app-data", {
@@ -85,7 +85,7 @@ test_that("{shinytest2} recording: app-data", {
     expect_identical(app$get_value(input = "factor_cols"), "Time")
     appdriver_wait_for_input(app, "apply_types")
     app$click("apply_types", timeout_ = 30000)
-    # Applying types rebuilds Step 2. Wait for the new choices before setting them.
+    # Applying types updates the existing controls. Wait for the new choices.
     app$wait_for_js(paste0(
         "!!document.querySelector('#selected_categorical_cols.shiny-bound-input input[value=\"Time\"]') && ",
         "!!document.querySelector('#selected_numerical_cols.shiny-bound-input') && ",
@@ -100,7 +100,7 @@ test_that("{shinytest2} recording: app-data", {
     expect_setequal(app$get_value(input = "selected_categorical_cols"), c("Group", "Time"))
     expect_false("Time" %in% app$get_value(input = "selected_numerical_cols"))
 
-    app$set_inputs(step2_scale = "log2")
+    appdriver_apply_transform(app, "log2")
     app$click(selector = "#filter_accordion .accordion-button")
     app$wait_for_value(input = "filter_Group", timeout = 30000)
     app$wait_for_value(input = "filter_Time", timeout = 30000)

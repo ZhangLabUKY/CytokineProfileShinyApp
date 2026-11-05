@@ -10,6 +10,16 @@ app_resolve_ns <- function(id = NULL, ns = NULL) {
   shiny::NS(id)
 }
 
+wizard_modal_dialog <- function(..., wide = FALSE) {
+  classes <- "wizard-dialog modal-dialog-scrollable"
+  if (wide) classes <- paste(classes, "wizard-dialog-wide")
+  htmltools::tagAppendAttributes(
+    shiny::modalDialog(...),
+    class = classes,
+    .cssSelector = ".modal-dialog"
+  )
+}
+
 app_step_title_text <- function(step, selected_function = NULL) {
   switch(
     as.character(step),

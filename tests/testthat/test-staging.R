@@ -16,7 +16,7 @@ test_that("built-in switches are current even before staging observers run", {
       seen$missing <- sum(is.na(data))
       seen$source <- app_staged_source_id(app_ctx$staged_files, "builtin_dataset")
       seen$imputed <- app_ctx$imputation_guard$current()
-    }, priority = 100, ignoreInit = TRUE)
+    }, priority = 1000, ignoreInit = TRUE)
     session$flushReact()
 
     app_ctx$imputation_guard$store(
@@ -67,6 +67,12 @@ test_that("same-name uploads replace staged contents before reset observers", {
       do.call(session$setInputs, setNames(list(upload(paths[1])), input_id))
       original_path <- getter()
       expect_identical(stage(), original_path)
+      if (kind == "main") {
+        session$setInputs(open_editor = 1)
+        app_ctx$bioplex$df$Marker[1] <- 999
+        session$setInputs(bioplex_confirm_modal = 1)
+        expect_equal(app_ctx$userData()$Marker, 999)
+      }
 
       seen <- new.env(parent = emptyenv())
       early_reader <- shiny::observeEvent(input[[input_id]], {
@@ -74,7 +80,7 @@ test_that("same-name uploads replace staged contents before reset observers", {
         seen$hash <- unname(tools::md5sum(seen$path))
         seen$source <- app_staged_source_id(app_ctx$staged_files, slot)
         if (kind == "main") seen$data <- app_ctx$userData()
-      }, priority = 100, ignoreInit = TRUE)
+      }, priority = 1000, ignoreInit = TRUE)
       session$flushReact()
 
       do.call(session$setInputs, setNames(list(upload(paths[2])), input_id))
@@ -120,7 +126,7 @@ test_that("failed staging blocks old sources and gives actionable guidance", {
         early_reader <- shiny::observeEvent(
           if (kind == "builtin") input$built_in_choice else input[[input_id]], {
             seen$result <- tryCatch(getter(), error = identity)
-          }, priority = 100, ignoreInit = TRUE
+          }, priority = 1000, ignoreInit = TRUE
         )
         session$flushReact()
         notifications$clear()
@@ -132,6 +138,10 @@ test_that("failed staging blocks old sources and gives actionable guidance", {
         }
         expect_s3_class(seen$result, "shiny.silent.error")
         expect_error(getter(), class = "shiny.silent.error")
+        if (kind == "main") {
+          expect_false(app_ctx$data_ready())
+          expect_error(app_ctx$userData(), class = "shiny.silent.error")
+        }
         errors <- Filter(function(call) identical(call$type, "error"), notifications$calls())
         expect_gt(length(errors), 0L)
         expect_match(as.character(errors[[1]]$ui), "could not be prepared")

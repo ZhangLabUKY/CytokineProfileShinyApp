@@ -22,6 +22,7 @@ mod_step2_preprocess_ui <- function(
 
   shiny::tagList(
     shiny::fluidRow(
+      class = "wizard-columns",
       shiny::column(
         width = 5,
         bslib::card(
@@ -31,7 +32,7 @@ mod_step2_preprocess_ui <- function(
           ),
           bslib::card_body(
             shiny::div(
-              style = "margin-bottom: 10px;",
+              class = "wizard-actions mb-2",
               shiny::actionButton(
                 ns("select_all_cat"),
                 "Select All",
@@ -62,7 +63,7 @@ mod_step2_preprocess_ui <- function(
           ),
           bslib::card_body(
             shiny::div(
-              style = "margin-bottom: 6px;",
+              class = "wizard-actions mb-2",
               shiny::actionButton(
                 ns("select_all_num"),
                 "Select All",
@@ -103,32 +104,15 @@ mod_step2_preprocess_ui <- function(
           ),
           bslib::card_body(
             style = "overflow: visible; min-height: 8rem;",
-            shiny::selectInput(
-              ns("step2_scale"),
-              label = shinyhelper::helper(
-                type = "inline",
-                title = "Data Transformation",
-                icon = "fas fa-question-circle",
-                shiny_tag = shiny::HTML(
-                  "<span style='margin-right: 15px;'>Apply a preprocessing method to selected numerical columns</span>"
-                ),
-                content = "Apply one preprocessing method to the selected numerical columns before imputation and downstream analysis. Log transforms require all non-missing selected values to be finite and greater than zero.",
-                colour = if (theme_choice %in% c("darkly", "cyborg")) {
-                  "red"
-                } else {
-                  "blue"
-                }
-              ),
-              choices = c(
-                "None" = "none",
-                "log2" = "log2",
-                "log10" = "log10",
-                "Z-score" = "zscore"
-              ),
-              selected = shiny::isolate(user_state$step2_scale) %||% "none",
-              selectize = FALSE,
-              width = "100%"
-            )
+            shiny::actionButton(
+              ns("configure_transform"), "Configure Transformation",
+              icon = shiny::icon("sliders"), class = "btn-secondary"
+            ),
+            shiny::div(
+              class = "wizard-wrap-text",
+              shiny::textOutput(ns("transform_summary"))
+            ),
+            shiny::helpText("Choose a method and the numeric columns to transform. Changes take effect when you click Apply.")
           )
         ),
         shiny::uiOutput(ns("conditional_filter_ui"))
@@ -136,31 +120,21 @@ mod_step2_preprocess_ui <- function(
       shiny::column(
         width = 7,
         bslib::card(
-          style = "height: 40vh; display: flex; flex-direction: column;",
           bslib::card_header(shiny::h4(
             shiny::icon("table"),
             "Filtered Data Explorer"
           )),
           bslib::card_body(
-            style = "flex: 1 1 auto; overflow-y: auto; padding: 1rem;",
-            shiny::div(
-              style = "max-height: 40vh; overflow-y: auto; padding: 1rem;",
-              DT::DTOutput(ns("filtered_data_preview"))
-            )
+            class = "wizard-table wizard-preview",
+            DT::DTOutput(ns("filtered_data_preview"))
           ),
           bslib::card_footer(
-            style = paste(
-              "display: flex;",
-              "justify-content: center;",
-              "padding: 0.75rem;",
-              "border-top: 1px solid #444;",
-              "background: inherit;"
-            ),
+            class = "wizard-actions justify-content-center",
             shiny::actionButton(
               ns("delete_selected_rows"),
               "Delete Selected",
               icon = shiny::icon("trash"),
-              class = "btn-danger me-2"
+              class = "btn-danger"
             ),
             shiny::actionButton(
               ns("expand_filtered"),
@@ -171,37 +145,27 @@ mod_step2_preprocess_ui <- function(
           )
         ),
         bslib::card(
-          style = "display: flex; flex-direction: column;",
           bslib::card_header(shiny::h4(
             shiny::icon("table"),
             "Deleted Samples"
           )),
           bslib::card_body(
-            style = "flex: 1 1 auto; overflow-y: auto; padding: 1rem;",
-            shiny::div(
-              style = "max-height: 40vh; overflow-y: auto; padding: 1rem;",
-              DT::DTOutput(ns("deleted_data_preview"))
-            )
+            class = "wizard-table wizard-preview",
+            DT::DTOutput(ns("deleted_data_preview"))
           ),
           bslib::card_footer(
-            style = paste(
-              "display: flex;",
-              "justify-content: center;",
-              "padding: 0.75rem;",
-              "border-top: 1px solid #444;",
-              "background: inherit;"
-            ),
+            class = "wizard-actions justify-content-center",
             shiny::actionButton(
               ns("restore_selected_rows"),
               "Restore Selected",
               icon = shiny::icon("undo"),
-              class = "btn-secondary me-2"
+              class = "btn-secondary"
             ),
             shiny::actionButton(
               ns("restore_all_rows"),
               "Restore All",
               icon = shiny::icon("undo"),
-              class = "btn-secondary me-2"
+              class = "btn-secondary"
             ),
             shiny::actionButton(
               ns("expand_deleted"),
@@ -218,14 +182,14 @@ mod_step2_preprocess_ui <- function(
       shiny::column(
         12,
         shiny::div(
-          style = "margin-top:0.5rem;",
+          class = "wizard-actions mt-2",
           shiny::actionButton(
             ns("back2"),
             "Back",
             icon = shiny::icon("arrow-left")
           ),
           shiny::conditionalPanel(
-            "input.step2_scale && input.step2_scale !== 'none'",
+            "output.transform_active == true",
             ns = ns,
             shiny::actionButton(
               ns("preview_transform"),
@@ -236,7 +200,7 @@ mod_step2_preprocess_ui <- function(
           ),
           shiny::actionButton(
             ns("open_impute_modal"),
-            "Treat missing values",
+            "Impute missing values",
             icon = shiny::icon("fas fa-eraser"),
             class = "btn-secondary"
           ),

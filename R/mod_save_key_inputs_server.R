@@ -90,25 +90,22 @@ mod_save_key_inputs_server <- function(input, output, session, app_ctx) {
     ignoreNULL = FALSE
   )
   shiny::observe({
-    input_values <- shiny::reactiveValuesToList(input)
-    cols <- input_values$selected_categorical_cols %||% character(0)
-    filter_values <- userState$step2_filter_values %||% list()
+    if (is.null(input$selected_categorical_cols)) return()
+    cols <- input$selected_categorical_cols
+    filter_values <- shiny::isolate(userState$step2_filter_values) %||% list()
     filter_values <- filter_values[intersect(names(filter_values), cols)]
 
     for (col in cols) {
       filter_id <- paste0("filter_", col)
-      value <- input_values[[filter_id]]
+      value <- input[[filter_id]]
       if (!is.null(value)) {
         filter_values[[col]] <- value
       }
     }
 
-    if (!identical(filter_values, userState$step2_filter_values)) {
+    if (!identical(filter_values, shiny::isolate(userState$step2_filter_values))) {
       userState$step2_filter_values <- filter_values
     }
-  })
-  shiny::observeEvent(input$step2_scale, {
-    userState$step2_scale <- input$step2_scale
   })
   shiny::observeEvent(selected_function(), {
     userState$selected_function <- selected_function()

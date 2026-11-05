@@ -14,15 +14,16 @@ mod_step5_results_ui <- function(
     ),
     shiny::fluidRow(
       shiny::column(
-        6,
-        shiny::uiOutput(ns("download_ui"))
+        12,
+        class = "col-lg-6",
+        shiny::uiOutput(ns("download_ui"), class = "wizard-export")
       )
     ),
     shiny::fluidRow(
       shiny::column(
         12,
         shiny::div(
-          style = "display:flex; align-items:center; margin-top:1rem;",
+          class = "wizard-actions justify-content-between mt-3",
           shiny::actionButton(
             ns("back5"),
             "Back",
@@ -30,7 +31,7 @@ mod_step5_results_ui <- function(
             class = "btn-secondary"
           ),
           shiny::div(
-            style = "margin-left:auto; display:flex; align-items:center; gap:.5rem;",
+            class = "wizard-actions ms-sm-auto",
             shiny::actionButton(
               ns("new_fresh"),
               "Start New (fresh)",

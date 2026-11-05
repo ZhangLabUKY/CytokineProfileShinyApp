@@ -34,3 +34,5 @@ notes/
 /manifest.json
 *.r453.bak
 app_server_stages.baseline.R
+Rplots.pdf
+debug.log

@@ -17,6 +17,16 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
   technicalErrorMessage <- shiny::reactiveVal(NULL)
   warningMessage <- shiny::reactiveVal(character())
   analysis_revision <- shiny::reactiveVal(0L)
+  result_epoch <- shiny::reactiveVal(0L)
+  fitted_epoch <- shiny::reactiveVal(NULL)
+  invalidate_results <- function() {
+    result_epoch(shiny::isolate(result_epoch()) + 1L)
+    analysis_revision(shiny::isolate(analysis_revision()) + 1L)
+    errorMessage(NULL)
+    technicalErrorMessage(NULL)
+    warningMessage(character())
+    result_observers$clear()
+  }
 
   parse_numeric_input <- function(x) {
     if (is.null(x) || !nzchar(trimws(x))) {
@@ -545,7 +555,8 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
     out
   }
 
-  analysisResult <- shiny::eventReactive(input$next4, {
+  fitted_result <- shiny::eventReactive(input$next4, {
+    fitted_epoch(result_epoch())
     errorMessage(NULL)
     technicalErrorMessage(NULL)
     warningMessage(character())
@@ -738,7 +749,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                       "Heatmap uses the Step 2-transformed matrix directly and calls cyt_heatmap(..., scale = NULL), so this is not a second log transformation.",
                       "Invalid values were found in the working numeric matrix before clustering:",
                       format_invalid_numeric_summary(invalid_heatmap),
-                      "Use Treat missing values or choose a transformation compatible with your data."
+                      "Use 'Impute missing values' or choose a transformation compatible with your data."
                     ),
                     call. = FALSE
                   )
@@ -1092,6 +1103,12 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
         NULL
       }
     ) # end tryCatch
+  })
+
+  analysisResult <- shiny::reactive({
+    value <- fitted_result()
+    shiny::req(identical(fitted_epoch(), result_epoch()))
+    value
   })
 
   reactivePlots <- shiny::reactive({

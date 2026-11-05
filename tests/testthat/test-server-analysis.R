@@ -12,6 +12,26 @@ friendly_analysis_failure_message <- paste(
   "Check the selected columns and options, then run it again."
 )
 
+test_that("source replacement and saved edits invalidate old analysis results", {
+  local_mocked_browser_side_effects()
+  shiny::testServer(app_server, {
+    run_app_server_analysis(session, app_ctx, "menu_univariate_2lvl")
+    expect_false(is.null(app_ctx$analysisResult()))
+    expect_false(is.null(output$result_display))
+    session$setInputs(built_in_choice = "ExampleData2")
+    expect_error(app_ctx$analysisResult(), class = "shiny.silent.error")
+    expect_error(output$result_display)
+    expect_equal(app_ctx$result_observers$size(), 0L)
+    # Invalidating a result must still allow the next explicit analysis run.
+    run_app_server_analysis(session, app_ctx, "menu_univariate_2lvl")
+    expect_false(is.null(app_ctx$analysisResult()))
+    session$setInputs(open_editor = 1)
+    app_ctx$bioplex$df$IL.10[1] <- app_ctx$bioplex$df$IL.10[1] + 1
+    session$setInputs(bioplex_confirm_modal = 1)
+    expect_error(app_ctx$analysisResult(), class = "shiny.silent.error")
+  })
+})
+
 expect_analysis_failure_state <- function(
   app_ctx,
   message,
@@ -201,7 +221,7 @@ test_that("sPLS-DA success advances to step 5 only after analysis completes", {
             paste(
               "sPLS-DA dropped unusable predictors before fitting for Group:",
               "MarkerSparse [observed values=2; reasons=fewer than 3 observed values (n=2)].",
-              "Consider Step 2 'Treat missing values' if you want to retain sparse predictors."
+              "Consider Step 2 'Impute missing values' if you want to retain sparse predictors."
             ),
             call. = FALSE
           )

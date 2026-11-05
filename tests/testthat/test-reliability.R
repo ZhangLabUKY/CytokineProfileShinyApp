@@ -67,16 +67,15 @@ test_that("result observer replacement leaves only one modal action", {
 test_that("the real preprocessing workflow invalidates applied imputation", {
   changes <- list(
     filter = function(session, ctx) session$setInputs(filter_Group = "T2D"),
-    transformation = function(session, ctx) session$setInputs(step2_scale = "zscore"),
+    transformation = function(session, ctx) session$setInputs(
+      step2_scale = "zscore", transform_cols = "IL.10", apply_transform = 1),
     deletion = function(session, ctx) { ctx$userState$deleted_row_ids <- 1L },
     types = function(session, ctx) session$setInputs(factor_cols = "IL.10", apply_types = 1),
-    sheet = function(session, ctx) session$setInputs(sheet_name = "Another sheet"),
-    builtin = function(session, ctx) session$setInputs(built_in_choice = "ExampleData2"),
+    builtin = function(session, ctx) session$setInputs(built_in_choice = "ExampleData1"),
     editor = function(session, ctx) {
-      data <- ctx$userData()
-      data$IL.10[1] <- data$IL.10[1] + 1
-      ctx$bioplex$final <- data
-      ctx$bioplex$active <- TRUE
+      session$setInputs(open_editor = 1)
+      ctx$bioplex$df$IL.10[1] <- ctx$bioplex$df$IL.10[1] + 1
+      session$setInputs(bioplex_confirm_modal = 1)
     },
     upload = function(session, ctx) {
       path <- tempfile(fileext = ".csv")
@@ -90,9 +89,9 @@ test_that("the real preprocessing workflow invalidates applied imputation", {
   )
   for (change in changes) {
     shiny::testServer(app_server, {
-      session$setInputs(use_builtin = TRUE, built_in_choice = "ExampleData1",
+      session$setInputs(use_builtin = TRUE, built_in_choice = "ExampleData2",
                         selected_categorical_cols = "Group",
-                        selected_numerical_cols = "IL.10", imp_cols = "IL.10")
+                        selected_numerical_cols = c("IL.10", "IFN.G"), imp_cols = "IFN.G")
       method <- stats::setNames(list("mean"), ui_imputation_method_input_id())
       do.call(session$setInputs, method)
       session$setInputs(apply_impute = 1)

@@ -3,6 +3,7 @@ mod_step1_data_ui <- function(id = NULL, ns = NULL, user_state) {
 
   shiny::tagList(
     shiny::fluidRow(
+      class = "wizard-columns",
       shiny::column(
         width = 5,
         bslib::card(
@@ -21,6 +22,10 @@ mod_step1_data_ui <- function(id = NULL, ns = NULL, user_state) {
               "Accepted Formats: '.csv', '.txt', '.xls', '.xlsx'"
             ),
             shiny::uiOutput(ns("sheet_selector")),
+            shiny::div(
+              class = "wizard-wrap-text",
+              shiny::textOutput(ns("current_data_source"))
+            ),
             shiny::uiOutput(ns("open_editor_btn")),
             shiny::hr(),
             shiny::tags$h5("Option B: Use Built-in Data"),
@@ -34,7 +39,7 @@ mod_step1_data_ui <- function(id = NULL, ns = NULL, user_state) {
           ),
           bslib::card_footer(
             shiny::div(
-              style = "text-align: right;",
+              class = "wizard-actions justify-content-end",
               shiny::actionButton(
                 ns("next1"),
                 "Next Step",
@@ -57,6 +62,7 @@ mod_step1_data_ui <- function(id = NULL, ns = NULL, user_state) {
               shiny::conditionalPanel(
                 condition = "input.view_data",
                 ns = ns,
+                class = "wizard-table",
                 shiny::uiOutput(ns("data_summary")),
                 shinycssloaders::withSpinner(
                   shiny::uiOutput(ns("preview_ui")),
@@ -77,6 +83,7 @@ mod_step1_data_ui <- function(id = NULL, ns = NULL, user_state) {
               shiny::conditionalPanel(
                 condition = "input.show_summary",
                 ns = ns,
+                class = "wizard-table",
                 shinycssloaders::withSpinner(
                   DT::DTOutput(ns("summary_stats_table")),
                   type = 8

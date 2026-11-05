@@ -87,12 +87,6 @@ mod_update_inputs_server <- function(input, output, session, app_ctx) {
       col_info <- step2_typed_col_info()
       all_cols <- col_info$all
       sync_step2_bucket_inputs()
-      # restore the preprocessing selector
-      shiny::updateSelectInput(
-        session,
-        "step2_scale",
-        selected = userState$step2_scale %||% "none"
-      )
       shiny::updateSelectizeInput(
         session,
         "factor_cols",

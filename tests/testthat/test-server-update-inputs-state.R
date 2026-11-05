@@ -53,10 +53,10 @@ test_that("step 2 restoration rehydrates bucket selections and defaults factor o
       messages$last("selected_numerical_cols")$message$value,
       "IL.10"
     )
-    expect_equal(
-      messages$last("step2_scale")$message$value,
-      "log2"
-    )
+    # Transformation is committed server state; navigation must not update a
+    # draft method control belonging to a closed popup.
+    expect_null(messages$last("step2_scale"))
+    expect_equal(app_ctx$userState$step2_scale, "log2")
     expect_equal(
       messages$last("factor_cols")$message$value,
       "Time"

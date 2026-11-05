@@ -55,7 +55,7 @@ test_that("{shinytest2} recording: sPLSDA-group", {
         )
     )
     app$set_inputs(selected_categorical_cols = "Group")
-    app$set_inputs(step2_scale = "log2")
+    appdriver_apply_transform(app, "log2")
     app$wait_for_idle(4000)
     app$click("next2", timeout_ = 30000)
     app$wait_for_idle(4000)

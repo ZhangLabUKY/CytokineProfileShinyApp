@@ -3,8 +3,10 @@ mod_step3_analysis_select_ui <- function(id = NULL, ns = NULL) {
 
   shiny::tagList(
     shiny::fluidRow(
+      class = "analysis-grid",
       shiny::column(
-        width = 3,
+        width = 6,
+        class = "col-12 col-lg-3",
         bslib::card(
           bslib::card_header("Univariate Analysis", class = "bg-info"),
           bslib::card_body(
@@ -32,7 +34,8 @@ mod_step3_analysis_select_ui <- function(id = NULL, ns = NULL) {
         )
       ),
       shiny::column(
-        width = 3,
+        width = 6,
+        class = "col-12 col-lg-3",
         bslib::card(
           bslib::card_header("Exploratory Analysis", class = "bg-info"),
           bslib::card_body(
@@ -80,7 +83,8 @@ mod_step3_analysis_select_ui <- function(id = NULL, ns = NULL) {
         )
       ),
       shiny::column(
-        width = 3,
+        width = 6,
+        class = "col-12 col-lg-3",
         bslib::card(
           bslib::card_header("Multivariate Analysis", class = "bg-info"),
           bslib::card_body(
@@ -108,7 +112,8 @@ mod_step3_analysis_select_ui <- function(id = NULL, ns = NULL) {
         )
       ),
       shiny::column(
-        width = 3,
+        width = 6,
+        class = "col-12 col-lg-3",
         bslib::card(
           bslib::card_header("Machine Learning Methods", class = "bg-info"),
           bslib::card_body(
@@ -124,20 +129,15 @@ mod_step3_analysis_select_ui <- function(id = NULL, ns = NULL) {
             )
           )
         )
-      ),
-      shiny::fluidRow(
-        shiny::column(
-          12,
-          shiny::div(
-            style = "margin-top: 1rem; display: flex; justify-content: flex-start;",
-            shiny::actionButton(
-              ns("back3"),
-              "Back",
-              icon = shiny::icon("arrow-left"),
-              class = "btn-secondary"
-            )
-          )
-        )
+      )
+    ),
+    shiny::div(
+      class = "wizard-actions mt-3",
+      shiny::actionButton(
+        ns("back3"),
+        "Back",
+        icon = shiny::icon("arrow-left"),
+        class = "btn-secondary"
       )
     )
   )

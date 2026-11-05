@@ -54,7 +54,7 @@ test_that("{shinytest2} recording: sPLSDA-Group-Treatment", {
             "IL-28A"
         )
     )
-    app$set_inputs(step2_scale = "log10")
+    appdriver_apply_transform(app, "log10")
     app$wait_for_idle(4000)
 
     app$click("next2", timeout_ = 30000)

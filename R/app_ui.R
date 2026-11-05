@@ -50,14 +50,16 @@ app_ui <- function() {
       shiny::tags$style(shiny::HTML(
         "
         .app-header {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.75rem 1rem;
           padding: 1rem;
-          border-bottom: 1px solid #444;
+          border-bottom: 1px solid var(--bs-border-color);
         }
-        .app-header .btn {
-          margin-left: 0.5rem;
-        }
-        .app-header .btn-sm {
-          margin: 0 0.5rem;
+        .app-header-actions .form-group {
+          margin-bottom: 0;
         }
         .sidebar .well {
           position: fixed;
@@ -219,17 +221,63 @@ app_ui <- function() {
         .scrollable-checkbox-group .form-check-inline input {
           margin-right: 0.35rem;
         }
+        .wizard-columns > [class*='col-'] {
+          min-width: 0;
+        }
+        @media (max-width: 991.98px) {
+          .wizard-columns > [class*='col-'] {
+            flex: 0 0 100%;
+            width: 100%;
+            max-width: 100%;
+          }
+        }
+        .wizard-actions {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        .app-header-actions .btn,
+        .analysis-grid .menu-card,
+        .wizard-actions .btn,
+        .wizard-export .btn,
+        .wizard-columns .scrollable-checkbox-group label {
+          white-space: normal;
+          overflow-wrap: anywhere;
+          max-width: 100%;
+        }
+        .wizard-actions > .wizard-actions {
+          min-width: 0;
+        }
+        .wizard-wrap-text {
+          overflow-wrap: anywhere;
+        }
+        .wizard-table {
+          min-width: 0;
+          max-width: 100%;
+          overflow-x: auto;
+        }
+        .wizard-preview {
+          max-height: 40vh;
+          overflow-y: auto;
+        }
+        .wizard-table .dataTable,
+        #shiny-modal .wizard-dialog-wide .dataTable {
+          white-space: nowrap;
+        }
+        .wizard-table .dataTables_paginate .pagination,
+        #shiny-modal .wizard-dialog-wide .dataTables_paginate .pagination {
+          flex-wrap: wrap;
+        }
         #brand {
           display: flex;
           align-items: center;
           gap: 0.55rem;
+          min-width: 0;
         }
         #brand .brand-title {
           margin: 0;
           line-height: 1;
-        }
-        .app-header {
-          border-bottom: 1px solid var(--bs-border-color) !important;
         }
         #brand .app-version {
           font-size: 0.78rem;
@@ -256,7 +304,18 @@ app_ui <- function() {
           object-fit: cover;
           border-radius: 0.35rem;
         }
-        @media (max-width: 576px) {
+        @media (max-width: 991.98px) {
+          .app-header-actions {
+            width: 100%;
+          }
+        }
+        @media (max-width: 575.98px) {
+          #brand .brand-title {
+            font-size: clamp(1.25rem, 5vw, 2rem);
+          }
+          #brand .brand-logo {
+            height: 44px;
+          }
           #brand .app-version {
             display: none;
           }
@@ -268,6 +327,19 @@ app_ui <- function() {
         #shiny-modal .modal-body {
           max-height: 70vh;
           overflow-y: auto;
+        }
+        #shiny-modal .wizard-dialog {
+          width: calc(100% - 2rem);
+          max-width: 56rem;
+          margin-inline: auto;
+        }
+        #shiny-modal .wizard-dialog-wide {
+          max-width: 90rem;
+        }
+        #shiny-modal .wizard-dialog .modal-body {
+          max-height: none;
+          min-width: 0;
+          overflow-wrap: anywhere;
         }
         .impute-method-popover {
           max-width: min(620px, calc(100vw - 2rem)) !important;
@@ -317,14 +389,13 @@ app_ui <- function() {
       });
       "
     )),
-    shiny::div(
-      class = "app-header d-flex align-items-center",
+    shiny::tags$header(
+      class = "app-header",
       shiny::div(
         id = "brand",
         shiny::tags$h1(
           "CytokineProfile",
-          class = "brand-title",
-          style = "margin:0;"
+          class = "brand-title"
         ),
         shiny::tags$span(class = "app-version", version_label),
         shiny::tags$img(
@@ -333,32 +404,32 @@ app_ui <- function() {
           alt = "CytokineProfile logo"
         )
       ),
-      shiny::div(class = "flex-grow-1"),
       shiny::div(
-        class = "d-flex align-items-center",
+        class = "app-header-actions d-flex flex-wrap align-items-center gap-2",
         shiny::tags$a(
           shiny::icon("github"),
           "GitHub Repository",
           href = "https://github.com/ZhangLabUKY/CytokineProfileShinyApp",
           target = "_blank",
-          class = "btn btn-light btn-sm me-2"
+          class = "btn btn-light btn-sm"
         ),
         shiny::tags$a(
           shiny::icon("globe"),
           "Project Website",
           href = "https://shinyinfo.cytokineprofile.org",
           target = "_blank",
-          class = "btn btn-light btn-sm me-4"
+          class = "btn btn-light btn-sm"
         ),
-        shiny::div(
+        htmltools::tagAppendAttributes(
           shiny::selectInput(
             "theme_choice",
-            NULL,
+            "Theme",
             choices = c("Auto" = "auto", "Light" = "flatly", "Dark" = "darkly"),
             selected = "Light",
             width = "100px"
           ),
-          style = "margin-right: 1rem; margin-top: 0.7rem;"
+          class = "visually-hidden",
+          .cssSelector = "label"
         )
       )
     ),

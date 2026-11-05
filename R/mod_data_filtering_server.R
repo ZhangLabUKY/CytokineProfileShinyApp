@@ -33,7 +33,7 @@ mod_data_filtering_server <- function(input, output, session, app_ctx) {
       # Use isolate() to read the input value without creating a dependency
       # When the UI is rebuilt, prefer the saved selection from userState.
       # Fall back to the live input value only when no saved state exists yet.
-      selected_now <- userState$step2_filter_values[[col]]
+      selected_now <- shiny::isolate(userState$step2_filter_values[[col]])
       if (is.null(selected_now)) {
         selected_now <- shiny::isolate(input[[filter_id]])
       }

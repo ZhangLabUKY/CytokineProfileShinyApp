@@ -99,9 +99,12 @@ test_that("save-key-input observers keep selected columns in sync before analysi
 test_that("imputation notifications explain missing and unsupported feature-wise selections", {
   local_mocked_browser_side_effects()
   notifications <- local_capture_shiny_notifications()
+  path <- withr::local_tempfile(fileext = ".csv")
+  utils::write.csv(data.frame(Group = c("A", "B", NA, "B"),
+                              Marker = c(1, NA, 2, 3)), path, row.names = FALSE)
 
   shiny::testServer(app_server, {
-    prepare_app_server_step3(session, app_ctx = app_ctx)
+    session$setInputs(datafile = list(name = "missing.csv", datapath = path))
 
     set_test_input(session, ui_imputation_method_input_id(), "mean")
     click_test_input(session, "apply_impute")
@@ -122,7 +125,7 @@ test_that("imputation notifications explain missing and unsupported feature-wise
     )
 
     notifications$clear()
-    set_test_input(session, "imp_cols", example1_test_numerical_cols()[1])
+    set_test_input(session, "imp_cols", "Marker")
     click_test_input(session, "apply_impute")
     expect_match(
       notifications$last()$ui,

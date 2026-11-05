@@ -308,7 +308,7 @@ cyt_splsda <- function(
           label,
           ":",
           .format_predictor_issues(predictor_issues),
-          "Consider Step 2 'Treat missing values' if you want to retain sparse predictors."
+          "Consider Step 2 'Impute missing values' if you want to retain sparse predictors."
         ),
         call. = FALSE
       )
@@ -342,7 +342,7 @@ cyt_splsda <- function(
         sprintf(
           paste(
             "sPLS-DA dropped %d row%s with no retained predictor values for %s.",
-            "Consider Step 2 'Treat missing values' if you want to retain sparse predictors."
+            "Consider Step 2 'Impute missing values' if you want to retain sparse predictors."
           ),
           dropped_rows,
           if (dropped_rows == 1) "" else "s",

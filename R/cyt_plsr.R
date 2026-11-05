@@ -215,7 +215,7 @@ cyt_plsr <- function(
             ),
             collapse = "; "
           ),
-          "Consider Step 2 'Treat missing values' if you want to retain sparse predictors."
+          "Consider Step 2 'Impute missing values' if you want to retain sparse predictors."
         ),
         call. = FALSE
       )
@@ -233,7 +233,7 @@ cyt_plsr <- function(
             collapse = "; "
           )
         ),
-        "Tip: use Step 2 'Treat missing values' to retain sparse predictors."
+        "Tip: use Step 2 'Impute missing values' to retain sparse predictors."
       )
       X <- X[, setdiff(names(X), predictor_issues$predictor), drop = FALSE]
     } else {

@@ -8,7 +8,7 @@ mod_step4_analysis_args_ui <- function(
   shiny::tagList(
     shiny::uiOutput(ns("function_options_ui")),
     shiny::div(
-      style = "display: flex; justify-content: space-between; margin-top: 1rem;",
+      class = "wizard-actions justify-content-between mt-3",
       shiny::actionButton(
         ns("back4"),
         "Back",

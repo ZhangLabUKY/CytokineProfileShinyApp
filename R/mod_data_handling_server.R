@@ -7,15 +7,26 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
   builtInList <- app_ctx$builtInList
   staged_files <- app_ctx$staged_files
 
+  # File inputs are recreated on navigation. Keep the upload descriptor on the
+  # server so unbinding a browser control cannot discard the active source.
+  retained_upload <- shiny::reactiveVal(NULL)
+  current_upload <- shiny::reactive(input$datafile %||% retained_upload())
+  using_builtin <- shiny::reactive({
+    isTRUE(userState$use_builtin) && identical(current_upload(), retained_upload())
+  })
+  editor_source <- shiny::reactiveVal(NULL)
+  editor_base <- shiny::reactiveVal(NULL)
+  import_oor_summary <- shiny::reactiveVal(NULL)
+
   stage_main_upload <- function() {
-    shiny::req(input$datafile)
+    shiny::req(current_upload())
     app_stage_uploaded_file(
-      source_path = input$datafile$datapath,
+      source_path = current_upload()$datapath,
       target_dir = upload_dir,
       slot_id = "main_data_upload",
       registry_env = staged_files,
-      original_name = input$datafile$name,
-      source_id = paste(input$datafile$datapath, input$datafile$name, sep = "::")
+      original_name = current_upload()$name,
+      source_id = paste(current_upload()$datapath, current_upload()$name, sep = "::")
     )
   }
 
@@ -37,20 +48,20 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
   }
 
   stage_builtin_cache <- function() {
-    shiny::req(isTRUE(input$use_builtin))
-    shiny::req(input$built_in_choice)
-    df <- app_builtin_dataset(input$built_in_choice)
+    shiny::req(using_builtin())
+    shiny::req(input$built_in_choice %||% userState$built_in_choice)
+    df <- app_builtin_dataset(input$built_in_choice %||% userState$built_in_choice)
     app_stage_rds_object(
       object = df,
       target_dir = builtins_dir,
       slot_id = "builtin_dataset",
       registry_env = staged_files,
-      source_id = input$built_in_choice
+      source_id = input$built_in_choice %||% userState$built_in_choice
     )
   }
 
   main_upload_path <- shiny::reactive({
-    shiny::req(input$datafile)
+    shiny::req(current_upload())
     # Readers can run before upload observers. Always verify the source identity;
     # the staging helper reuses an existing file only for the same source.
     shiny::req(stage_with_notification(stage_main_upload, "Uploaded file"))
@@ -63,8 +74,8 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
   })
 
   builtin_cache_path <- shiny::reactive({
-    shiny::req(isTRUE(input$use_builtin))
-    shiny::req(input$built_in_choice)
+    shiny::req(using_builtin())
+    shiny::req(input$built_in_choice %||% userState$built_in_choice)
     shiny::req(stage_with_notification(stage_builtin_cache, "Built-in dataset"))
   })
 
@@ -92,7 +103,8 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
     {
       userState$use_builtin <- input$use_builtin
     },
-    ignoreNULL = FALSE
+    ignoreNULL = TRUE,
+    priority = 400
   )
 
   # remember which built-in data they picked
@@ -101,13 +113,14 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
     {
       userState$built_in_choice <- input$built_in_choice
     },
-    ignoreNULL = FALSE
+    ignoreNULL = TRUE,
+    priority = 400
   )
 
   shiny::observeEvent(
     list(input$use_builtin, input$built_in_choice),
     {
-      if (!isTRUE(input$use_builtin) || !shiny::isTruthy(input$built_in_choice)) {
+      if (!using_builtin() || !shiny::isTruthy(input$built_in_choice)) {
         return()
       }
 
@@ -157,122 +170,89 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
   # cache for loaded Excel sheets
   excel_cache <- shiny::reactiveVal(list())
 
-  # If the user uploads a new main data file or a new bioplex file, clear any
-  # previously 'saved' Bio-Plex dataset so the editor will read the newly
-  # uploaded file (instead of returning the persisted `bioplex$final`).
-  shiny::observeEvent(
-    input$datafile,
-    {
-      if (is.null(stage_with_notification(stage_main_upload, "Uploaded file"))) {
-        return()
-      }
+  clear_editor <- function() {
+    bioplex$active <- FALSE
+    bioplex$final <- NULL
+    bioplex$df <- NULL
+    bioplex$editor_mode <- "persisted"
+    bioplex$deleted_idx <- integer(0)
+    bioplex$deleted_by_sheet <- list()
+    bioplex$user_columns <- character(0)
+    bioplex$hidden_cols <- character(0)
+    bioplex$cols_master <- NULL
+    editor_source(NULL)
+    editor_base(NULL)
+    excel_cache(list())
+  }
 
-      # New upload -> clear persisted bioplex state so editor uses uploaded file
-      bioplex$active <- FALSE
-      bioplex$final <- NULL
-      bioplex$df <- NULL
-      bioplex$editor_mode <- "sheets"
-      bioplex$deleted_idx <- integer(0)
-      bioplex$deleted_by_sheet <- list()
-      bioplex$user_columns <- character(0)
-      bioplex$hidden_cols <- character(0)
-      # Also clear any excel cache entries related to this datapath so sheets re-read
-      excel_cache(list())
+  reset_import <- function() {
+    clear_editor()
+    if (is.function(app_ctx$reset_preprocessing)) app_ctx$reset_preprocessing()
+  }
 
-      # Clear stored sheet selection (prevents mismatched sheet names when
-      # uploading a different workbook that doesn't contain the previously
-      # selected sheet). Also clear the saved userState sheet name so the UI
-      # doesn't re-populate with an invalid value.
-      userState$sheet_name <- NULL
-      userState$selected_columns <- NULL
-      userState$selected_categorical_cols <- NULL
-      userState$selected_numerical_cols <- NULL
-      userState$step2_scale <- "none"
-      userState$step2_factor_cols <- NULL
-      userState$step2_numeric_override_cols <- NULL
-      userState$step2_factor_order_enable <- FALSE
-      userState$step2_factor_order_col <- NULL
-      userState$step2_factor_levels_csv <- NULL
-      userState$step2_applied_factor_cols <- NULL
-      userState$step2_applied_numeric_override_cols <- NULL
-      userState$step2_applied_factor_order_enable <- FALSE
-      userState$step2_applied_factor_order_col <- NULL
-      userState$step2_applied_factor_levels_csv <- NULL
-      try(
-        shiny::updateSelectizeInput(
-          session,
-          "sheet_name",
-          selected = character(0)
-        ),
-        silent = TRUE
-      )
+  shiny::observeEvent(input$datafile, {
+    if (identical(input$datafile, retained_upload())) return()
+    retained_upload(input$datafile)
+    userState$use_builtin <- FALSE
+    shiny::updateCheckboxInput(session, "use_builtin", value = FALSE)
+    userState$sheet_name <- NULL
+    reset_import()
+    # Reset first, including on staging failure: never expose the old import.
+    path <- stage_with_notification(stage_main_upload, "Uploaded file")
+    if (is.null(path)) return()
+    if (tolower(tools::file_ext(current_upload()$name)) %in% c("xls", "xlsx")) {
+      sheets <- tryCatch(readxl::excel_sheets(path), error = function(e) character())
+      userState$sheet_name <- if (length(sheets)) sheets[1] else NULL
+      shiny::updateSelectizeInput(session, "sheet_name", choices = sheets,
+                                 selected = userState$sheet_name %||% character())
+    }
+  }, ignoreNULL = TRUE, priority = 300)
 
-      # Notify the user that previous editor state was cleared due to new upload
-      shiny::showNotification(
-        "New upload detected - previous data-editor state cleared.",
-        type = "message",
-        duration = 4
-      )
-    },
-    ignoreNULL = TRUE
-  )
+  shiny::observeEvent(input$sheet_name, {
+    shiny::req(current_upload())
+    ext <- tolower(tools::file_ext(current_upload()$name))
+    if (!ext %in% c("xls", "xlsx")) return()
+    sheets <- tryCatch(readxl::excel_sheets(main_upload_path()), error = function(e) character())
+    selected <- intersect(input$sheet_name, sheets)
+    if (!length(selected) || identical(selected[1], userState$sheet_name)) return()
+    userState$sheet_name <- selected[1]
+    reset_import()
+  }, ignoreNULL = TRUE, priority = 200)
 
-  shiny::observeEvent(
-    input$bioplex_file,
-    {
-      if (is.null(stage_with_notification(stage_bioplex_upload, "Bio-Plex workbook"))) {
-        return()
-      }
+  # Keep source changes distinct from navigation and editor drafts.
+  import_source <- shiny::reactive({
+    if (using_builtin()) {
+      list(kind = "builtin", choice = input$built_in_choice %||% userState$built_in_choice)
+    } else {
+      upload <- current_upload()
+      sheet <- userState$sheet_name
+      if (!identical(upload, retained_upload())) sheet <- NULL
+      list(kind = "upload", upload = upload, sheet = sheet)
+    }
+  })
+  observed_source <- shiny::reactiveVal(NULL)
+  shiny::observeEvent(import_source(), {
+    source <- import_source()
+    # A reactive can invalidate without changing its value (for example when
+    # the file input unbinds). Only a different source should clear saved data.
+    previous <- observed_source()
+    if (identical(source, previous)) return()
+    observed_source(source)
+    if (!is.null(previous)) reset_import()
+  }, priority = 150)
 
-      bioplex$active <- FALSE
-      bioplex$final <- NULL
-      bioplex$df <- NULL
-      bioplex$editor_mode <- "sheets"
-      bioplex$deleted_idx <- integer(0)
-      bioplex$deleted_by_sheet <- list()
-      bioplex$user_columns <- character(0)
-      bioplex$hidden_cols <- character(0)
-      excel_cache(list())
-      userState$sheet_name <- NULL
-      userState$selected_columns <- NULL
-      userState$selected_categorical_cols <- NULL
-      userState$selected_numerical_cols <- NULL
-      userState$step2_scale <- "none"
-      userState$step2_factor_cols <- NULL
-      userState$step2_numeric_override_cols <- NULL
-      userState$step2_factor_order_enable <- FALSE
-      userState$step2_factor_order_col <- NULL
-      userState$step2_factor_levels_csv <- NULL
-      userState$step2_applied_factor_cols <- NULL
-      userState$step2_applied_numeric_override_cols <- NULL
-      userState$step2_applied_factor_order_enable <- FALSE
-      userState$step2_applied_factor_order_col <- NULL
-      userState$step2_applied_factor_levels_csv <- NULL
-      try(
-        shiny::updateSelectizeInput(
-          session,
-          "sheet_name",
-          selected = character(0)
-        ),
-        silent = TRUE
-      )
-      shiny::showNotification(
-        "New Bioplex file detected - previous data-editor state cleared.",
-        type = "message",
-        duration = 4
-      )
-    },
-    ignoreNULL = TRUE
-  )
+  shiny::observeEvent(input$bioplex_file, {
+    userState$sheet_name <- NULL
+    reset_import()
+    stage_with_notification(stage_bioplex_upload, "Bio-Plex workbook")
+  }, ignoreNULL = TRUE, priority = 300)
 
-  userData <- shiny::reactive({
-    if (isTRUE(bioplex$active) && !is.null(bioplex$final)) {
-      df <- bioplex$final
-    } else if (isTRUE(input$use_builtin)) {
+  imported_data <- shiny::reactive({
+    if (using_builtin()) {
       df <- readRDS(builtin_cache_path())
     } else {
-      shiny::req(input$datafile)
-      safe_name <- basename(input$datafile$name)
+      shiny::req(current_upload())
+      safe_name <- basename(current_upload()$name)
       ext <- tolower(tools::file_ext(safe_name))
       shiny::validate(shiny::need(
         ext %in% c("csv", "txt", "xls", "xlsx"),
@@ -305,8 +285,9 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
         # Safely choose the requested sheet(s). If the previously selected
         # sheet(s) don't exist in this workbook, fall back to the first sheet.
         sheet_to_read <- NULL
-        if (!is.null(input$sheet_name) && length(input$sheet_name) > 0) {
-          valid <- intersect(input$sheet_name, all_sheets)
+        if (!is.null(userState$sheet_name) && length(userState$sheet_name) > 0 &&
+            identical(current_upload(), retained_upload())) {
+          valid <- intersect(userState$sheet_name, all_sheets)
           if (length(valid) >= 1) sheet_to_read <- valid[1]
         }
         if (is.null(sheet_to_read)) {
@@ -328,7 +309,14 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
         )
       }
     }
-    df$..cyto_id.. <- 1:nrow(df)
+    # The editor and direct continuation share identical names and cleaning.
+    df$..cyto_id.. <- NULL
+    names(df) <- make.unique(names(df))
+    import_oor_summary(.detect_oor_tokens(df))
+    df <- bioplex_clean_numeric_only(df)
+    shiny::validate(shiny::need(nrow(df) > 0 && ncol(df) > 0,
+                               "Choose a file and sheet containing data rows and columns."))
+    df$..cyto_id.. <- seq_len(nrow(df))
 
     # Coerce character columns that are actually numeric-like back to numeric.
     # This prevents columns containing NA tokens or minor noise from being
@@ -362,6 +350,24 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
       }
     }
     df
+  })
+
+  userData <- shiny::reactive({
+    # Verify source identity even when a reader runs before reset observers.
+    if (isTRUE(bioplex$active) && !is.null(bioplex$final) &&
+        identical(editor_source(), import_source())) {
+      df <- bioplex$final
+      df$..cyto_id.. <- seq_len(nrow(df))
+      return(df)
+    }
+    imported_data()
+  })
+
+  data_ready <- shiny::reactive({
+    tryCatch({
+      df <- userData()
+      is.data.frame(df) && nrow(df) > 0 && ncol(df) > 1
+    }, error = function(e) FALSE)
   })
 
   step2_applied_type_state <- shiny::reactive({
@@ -411,9 +417,19 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
   ## ---------------------------
   ## UI for Sheet Selector and Built-in Data Choice
   ## ---------------------------
+  output$current_data_source <- shiny::renderText({
+    if (using_builtin()) {
+      return(paste("Using built-in dataset:", userState$built_in_choice))
+    }
+    upload <- current_upload()
+    if (is.null(upload)) return("")
+    paste0("Uploaded: ", basename(upload$name),
+           if (!is.null(userState$sheet_name)) paste0(" | Sheet: ", userState$sheet_name) else "")
+  })
+
   output$sheet_selector <- shiny::renderUI({
-    shiny::req(input$datafile)
-    ext <- tolower(tools::file_ext(input$datafile$name))
+    shiny::req(current_upload())
+    ext <- tolower(tools::file_ext(current_upload()$name))
     if (!ext %in% c("xls", "xlsx")) {
       return(NULL)
     }
@@ -430,18 +446,18 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
 
     shiny::selectizeInput(
       inputId = "sheet_name",
-      label = "Select the desired sheets:",
-      multiple = TRUE,
+      label = "Select a sheet:",
+      multiple = FALSE,
       choices = sheets,
       options = list(
-        placeholder = "Select sheets..."
+        placeholder = "Select a sheet..."
       ),
       selected = shiny::isolate(userState$sheet_name) %||% sheets[1]
     )
   })
 
   output$built_in_selector <- shiny::renderUI({
-    if (!isTRUE(input$use_builtin)) {
+    if (!using_builtin()) {
       return(NULL)
     }
 
@@ -536,7 +552,7 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
   )
   # Per-sheet data frames (row 1 -> column names)
   bioplex_per_sheet <- shiny::reactive({
-    if (shiny::isTruthy(input$datafile) && length(input$sheet_name) >= 1) {
+    if (shiny::isTruthy(current_upload()) && length(input$sheet_name) >= 1) {
       path <- main_upload_path()
       # Ensure we only attempt to read sheets that exist in this workbook
       all_sheets <- tryCatch(readxl::excel_sheets(path), error = function(e) {
@@ -605,7 +621,7 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
   })
   # shows the button only when a file is uploaded
   output$open_editor_btn <- shiny::renderUI({
-    shiny::req(input$datafile) # waits until a file is selected/uploaded
+    shiny::req(data_ready())
     shiny::div(
       class = "mt-2",
       shiny::actionButton(
@@ -616,143 +632,31 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
     )
   })
   shiny::observeEvent(input$open_editor, {
-    if (isTRUE(bioplex$active) && !is.null(bioplex$final)) {
-      bioplex$editor_mode <- "persisted"
-      bioplex$df <- bioplex$final
-      bioplex$deleted_idx <- integer(0)
-      bioplex$cols_master <- NULL
-      show_data_editor_modal()
-      return() # <- important: don't run the file-reading path
-    }
-    shiny::req(input$datafile)
-    ext <- tolower(tools::file_ext(basename(input$datafile$name)))
-
-    if (ext %in% c("xls", "xlsx") && length(input$sheet_name) >= 1) {
-      # SHEETS MODE a?' tabs appear
-      bioplex$editor_mode <- "sheets"
-      ps <- bioplex_per_sheet() # now points at Option A inputs
-      shiny::req(length(ps) >= 1)
-      bioplex$deleted_by_sheet <- setNames(
-        replicate(length(ps), integer(0), simplify = FALSE),
-        names(ps)
-      )
-      bioplex$df <- dplyr::bind_rows(ps) # combined working table (no .id column)
-    } else {
-      # PERSISTED MODE for csv/txt or single-sheet Excel
-      df <- switch(
-        ext,
-        "csv" = tryCatch(
-          read_uploaded_flat_file(main_upload_path(), ext),
-          error = function(e) {
-            app_note_technical_error("Bio-Plex flat-file import", e)
-            shiny::showNotification(
-              "We could not read this file. Check that it is saved correctly and try again.",
-              type = "error"
-            )
-            NULL
-          }
-        ),
-        "txt" = tryCatch(
-          read_uploaded_flat_file(main_upload_path(), ext),
-          error = function(e) {
-            app_note_technical_error("Bio-Plex flat-file import", e)
-            shiny::showNotification(
-              "We could not read this file. Check that it is saved correctly and try again.",
-              type = "error"
-            )
-            NULL
-          }
-        ),
-        "xls" = {
-          dest <- main_upload_path()
-          all_sheets <- tryCatch(
-            readxl::excel_sheets(dest),
-            error = function(e) {
-              app_note_technical_error("Bio-Plex Excel sheet discovery", e)
-              character()
-            }
-          )
-          if (!length(all_sheets)) {
-            shiny::showNotification(
-              "Choose an Excel file with at least one readable sheet.",
-              type = "error"
-            )
-            return()
-          }
-          sheet_choice <- NULL
-          if (!is.null(input$sheet_name) && length(input$sheet_name) > 0) {
-            valid <- intersect(input$sheet_name, all_sheets)
-            if (length(valid) >= 1) sheet_choice <- valid[1]
-          }
-          if (is.null(sheet_choice)) {
-            sheet_choice <- 1L
-          }
-          tryCatch(
-            as.data.frame(readxl::read_excel(dest, sheet = sheet_choice)),
-            error = function(e) {
-              app_note_technical_error("Bio-Plex Excel import", e)
-              shiny::showNotification(
-                "We could not read the selected Excel sheet. Choose another sheet or upload a different file.",
-                type = "error"
-              )
-              NULL
-            }
-          )
-        },
-        "xlsx" = {
-          dest <- main_upload_path()
-          all_sheets <- tryCatch(
-            readxl::excel_sheets(dest),
-            error = function(e) {
-              app_note_technical_error("Bio-Plex Excel sheet discovery", e)
-              character()
-            }
-          )
-          if (!length(all_sheets)) {
-            shiny::showNotification(
-              "Choose an Excel file with at least one readable sheet.",
-              type = "error"
-            )
-            return()
-          }
-          sheet_choice <- NULL
-          if (!is.null(input$sheet_name) && length(input$sheet_name) > 0) {
-            valid <- intersect(input$sheet_name, all_sheets)
-            if (length(valid) >= 1) sheet_choice <- valid[1]
-          }
-          if (is.null(sheet_choice)) {
-            sheet_choice <- 1L
-          }
-          tryCatch(
-            as.data.frame(readxl::read_excel(dest, sheet = sheet_choice)),
-            error = function(e) {
-              app_note_technical_error("Bio-Plex Excel import", e)
-              shiny::showNotification(
-                "We could not read the selected Excel sheet. Choose another sheet or upload a different file.",
-                type = "error"
-              )
-              NULL
-            }
-          )
-        },
-        {
-          shiny::showNotification(
-            "Upload a CSV, TXT, XLS, or XLSX file.",
-            type = "error"
-          )
-          NULL
-        }
-      )
-      if (is.null(df)) {
-        return()
-      }
-      bioplex$editor_mode <- "persisted"
-      bioplex$df <- df
-    }
-
+    shiny::req(data_ready())
+    df <- userData()
+    df$..cyto_id.. <- NULL
+    editor_base(df)
+    editor_draft_source(import_source())
+    bioplex$editor_mode <- "persisted"
+    bioplex$df <- df
     bioplex$deleted_idx <- integer(0)
+    bioplex$deleted_by_sheet <- list()
     bioplex$hidden_cols <- character(0)
+    bioplex$user_columns <- character(0)
+    bioplex$cols_master <- NULL
     show_data_editor_modal()
+  })
+
+  editor_draft_source <- shiny::reactiveVal(NULL)
+  shiny::observeEvent(input$cancel_data_editor, {
+    bioplex$df <- NULL
+    bioplex$deleted_idx <- integer(0)
+    bioplex$deleted_by_sheet <- list()
+    bioplex$hidden_cols <- character(0)
+    bioplex$cols_master <- NULL
+    editor_base(NULL)
+    editor_draft_source(NULL)
+    shiny::removeModal()
   })
 
   output$bioplex_modal_tabs <- shiny::renderUI({
@@ -850,7 +754,7 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
         if (identical(bioplex$editor_mode, "persisted")) {
           shiny::div(
             class = "alert alert-info mb-2",
-            "Editing previously saved data."
+            "Changes take effect only when you click Save & Use."
           )
         },
         shiny::tags$label("Column names"),
@@ -1420,12 +1324,13 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
   })
   show_bioplex_editor_modal <- function() {
     shiny::showModal(
-      shiny::modalDialog(
+      wizard_modal_dialog(
         title = "Bio-Plex Editor",
+        wide = TRUE,
         size = "l",
         easyClose = FALSE,
         footer = shiny::tagList(
-          shiny::modalButton("Close"),
+          shiny::actionButton("cancel_data_editor", "Cancel"),
           shiny::actionButton(
             "bioplex_confirm_modal",
             "Save & Use",
@@ -1438,12 +1343,13 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
   }
   show_data_editor_modal <- function(title = "Data Editor") {
     shiny::showModal(
-      shiny::modalDialog(
+      wizard_modal_dialog(
         title = title,
+        wide = TRUE,
         size = "l",
         easyClose = FALSE,
         footer = shiny::tagList(
-          shiny::modalButton("Close"),
+          shiny::actionButton("cancel_data_editor", "Cancel"),
           shiny::actionButton(
             "bioplex_confirm_modal",
             "Save & Use",
@@ -1657,6 +1563,57 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
     )
   }
 
+  show_oor_warning <- function(oor_summary) {
+      shiny::showModal(
+        shiny::modalDialog(
+          title = "Out-of-range values were adjusted",
+          easyClose = FALSE,
+          footer = shiny::actionButton(
+            "oor_warning_ok",
+            "Continue",
+            class = "btn-primary"
+          ),
+          shiny::p(
+            sprintf(
+              "The uploaded data included %d out-of-range value%s. %d were above range and %d were below range.",
+              oor_summary$total,
+              if (oor_summary$total == 1) "" else "s",
+              oor_summary$gt,
+              oor_summary$lt
+            )
+          ),
+          shiny::p(
+            shiny::tags$b("Affected columns:"),
+            paste0(" ", .format_oor_columns(oor_summary$columns))
+          ),
+          shiny::p(
+            "These values were handled automatically during data cleaning before analysis."
+          ),
+          shiny::p(
+            "For each affected column, the app uses the non-out-of-range numeric values in that same column as the reference for the replacement values."
+          ),
+          shiny::tags$ul(
+            shiny::tags$li(
+              "Values marked above range are replaced with the column maximum plus one percent of that column's observed range."
+            ),
+            shiny::tags$li(
+              "Values marked below range are replaced with the column minimum plus ten percent of that minimum when the column minimum is positive."
+            ),
+            shiny::tags$li(
+              "If the column minimum is zero or negative, values marked below range are replaced with that minimum."
+            )
+          ),
+          shiny::p(
+            "The cleaned data is ready for use in the app. Click Continue to proceed."
+          )
+        )
+      )
+  }
+  shiny::observeEvent(imported_data(), {
+    summary <- import_oor_summary()
+    if (!is.null(summary) && summary$total > 0) show_oor_warning(summary)
+  })
+
   # Confirm import (activate for Step 2)
   shiny::observeEvent(input$bioplex_confirm_modal, {
     combined_now <- if (identical(bioplex$editor_mode, "persisted")) {
@@ -1681,60 +1638,23 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
     # Clean asterisks + OOR (your existing helper)
     final <- bioplex_clean_numeric_only(final_raw)
 
+    # A draft belongs to exactly one import. Never save an obsolete modal.
+    shiny::req(identical(editor_draft_source(), import_source()))
+    if (!identical(final, editor_base())) {
+      if (is.function(app_ctx$reset_preprocessing)) app_ctx$reset_preprocessing()
+    }
     # Persist & activate
+    editor_source(import_source())
     bioplex$final <- final
     bioplex$active <- TRUE
     bioplex$editor_mode <- "persisted"
 
     shiny::removeModal()
     if (oor_summary$total > 0) {
-      shiny::showModal(
-        shiny::modalDialog(
-          title = "Out-of-range values were adjusted",
-          easyClose = FALSE,
-          footer = shiny::actionButton(
-            "oor_warning_ok",
-            "Continue",
-            class = "btn-primary"
-          ),
-          shiny::p(
-            sprintf(
-              "The uploaded data included %d out-of-range value%s. %d were above range and %d were below range.",
-              oor_summary$total,
-              if (oor_summary$total == 1) "" else "s",
-              oor_summary$gt,
-              oor_summary$lt
-            )
-          ),
-          shiny::p(
-            shiny::tags$b("Affected columns:"),
-            paste0(" ", .format_oor_columns(oor_summary$columns))
-          ),
-          shiny::p(
-            "These values were handled automatically during data cleaning before the dataset was staged for analysis."
-          ),
-          shiny::p(
-            "For each affected column, the app uses the non-out-of-range numeric values in that same column as the reference for the replacement values."
-          ),
-          shiny::tags$ul(
-            shiny::tags$li(
-              "Values marked above range are replaced with the column maximum plus one percent of that column's observed range."
-            ),
-            shiny::tags$li(
-              "Values marked below range are replaced with the column minimum plus ten percent of that minimum when the column minimum is positive."
-            ),
-            shiny::tags$li(
-              "If the column minimum is zero or negative, values marked below range are replaced with that minimum."
-            )
-          ),
-          shiny::p(
-            "Your cleaned data has already been saved for use in the app. Click Continue to proceed."
-          )
-        )
-      )
+      show_oor_warning(oor_summary)
     } else {
       shiny::showNotification(
-        "Bio-Plex data cleaned and staged. Click 'Next Step' to continue.",
+        "Data saved. Click 'Next Step' to continue.",
         type = "message"
       )
     }
@@ -1746,7 +1666,7 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
 
   # REACTIVE & OUTPUT to track if data is loaded
   output$data_is_loaded <- shiny::reactive({
-    isTRUE(input$use_builtin) || isTRUE(bioplex$active)
+    data_ready()
   })
   shiny::outputOptions(output, "data_is_loaded", suspendWhenHidden = FALSE)
 
@@ -1768,7 +1688,7 @@ mod_data_handling_server <- function(input, output, session, app_ctx) {
     )
   })
   output$preview_ui <- shiny::renderUI({
-    shiny::req(input$use_builtin || isTRUE(bioplex$active))
+    shiny::req(data_ready())
     DT::dataTableOutput("data_preview")
   })
   output$data_preview <- DT::renderDT(

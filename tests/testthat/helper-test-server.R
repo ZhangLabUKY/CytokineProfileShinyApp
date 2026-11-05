@@ -429,6 +429,8 @@ prepare_app_server_step3 <- function(
 
   if (!identical(scale_choice, "none")) {
     set_test_input(session, "step2_scale", scale_choice)
+    set_test_input(session, "transform_cols", example1_test_numerical_cols())
+    click_test_input(session, "apply_transform")
   }
 
   if (apply_filters) {

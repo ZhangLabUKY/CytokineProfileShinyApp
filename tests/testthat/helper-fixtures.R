@@ -72,6 +72,17 @@ appdriver_wait_for_input <- function(app, id) {
   ), timeout = 30000)
 }
 
+appdriver_apply_transform <- function(app, method, columns = NULL) {
+  appdriver_wait_for_input(app, "configure_transform")
+  app$click("configure_transform")
+  appdriver_wait_for_input(app, "step2_scale")
+  app$set_inputs(step2_scale = method)
+  if (!is.null(columns)) app$set_inputs(transform_cols = columns)
+  app$click("apply_transform")
+  app$wait_for_js("!document.getElementById('step2_scale')", timeout = 30000)
+  app$wait_for_idle()
+}
+
 ex1_full <- as.data.frame(ExampleData1)
 ex1_numeric <- ex1_full[, -c(1:3), drop = FALSE]
 ex1_group <- ex1_full[, -c(2:3), drop = FALSE]

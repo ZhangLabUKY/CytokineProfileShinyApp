@@ -23,6 +23,7 @@ mod_persistent_state_server <- function(input, output, session, app_ctx) {
 
     # Step 2 preprocessing
     step2_scale = "none",
+    step2_transform_cols = NULL,
     step2_filter_values = NULL,
     step2_factor_cols = NULL,
     step2_numeric_override_cols = NULL,
