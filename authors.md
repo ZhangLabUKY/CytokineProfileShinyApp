@@ -14,13 +14,13 @@ Source:
 [`DESCRIPTION`](https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/devel/DESCRIPTION)
 
 Saraswat S, Zhang X (2026). *CytokineProfileShinyApp: Comphrensive
-Cytokine Profiling Analysis Shiny Application*. R package version 0.0.1,
+Cytokine Profiling Analysis Shiny Application*. R package version 0.0.2,
 <https://github.com/ZhangLabUKY/CytokineProfileShinyApp>.
 
     @Manual{,
       title = {CytokineProfileShinyApp: Comphrensive Cytokine Profiling Analysis Shiny Application},
       author = {Shubh Saraswat and Xiaohua Douglas Zhang},
       year = {2026},
-      note = {R package version 0.0.1},
+      note = {R package version 0.0.2},
       url = {https://github.com/ZhangLabUKY/CytokineProfileShinyApp},
     }

@@ -178,7 +178,7 @@ After this overview, the next useful articles are:
 
 ------------------------------------------------------------------------
 
-*Last updated:* November 04, 2026
+*Last updated:* November 05, 2026
 
 If you apply imputation and then change the source data or preprocessing
 choices, the app clears the imputed data and asks you to apply

@@ -1,6 +1,6 @@
 # Changelog
 
-## CytokineProfileShinyApp 0.0.1
+## CytokineProfileShinyApp 0.0.2
 
 - The development and deployment renv environment now uses R 4.6.1 and
   Bioconductor 3.23. The declared R minimum is 4.4; older R
@@ -21,9 +21,10 @@
   holdout split by outcome group, and validates predictor types, group
   sizes, and CV folds before fitting. Validation guidance remains
   visible in the app.
-- Browser regressions support source and installed app layouts, pin the
-  selected Chrome version in CI, and assert categorical filter counts
-  before capturing screenshots.
+- Browser recordings remain local with the developer’s Chrome pin and
+  reviewed snapshot baselines. GitHub skips browser startup while
+  retaining package, server, analysis, coverage, and locked-environment
+  checks.
 - Connect Cloud deployments use renv.lock directly, with the locked
   R/Bioconductor environment checked in CI. One-time
   migration/publishing wrappers have been removed.
@@ -32,7 +33,7 @@
 - Runtime dependencies and test-only dependencies are declared
   separately. Ordinary startup only activates renv.
 
-## CytokineProfileShinyApp 0.0.0.9000
+## CytokineProfileShinyApp 0.0.1
 
 This development build focuses on making the app easier to use, easier
 to read, and more reliable.
