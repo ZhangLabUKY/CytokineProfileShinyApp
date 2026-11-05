@@ -109,6 +109,12 @@ selection.</li>
 <p>The app supports common tabular formats such as CSV, XLS/X, and TXT.
 It also includes example datasets so you can learn the workflow before
 analyzing your own data.</p>
+<p>Choose one sheet for an Excel upload. Once the file is readable, you
+can continue directly to Step 2. The Data Editor is optional: use
+<strong>Save &amp; Use</strong> to commit edits or
+<strong>Cancel</strong> to discard the draft. Saving actual changes,
+selecting another sheet, or replacing the file resets previous
+preprocessing and results.</p>
 <p>At this step, your main job is to confirm that the dataset loaded the
 way you expect:</p>
 <ul>
@@ -137,6 +143,32 @@ subsets you want to compare.</li>
 <li>Exclude samples only when you have a clear reason, such as failed
 quality control or a predefined exclusion rule.</li>
 </ul>
+<div class="section level3">
+<h3 id="transform-selected-columns">Transform selected columns<a class="anchor" aria-label="anchor" href="#transform-selected-columns"></a>
+</h3>
+<p>Use <strong>Configure Transformation</strong> to choose a method and
+specific numeric columns, then click <strong>Apply</strong>. Unchosen
+columns retain their original values. <strong>Cancel</strong> leaves the
+applied settings unchanged, and choosing <strong>None</strong> removes
+the transformation. The app transforms values after filtering and row
+deletions, before imputation.</p>
+</div>
+<div class="section level3">
+<h3 id="impute-missing-values">Impute missing values<a class="anchor" aria-label="anchor" href="#impute-missing-values"></a>
+</h3>
+<p><strong>Impute Missing Values</strong> lists the columns with missing
+values in the current data and shows the count beside each name. After
+applying imputation, reopen the dialog and click <strong>Undo
+missing-value treatment</strong> to restore the missing values while
+keeping your filters, transformations, type overrides, and row
+deletions.</p>
+<p>Changing the source data or preprocessing clears imputation and
+prompts you to apply it again. You can move between wizard steps and
+keep imputation as long as the data and preprocessing stay the same.</p>
+</div>
+<div class="section level3">
+<h3 id="review-the-working-data">Review the working data<a class="anchor" aria-label="anchor" href="#review-the-working-data"></a>
+</h3>
 <p>The live data preview is especially helpful here. It lets you verify
 that the app is analyzing the samples and categories you intended before
 you move on.</p>
@@ -149,6 +181,7 @@ interpret.</li>
 and multi-level univariate analysis are often more informative.</li>
 </ul>
 <p><img src="../reference/figures/Shiny_Step2.gif"></p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="step-3-choosing-the-analysis-family">Step 3: Choosing the analysis family<a class="anchor" aria-label="anchor" href="#step-3-choosing-the-analysis-family"></a>
@@ -259,10 +292,6 @@ XGBoost</a> for classification-focused workflows.</li>
 </ul>
 <hr>
 <p><em>Last updated:</em> November 05, 2026</p>
-<p>If you apply imputation and then change the source data or
-preprocessing choices, the app clears the imputed data and asks you to
-apply imputation again. Moving between wizard steps preserves imputation
-when the data and preprocessing are unchanged.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

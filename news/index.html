@@ -43,18 +43,39 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.2" id="cytokineprofileshinyapp-002">CytokineProfileShinyApp 0.0.2<a class="anchor" aria-label="anchor" href="#cytokineprofileshinyapp-002"></a></h2>
-<ul><li>The development and deployment renv environment now uses R 4.6.1 and Bioconductor 3.23. The declared R minimum is 4.4; older R installations need compatible dependency versions and separate compatibility validation.</li>
+<div class="section level3">
+<h3 id="whats-new-0-0-2">What’s New<a class="anchor" aria-label="anchor" href="#whats-new-0-0-2"></a></h3>
+<ul><li>Transformations now have an Apply/Cancel popup for choosing a method and specific numeric columns. Transformation previews and analyses use only the applied choices.</li>
+<li>The Impute Missing Values dialog lists only columns with missing data and shows the count for each column. Undo is available in the same dialog and preserves filters, transformations, type overrides, and row deletions.</li>
+<li>XGBoost now supports a single numeric predictor, stratifies the holdout split by outcome group, and validates predictor types, group sizes, and cross-validation folds before fitting. Validation guidance appears in the app.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="easier-to-use-0-0-2">Easier to Use<a class="anchor" aria-label="anchor" href="#easier-to-use-0-0-2"></a></h3>
+<ul><li>Continue straight after uploading data or choosing one Excel sheet. The optional Data Editor lets you discard draft edits with Cancel or apply them with Save &amp; Use. Saving changed data resets preprocessing.</li>
+<li>Cards in Steps 1–2 stack on narrower screens. Buttons and long filenames wrap, and wide tables scroll inside their cards. The Data Editor and preprocessing dialogs keep footer actions within reach as you scroll.</li>
+<li>Both Filtered Data Explorer views show a clear message when filters or row exclusions leave zero rows. Applied transformation settings take effect again when matching rows return.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="better-figures-0-0-2">Better Figures<a class="anchor" aria-label="anchor" href="#better-figures-0-0-2"></a></h3>
+<ul><li>Grouped plots stay distinct even when group labels differ only by punctuation or contain Unicode.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-0-0-2">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-0-2"></a></h3>
+<ul><li>Replacing a file on Step 1 refreshes the sheet picker, preview, and editor. Switching built-in datasets and replacing uploads verify the staged source before reading it. A source replacement clears previous preprocessing and results.</li>
 <li>Changing source data, filters, row deletions, applied column types, or transformations now clears stale imputation and asks users to reapply it. Navigation preserves valid imputation.</li>
-<li>Switching built-in datasets or replacing an upload now verifies the staged source before reading it, preventing downstream steps from using the previous dataset.</li>
-<li>Grouped results use unique internal plot IDs, including when labels differ only by punctuation or contain Unicode.</li>
+<li>Changing themes preserves the upload and controls in Steps 1–2. Step 2 also updates column and type selections in place.</li>
 <li>Repeated sPLS-DA runs replace obsolete interactive-modal observers.</li>
 <li>Result displays refresh after an analysis completes, including when the previous cached display was empty.</li>
-<li>XGBoost now supports a single numeric predictor, stratifies the holdout split by outcome group, and validates predictor types, group sizes, and CV folds before fitting. Validation guidance remains visible in the app.</li>
-<li>Browser recordings remain local with the developer’s Chrome pin and reviewed snapshot baselines. GitHub skips browser startup while retaining package, server, analysis, coverage, and locked-environment checks.</li>
-<li>Connect Cloud deployments use renv.lock directly, with the locked R/Bioconductor environment checked in CI. One-time migration/publishing wrappers have been removed.</li>
-<li>Privacy and tutorial pages are included in installed apps; generated plot PDFs are excluded from packages and deployment.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="behind-the-scenes-0-0-2">Behind the Scenes<a class="anchor" aria-label="anchor" href="#behind-the-scenes-0-0-2"></a></h3>
+<ul><li>The development and deployment renv environment uses R 4.6.1 and Bioconductor 3.23. The declared R minimum is 4.4. Older R installations need compatible dependency versions and separate compatibility validation.</li>
+<li>Local browser tests cover the new workflows using the pinned Chrome version and reviewed screenshots. GitHub runs package, server, analysis, coverage, and locked-environment checks.</li>
+<li>Connect Cloud deployments use <code>renv.lock</code> directly. CI checks the locked R and Bioconductor environment. The one-time migration and publishing scripts were removed.</li>
+<li>Installed apps include the privacy and tutorial pages. Package and deployment bundles exclude generated plot PDFs.</li>
 <li>Runtime dependencies and test-only dependencies are declared separately. Ordinary startup only activates renv.</li>
 </ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.1" id="cytokineprofileshinyapp-001">CytokineProfileShinyApp 0.0.1<a class="anchor" aria-label="anchor" href="#cytokineprofileshinyapp-001"></a></h2>
 <p>This development build focuses on making the app easier to use, easier to read, and more reliable.</p>

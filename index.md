@@ -80,13 +80,17 @@ The app is structured as a multi-step wizard:
 ### Step 1: Data Upload
 
 - File Input: Upload your own data file (CSV, TXT, Excel).
-  - For Excel files, choose the desired sheet.
+  - For Excel files, choose one sheet.
+- Optional Data Editor: Continue directly after uploading, or edit
+  first. Save & Use commits edits; Cancel discards them.
 - Built-in Data: Choose from built-in data sets.
 
 ### Step 2: Column Selection and Filtering
 
 - Column Selection: Choose the columns to analyze.
-- Transformation: Apply log2 transformation if needed.
+- Transformation: Use Configure Transformation to choose log2, log10, or
+  Z-score and the numeric columns to transform, then click Apply. Cancel
+  keeps the previous settings.
   - Preview data distribution with and without transformation.
 - Convert columns to categorical variables.
 - Convert selected columns back to numeric while keeping non-parsable
@@ -94,7 +98,9 @@ The app is structured as a multi-step wizard:
 - Automatically recognize more numeric-looking columns even when common
   missing-value tokens are present.
 - Filter Data: Apply filters to categorical variables.
-- Missing Value Handling: Choose to impute them using various methods.
+- Missing Value Handling: Choose columns with missing data and an
+  imputation method. Use Undo missing-value treatment in the same dialog
+  to restore missing values while keeping other preprocessing choices.
 
 ### Step 3: Analysis Selection
 
