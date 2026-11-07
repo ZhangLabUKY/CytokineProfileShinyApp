@@ -142,31 +142,37 @@ interesting components without actually predicting the outcome well.</p>
 <p>The highest-value controls are:</p>
 <ul>
 <li>
-<code>Response Column</code>: the numeric outcome the model is
-trying to predict.</li>
+<strong>Numeric measurement to predict</strong> selects the numeric
+outcome the model is trying to predict.</li>
 <li>
-<code>Predictor Columns</code>: the cytokines or other numeric
-predictors included in the model.</li>
+<strong>Measurements used to predict</strong> selects the cytokines
+or other numeric predictors included in the model.</li>
 <li>
 <code>Number of Components</code>: how many latent components the
 model extracts.</li>
 <li>
-<code>Sparse PLSR</code>: whether the model keeps all predictors or
-enforces variable selection.</li>
+<strong>Use fewer measurements per component</strong> selects
+whether the model keeps all predictors or enforces variable
+selection.</li>
 <li>
-<code>Number of Variables</code>: how many predictors are retained
-per component when <code>Sparse PLSR</code> is turned on.</li>
+<strong>Measurements to keep per component</strong> selects how many
+predictors are retained per component when <strong>Use fewer
+measurements per component</strong> is turned on.</li>
 <li>
-<code>Cross-validation</code> and <code>Number of Folds</code>:
-whether the app estimates generalization performance.</li>
+<strong>Check model performance (cross-validation)</strong> and
+<code>Number of Folds</code> control how the app holds back samples to
+check predictions.</li>
 <li>
-<code>Grouping Column</code> and <code>Ellipse</code>: visual aids
-for the score plot only.</li>
+<strong>Color samples by (optional)</strong> and
+<code>Ellipse</code> help distinguish groups in the score plot. The
+grouping column is excluded from the measurements the model can
+use.</li>
 </ul>
-<p>In practice, <code>Response Column</code>,
-<code>Predictor Columns</code>, and <code>Number of Components</code>
-define the model, while <code>Sparse PLSR</code> changes how simple or
-dense the predictor set remains.</p>
+<p>In practice, <strong>Numeric measurement to predict</strong>,
+<strong>Measurements used to predict</strong>, and
+<code>Number of Components</code> define the model, while <strong>Use
+fewer measurements per component</strong> changes how simple or dense
+the predictor set remains.</p>
 </div>
 <div class="section level2">
 <h2 id="how-to-read-the-main-outputs">How to read the main outputs<a class="anchor" aria-label="anchor" href="#how-to-read-the-main-outputs"></a>
@@ -255,13 +261,13 @@ variable rankings are not absolute</li>
 <li>Filter the dataset to the samples and cytokines you want to
 model.</li>
 <li>Choose <code>Partial Least Squares Regression (PLSR)</code>.</li>
-<li>Set <code>Response Column</code> and confirm the
-<code>Predictor Columns</code>.</li>
+<li>Set <strong>Numeric measurement to predict</strong> and confirm the
+<strong>Measurements used to predict</strong>.</li>
 <li>Choose <code>Number of Components</code>.</li>
-<li>Turn on <code>Sparse PLSR</code> only if you want a smaller selected
-predictor set.</li>
-<li>Add <code>Cross-validation</code> if you want a better sense of
-model stability.</li>
+<li>Turn on <strong>Use fewer measurements per component</strong> only
+if you want a smaller selected predictor set.</li>
+<li>Add <strong>Check model performance (cross-validation)</strong> if
+you want a better sense of model stability.</li>
 <li>Read <code>Predicted vs Observed</code>,
 <code>Residuals vs Fitted</code>, <code>Loadings Plots</code>, and
 <code>VIP Scores</code> together.</li>
@@ -283,7 +289,7 @@ the outcome is categorical rather than numeric.</li>
 sPLS-DA</a> if the study spans multiple batches or cohorts.</li>
 </ul>
 <hr>
-<p><em>Last updated:</em> November 05, 2026</p>
+<p><em>Last updated:</em> November 07, 2026</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

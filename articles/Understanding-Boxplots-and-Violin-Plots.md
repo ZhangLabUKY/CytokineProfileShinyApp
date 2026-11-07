@@ -42,16 +42,20 @@ variables.
 
 For both methods, the most important controls are:
 
-- `Grouping Columns (Optional)`: whether the distributions are shown
-  overall or split by group.
-- `Bin Size`: how many numeric variables are shown on one page.
-- `Y-Axis Limits`: whether to keep automatic scaling or force a shared
-  scale across plots.
+- **Group plots by (optional)** shows the overall distribution when left
+  blank. Choose `Treatment` to compare treatment groups, or select
+  `Group` and `Treatment` to see each combination.
+- **Variables per page** controls how many measurements, such as IL-6
+  and TNF-α, appear on each ungrouped plot page. It defaults to 25 and
+  is shown when no grouping column is selected.
+- **Y-axis range (optional)** changes the visible range. Leave it blank
+  for an automatic range or enter two numbers such as `0, 100` to use
+  the same scale across plots.
 
 For violin plots specifically:
 
-- `Show Boxplot Overlay`: adds quartile and median structure inside the
-  violin.
+- **Show a boxplot inside each violin** adds the median and middle half
+  of the values to each violin.
 
 These decisions matter more than stylistic choices because they change
 what patterns are easy to see.
@@ -80,7 +84,7 @@ Use them when boxplots feel too compressed to describe the data shape.
 
 ### Reading grouped views
 
-When `Grouping Columns (Optional)` is used:
+When you select columns under **Group plots by (optional)**:
 
 - compare both center and spread
 - ask whether one group is simply shifted or whether the shape is
@@ -102,12 +106,14 @@ Keep these limits in mind:
 
 1.  Filter the dataset to the groups and cytokines you want to inspect.
 2.  Choose `Boxplots` or `Violin Plots`.
-3.  Decide whether to use `Grouping Columns (Optional)`.
-4.  Adjust `Bin Size` if the page is too dense or too sparse.
-5.  Leave `Y-Axis Limits` automatic unless you need consistent scales
-    across pages.
-6.  For violin plots, turn on `Show Boxplot Overlay` if you want both
-    shape and quartile summaries.
+3.  Leave **Group plots by (optional)** blank for an overall view, or
+    choose `Treatment` to compare treatment groups.
+4.  For ungrouped plots, adjust **Variables per page** if the page is
+    too dense or too sparse.
+5.  Leave **Y-axis range (optional)** blank unless you need consistent
+    scales across plots.
+6.  For violin plots, turn on **Show a boxplot inside each violin** to
+    see the median and middle half of the values.
 
 ## What to read next
 
@@ -125,4 +131,4 @@ Related articles:
 
 ------------------------------------------------------------------------
 
-*Last updated:* November 05, 2026
+*Last updated:* November 07, 2026

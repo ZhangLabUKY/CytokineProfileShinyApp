@@ -123,20 +123,24 @@ variables.</p>
 <p>For both methods, the most important controls are:</p>
 <ul>
 <li>
-<code>Grouping Columns (Optional)</code>: whether the distributions
-are shown overall or split by group.</li>
+<strong>Group plots by (optional)</strong> shows the overall
+distribution when left blank. Choose <code>Treatment</code> to compare
+treatment groups, or select <code>Group</code> and
+<code>Treatment</code> to see each combination.</li>
 <li>
-<code>Bin Size</code>: how many numeric variables are shown on one
-page.</li>
+<strong>Variables per page</strong> controls how many measurements,
+such as IL-6 and TNF-α, appear on each ungrouped plot page. It defaults
+to 25 and is shown when no grouping column is selected.</li>
 <li>
-<code>Y-Axis Limits</code>: whether to keep automatic scaling or
-force a shared scale across plots.</li>
+<strong>Y-axis range (optional)</strong> changes the visible range.
+Leave it blank for an automatic range or enter two numbers such as
+<code>0, 100</code> to use the same scale across plots.</li>
 </ul>
 <p>For violin plots specifically:</p>
 <ul>
 <li>
-<code>Show Boxplot Overlay</code>: adds quartile and median
-structure inside the violin.</li>
+<strong>Show a boxplot inside each violin</strong> adds the median
+and middle half of the values to each violin.</li>
 </ul>
 <p>These decisions matter more than stylistic choices because they
 change what patterns are easy to see.</p>
@@ -171,7 +175,8 @@ shape.</p>
 <div class="section level3">
 <h3 id="reading-grouped-views">Reading grouped views<a class="anchor" aria-label="anchor" href="#reading-grouped-views"></a>
 </h3>
-<p>When <code>Grouping Columns (Optional)</code> is used:</p>
+<p>When you select columns under <strong>Group plots by
+(optional)</strong>:</p>
 <ul>
 <li>compare both center and spread</li>
 <li>ask whether one group is simply shifted or whether the shape is
@@ -202,13 +207,15 @@ problems, so they deserve follow-up rather than automatic removal</li>
 <li>Filter the dataset to the groups and cytokines you want to
 inspect.</li>
 <li>Choose <code>Boxplots</code> or <code>Violin Plots</code>.</li>
-<li>Decide whether to use <code>Grouping Columns (Optional)</code>.</li>
-<li>Adjust <code>Bin Size</code> if the page is too dense or too
-sparse.</li>
-<li>Leave <code>Y-Axis Limits</code> automatic unless you need
-consistent scales across pages.</li>
-<li>For violin plots, turn on <code>Show Boxplot Overlay</code> if you
-want both shape and quartile summaries.</li>
+<li>Leave <strong>Group plots by (optional)</strong> blank for an
+overall view, or choose <code>Treatment</code> to compare treatment
+groups.</li>
+<li>For ungrouped plots, adjust <strong>Variables per page</strong> if
+the page is too dense or too sparse.</li>
+<li>Leave <strong>Y-axis range (optional)</strong> blank unless you need
+consistent scales across plots.</li>
+<li>For violin plots, turn on <strong>Show a boxplot inside each
+violin</strong> to see the median and middle half of the values.</li>
 </ol>
 </div>
 <div class="section level2">
@@ -229,7 +236,7 @@ Univariate Test Selection</a> when you are ready to move from
 exploratory views to formal testing.</li>
 </ul>
 <hr>
-<p><em>Last updated:</em> November 05, 2026</p>
+<p><em>Last updated:</em> November 07, 2026</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

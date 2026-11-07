@@ -37,8 +37,8 @@ most important choices in this workflow.
 
 The settings that usually matter most are:
 
-- `Annotation Column`
-- `Annotation Side`
+- **Color-label samples by (optional)**
+- **Where to put the color strip**
 
 ### Why scaling matters
 
@@ -89,8 +89,8 @@ Important cautions for heatmaps are:
 1.  Filter the dataset to the relevant samples and cytokines.
 2.  Choose `Heatmap`.
 3.  Decide on any Step 2 preprocessing before running the heatmap.
-4.  Set `Annotation Column` and `Annotation Side` so the clustering can
-    be interpreted in study context.
+4.  Set **Color-label samples by (optional)** and **Where to put the
+    color strip** so the clustering can be interpreted in study context.
 5.  Inspect the figure both with and without clustering if you want to
     separate raw ordering from similarity structure.
 
@@ -110,4 +110,4 @@ Related articles:
 
 ------------------------------------------------------------------------
 
-*Last updated:* November 05, 2026
+*Last updated:* November 07, 2026

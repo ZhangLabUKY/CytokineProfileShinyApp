@@ -110,24 +110,25 @@ filtering to subjects with Pre-Diabetes (PreT2D) and Type 2 Diabetes
 <p>The highest-value settings to understand are:</p>
 <ul>
 <li>
-<code>Grouping Column</code>: defines the classes the model is
+<strong>Class to predict</strong> defines the classes the model is
 trying to predict.</li>
 <li>
 <code>Number of Trees</code>: affects model stability and
 runtime.</li>
 <li>
-<code>Number of Variables to Split</code>: controls how many
-predictors are considered at each tree split.</li>
+<strong>Measurements considered at each tree split</strong> controls
+how many predictors are considered at each tree split.</li>
 <li>
-<code>Train Fraction</code>: determines how much data is used for
-training versus held-out testing.</li>
+<strong>Fraction of samples used for training</strong> determines
+how much data is used for training versus held-out testing.</li>
 <li>
 <code>Plot ROC (Binary Comparison Only)</code>: adds an ROC view
 when the comparison has exactly two classes.</li>
 <li>
-<code>Run RFCV</code>, <code>Number of Folds</code>, and
-<code>Step Size</code>: control the feature-selection cross-validation
-view.</li>
+<strong>Check performance with fewer measurements</strong> compares
+prediction error as the number of measurements decreases.
+<code>Number of Folds</code> and <strong>Fraction of measurements
+removed per step</strong> control that check.</li>
 </ul>
 <p>For app users, the safest workflow is to change one of these at a
 time and then check whether the held-out or cross-validated performance
@@ -193,8 +194,9 @@ with the same seed or checking cross-validation outputs is useful.</li>
 performance looks unstable between runs.</li>
 <li>Number of Variables to Split: start near the default behavior, then
 adjust only if performance is clearly underwhelming.</li>
-<li>Train Fraction: larger training sets can improve fitting, but they
-leave less held-out data for honest checking.</li>
+<li>A larger <strong>Fraction of samples used for training</strong>
+gives the model more data to learn from and leaves fewer samples for the
+test set.</li>
 <li>Number of Folds: more folds can give a steadier validation estimate,
 but they also cost more computation.</li>
 <li>Step Size: smaller steps make RFCV more granular, while larger steps
@@ -207,11 +209,12 @@ make it faster but coarser.</li>
 <ol style="list-style-type: decimal">
 <li>Filter the dataset to the classes you want to compare.</li>
 <li>Choose <code>Random Forest</code>.</li>
-<li>Set <code>Grouping Column</code>, <code>Number of Trees</code>,
-<code>Number of Variables to Split</code>, and
-<code>Train Fraction</code>.</li>
+<li>Set <strong>Class to predict</strong>, <code>Number of Trees</code>,
+<strong>Measurements considered at each tree split</strong>, and
+<strong>Fraction of samples used for training</strong>.</li>
 <li>Turn on <code>Plot ROC (Binary Comparison Only)</code> and
-<code>Run RFCV</code> if you want stronger validation context.</li>
+<strong>Check performance with fewer measurements</strong> if you want
+stronger validation context.</li>
 <li>Read the variable importance plot together with the summary and
 validation outputs.</li>
 </ol>
@@ -239,7 +242,7 @@ Boxplots and Violin Plots</a> when top-ranked features need
 raw-distribution follow-up.</li>
 </ul>
 <hr>
-<p><em>Last updated:</em> November 05, 2026</p>
+<p><em>Last updated:</em> November 07, 2026</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

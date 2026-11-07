@@ -32,23 +32,28 @@ compares Non-Diabetic (ND), Pre-Diabetic (PreT2D), and Type 2 Diabetes
 
 The settings that most strongly affect interpretation are:
 
-- `sPLS-DA Comparison Column`: defines the classes the model is trying
-  to separate.
-- `sPLS-DA Stratification Column`: adds a second visual grouping layer
-  when you want shapes or labels within the main classes.
-- `Number of Variables`: controls how many cytokines are kept on each
-  component.
-- `Cross-Validation Option` and `Number of Folds`: control how model
-  stability is checked.
+- **Class to predict** identifies the column the model should learn to
+  predict, such as `Group` for Control vs. Treated.
+- **Run separately by (optional)** defaults to **None — analyze all
+  samples** and fits one model on the samples remaining after Step 2.
+  Choose a categorical column such as `Treatment` to fit one model per
+  treatment level. To split by numeric time points, mark the time column
+  as categorical in Step 2.
+- **Measurements to keep per component** controls how many cytokines are
+  kept on each component.
+- **Check model performance (cross-validation)** and `Number of Folds`
+  control how the app splits the data to check classification
+  performance.
 - `Number of Components`: controls how much latent structure the model
   calculates and displays.
-- `Plot ROC`, `Draw Ellipse`, `Shaded Background Prediction`, and
-  `Confusion Matrix`: add validation and visual aids that help you judge
-  how convincing the separation really is.
-- `Perform Batch Correction?`, `Select Batch Column`,
-  `Perform Multilevel Analysis?`, and `Select Repeated Measures Column`:
-  matter only when your study includes known batch effects or repeated
-  measurements.
+- **Show correct and incorrect classifications (confusion matrix)** and
+  `Plot ROC` summarize classification performance. `Draw Ellipse` and
+  **Shade the predicted class regions** change how groups are shown on
+  the plot.
+- Use **Adjust for experimental batches** with the **Experimental batch
+  column** to account for a technical source such as a plate or run. Use
+  **Account for repeated measurements** with the **Subject ID column**
+  to link samples from the same subject.
 
 For app users, the most practical rule is to avoid changing many of
 these at once. Start with a reasonable number of variables and
@@ -141,11 +146,13 @@ Keep these points in mind when using sPLS-DA:
     compare.
 2.  Choose
     `Sparse Partial Least Squares - Discriminant Analysis (sPLS-DA)`.
-3.  Set `sPLS-DA Comparison Column`, `Number of Variables`, and
-    `Number of Components`.
-4.  Decide whether to turn on `Cross-Validation Option`, `Plot ROC`,
-    `Draw Ellipse`, `Shaded Background Prediction`, and
-    `Confusion Matrix`.
+3.  Choose **Class to predict** and set **Measurements to keep per
+    component** and `Number of Components`. Leave **Run separately by
+    (optional)** at **None — analyze all samples** for one model.
+4.  Decide whether to turn on **Check model performance
+    (cross-validation)**, `Plot ROC`, `Draw Ellipse`, **Shade the
+    predicted class regions**, and **Show correct and incorrect
+    classifications (confusion matrix)**.
 5.  Review the score plot, loadings, VIP scores, and validation metrics
     together.
 
@@ -176,4 +183,4 @@ Related articles:
 
 ------------------------------------------------------------------------
 
-*Last updated:* November 05, 2026
+*Last updated:* November 07, 2026

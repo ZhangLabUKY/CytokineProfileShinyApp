@@ -116,14 +116,14 @@ count in the smallest group.</p>
 <p>The arguments that most affect interpretation are:</p>
 <ul>
 <li>
-<code>Grouping Column</code>: defines the classes the model is
+<strong>Class to predict</strong> defines the classes the model is
 trying to predict.</li>
 <li>
-<code>Train Fraction</code>: controls how much data is kept for
-model training versus held-out testing.</li>
+<strong>Fraction of samples used for training</strong> controls how
+much data is kept for model training versus held-out testing.</li>
 <li>
-<code>Number of Rounds</code>: controls how long boosting
-continues.</li>
+<strong>Number of training rounds</strong> controls how long
+boosting continues.</li>
 <li>
 <code>Maximum Depth</code>: controls how complex each tree can
 become.</li>
@@ -134,12 +134,13 @@ updates the model.</li>
 <code>Evaluation Metric</code>: determines what the training process
 tries to optimize.</li>
 <li>
-<code>Top Number of Features</code>: changes how many ranked
-features are shown in the importance display.</li>
+<strong>Measurements to show in the importance plot</strong> changes
+how many ranked features are shown in the importance display.</li>
 <li>
-<code>Plot ROC (Binary Only)</code>, <code>Cross-Validation</code>,
-and <code>Number of Folds</code>: control how much validation context
-you get when judging model performance.</li>
+<code>Plot ROC (Binary Only)</code> adds a view of performance for
+two classes. <strong>Check model performance (cross-validation)</strong>
+and <code>Number of Folds</code> control how performance is checked
+within the training data.</li>
 </ul>
 <p>These settings interact with one another. For example, a lower
 learning rate often needs more boosting rounds, while deeper trees may
@@ -201,8 +202,10 @@ more easily.</li>
 <code>auc</code> is natural for binary classification, while
 <code>mlogloss</code> is often more appropriate for multiclass
 settings.</li>
-<li>Train Fraction and Cross-Validation: these settings determine how
-honestly the model is being checked on unseen data.</li>
+<li>
+<strong>Fraction of samples used for training</strong> controls the
+size of the held-out test set. <strong>Check model performance
+(cross-validation)</strong> adds checks within the training data.</li>
 <li>Top Number of Features: use this to improve readability of the
 importance plot, not to tune the model itself.</li>
 </ul>
@@ -213,10 +216,11 @@ importance plot, not to tune the model itself.</li>
 <ol style="list-style-type: decimal">
 <li>Filter the dataset to the classes you want to compare.</li>
 <li>Choose <code>Extreme Gradient Boosting (XGBoost)</code>.</li>
-<li>Start with moderate values for <code>Number of Rounds</code>,
-<code>Learning Rate</code>, and <code>Maximum Depth</code>.</li>
-<li>Enable <code>Cross-Validation</code> or
-<code>Plot ROC (Binary Only)</code> when available.</li>
+<li>Start with moderate values for <strong>Number of training
+rounds</strong>, <code>Learning Rate</code>, and
+<code>Maximum Depth</code>.</li>
+<li>Enable <strong>Check model performance (cross-validation)</strong>
+or <code>Plot ROC (Binary Only)</code> when available.</li>
 <li>Read the importance and performance outputs together before drawing
 biological conclusions.</li>
 </ol>
@@ -243,7 +247,7 @@ Boxplots and Violin Plots</a> when important features need
 raw-distribution follow-up.</li>
 </ul>
 <hr>
-<p><em>Last updated:</em> November 05, 2026</p>
+<p><em>Last updated:</em> November 07, 2026</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

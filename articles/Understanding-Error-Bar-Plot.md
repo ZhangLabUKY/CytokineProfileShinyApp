@@ -46,9 +46,11 @@ values compare across the measured variables?
 
 The highest-value controls are:
 
-- `Comparison Column`: the grouping variable being compared.
-- `Statistic`: whether the bar height represents the mean or median.
-- `Error Metric`: what the error bars represent.
+- **Compare groups from** selects the grouping variable being compared.
+- **Bar height** selects whether the bar height represents the mean or
+  median.
+- **What error bars show** sets the measure of spread or uncertainty
+  displayed around each bar.
 - `Statistical Test`: how the significance annotations are computed.
 - `Multiple-Testing Correction`: whether p-values are adjusted across
   many comparisons.
@@ -70,8 +72,8 @@ Interpret these settings carefully:
 A useful reading order is:
 
 1.  Identify the cytokines where group summaries are farthest apart.
-2.  Check whether the chosen `Error Metric` suggests stable or noisy
-    group estimates.
+2.  Check whether the bars show variation in the measurements or
+    uncertainty in the group summary.
 3.  Read any statistical annotations only after remembering which
     `Statistical Test` and correction were used.
 
@@ -102,8 +104,8 @@ Important cautions include:
 1.  Filter the dataset to the groups and cytokines you want to
     summarize.
 2.  Choose `Error-Bar Plot`.
-3.  Set `Comparison Column`.
-4.  Choose `Statistic` and `Error Metric`.
+3.  Set **Compare groups from**.
+4.  Choose **Bar height** and **What error bars show**.
 5.  Review `Statistical Test` and `Multiple-Testing Correction` if you
     want annotations.
 6.  Adjust `Number of Columns` if the figure feels crowded.
@@ -126,4 +128,4 @@ Related articles:
 
 ------------------------------------------------------------------------
 
-*Last updated:* November 05, 2026
+*Last updated:* November 07, 2026

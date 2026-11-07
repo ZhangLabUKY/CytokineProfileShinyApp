@@ -55,21 +55,26 @@ interesting components without actually predicting the outcome well.
 
 The highest-value controls are:
 
-- `Response Column`: the numeric outcome the model is trying to predict.
-- `Predictor Columns`: the cytokines or other numeric predictors
-  included in the model.
+- **Numeric measurement to predict** selects the numeric outcome the
+  model is trying to predict.
+- **Measurements used to predict** selects the cytokines or other
+  numeric predictors included in the model.
 - `Number of Components`: how many latent components the model extracts.
-- `Sparse PLSR`: whether the model keeps all predictors or enforces
-  variable selection.
-- `Number of Variables`: how many predictors are retained per component
-  when `Sparse PLSR` is turned on.
-- `Cross-validation` and `Number of Folds`: whether the app estimates
-  generalization performance.
-- `Grouping Column` and `Ellipse`: visual aids for the score plot only.
+- **Use fewer measurements per component** selects whether the model
+  keeps all predictors or enforces variable selection.
+- **Measurements to keep per component** selects how many predictors are
+  retained per component when **Use fewer measurements per component**
+  is turned on.
+- **Check model performance (cross-validation)** and `Number of Folds`
+  control how the app holds back samples to check predictions.
+- **Color samples by (optional)** and `Ellipse` help distinguish groups
+  in the score plot. The grouping column is excluded from the
+  measurements the model can use.
 
-In practice, `Response Column`, `Predictor Columns`, and
-`Number of Components` define the model, while `Sparse PLSR` changes how
-simple or dense the predictor set remains.
+In practice, **Numeric measurement to predict**, **Measurements used to
+predict**, and `Number of Components` define the model, while **Use
+fewer measurements per component** changes how simple or dense the
+predictor set remains.
 
 ## How to read the main outputs
 
@@ -142,12 +147,13 @@ Important limits to remember:
 
 1.  Filter the dataset to the samples and cytokines you want to model.
 2.  Choose `Partial Least Squares Regression (PLSR)`.
-3.  Set `Response Column` and confirm the `Predictor Columns`.
+3.  Set **Numeric measurement to predict** and confirm the
+    **Measurements used to predict**.
 4.  Choose `Number of Components`.
-5.  Turn on `Sparse PLSR` only if you want a smaller selected predictor
-    set.
-6.  Add `Cross-validation` if you want a better sense of model
-    stability.
+5.  Turn on **Use fewer measurements per component** only if you want a
+    smaller selected predictor set.
+6.  Add **Check model performance (cross-validation)** if you want a
+    better sense of model stability.
 7.  Read `Predicted vs Observed`, `Residuals vs Fitted`,
     `Loadings Plots`, and `VIP Scores` together.
 
@@ -167,4 +173,4 @@ Related articles:
 
 ------------------------------------------------------------------------
 
-*Last updated:* November 05, 2026
+*Last updated:* November 07, 2026

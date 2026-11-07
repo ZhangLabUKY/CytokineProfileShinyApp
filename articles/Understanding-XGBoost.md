@@ -33,20 +33,21 @@ count in the smallest group.
 
 The arguments that most affect interpretation are:
 
-- `Grouping Column`: defines the classes the model is trying to predict.
-- `Train Fraction`: controls how much data is kept for model training
-  versus held-out testing.
-- `Number of Rounds`: controls how long boosting continues.
+- **Class to predict** defines the classes the model is trying to
+  predict.
+- **Fraction of samples used for training** controls how much data is
+  kept for model training versus held-out testing.
+- **Number of training rounds** controls how long boosting continues.
 - `Maximum Depth`: controls how complex each tree can become.
 - `Learning Rate`: controls how aggressively each round updates the
   model.
 - `Evaluation Metric`: determines what the training process tries to
   optimize.
-- `Top Number of Features`: changes how many ranked features are shown
-  in the importance display.
-- `Plot ROC (Binary Only)`, `Cross-Validation`, and `Number of Folds`:
-  control how much validation context you get when judging model
-  performance.
+- **Measurements to show in the importance plot** changes how many
+  ranked features are shown in the importance display.
+- `Plot ROC (Binary Only)` adds a view of performance for two classes.
+  **Check model performance (cross-validation)** and `Number of Folds`
+  control how performance is checked within the training data.
 
 These settings interact with one another. For example, a lower learning
 rate often needs more boosting rounds, while deeper trees may improve
@@ -102,8 +103,9 @@ rather than pushing the model to fit as tightly as possible.
 - Evaluation Metric: choose a metric that matches the study design.
   `auc` is natural for binary classification, while `mlogloss` is often
   more appropriate for multiclass settings.
-- Train Fraction and Cross-Validation: these settings determine how
-  honestly the model is being checked on unseen data.
+- **Fraction of samples used for training** controls the size of the
+  held-out test set. **Check model performance (cross-validation)** adds
+  checks within the training data.
 - Top Number of Features: use this to improve readability of the
   importance plot, not to tune the model itself.
 
@@ -111,10 +113,10 @@ rather than pushing the model to fit as tightly as possible.
 
 1.  Filter the dataset to the classes you want to compare.
 2.  Choose `Extreme Gradient Boosting (XGBoost)`.
-3.  Start with moderate values for `Number of Rounds`, `Learning Rate`,
-    and `Maximum Depth`.
-4.  Enable `Cross-Validation` or `Plot ROC (Binary Only)` when
-    available.
+3.  Start with moderate values for **Number of training rounds**,
+    `Learning Rate`, and `Maximum Depth`.
+4.  Enable **Check model performance (cross-validation)** or
+    `Plot ROC (Binary Only)` when available.
 5.  Read the importance and performance outputs together before drawing
     biological conclusions.
 
@@ -138,4 +140,4 @@ Related articles:
 
 ------------------------------------------------------------------------
 
-*Last updated:* November 05, 2026
+*Last updated:* November 07, 2026

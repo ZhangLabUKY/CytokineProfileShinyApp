@@ -173,11 +173,15 @@ patterns</li>
 <p>The most important PCA settings are:</p>
 <ul>
 <li>
-<code>PCA Comparison Column</code>: decides how the main sample
-groups are colored or separated visually.</li>
+<strong>Sample groups</strong> distinguishes groups in the plots.
+For example, choose <code>Group</code> to show Control and Treated
+samples separately on the score plot.</li>
 <li>
-<code>PCA Stratification Column</code>: adds a second visual
-grouping layer when you want shapes within colors.</li>
+<strong>Run separately by (optional)</strong> defaults to
+<strong>None — analyze all samples</strong> and runs one PCA on the
+samples remaining after Step 2. Choose a categorical column such as
+<code>Treatment</code> to run one PCA per treatment level. To split by
+numeric time points, mark the time column as categorical in Step 2.</li>
 <li>
 <code>Number of Components</code>: determines how many components
 are computed and emphasized.</li>
@@ -185,13 +189,13 @@ are computed and emphasized.</li>
 <code>Select Colors for PCA Plot (Optional)</code>: lets you
 override the automatic colors.</li>
 <li>
-<code>Draw Ellipse</code>: adds visual confidence regions to the
-individuals plot.</li>
+<strong>Draw an ellipse around each sample group</strong> adds
+visual confidence regions to the individuals plot.</li>
 <li>
 <code>Plot Style</code>: enables 2D or 3D plotting.</li>
 <li>
-<code>Plotting Symbols</code>: helps distinguish subgroup structure
-when you use a second grouping column.</li>
+<code>Plotting Symbols</code>: helps distinguish the sample groups
+in the score plots.</li>
 </ul>
 <p>For most app users, one of the biggest decisions still happens
 earlier in Step 2. The preprocessing or transformation applied there can
@@ -220,11 +224,13 @@ answer.</li>
 <li>Filter the dataset to the samples and cytokines you want to
 explore.</li>
 <li>Choose <code>Principal Component Analysis (PCA)</code>.</li>
-<li>Set <code>PCA Comparison Column</code>,
-<code>PCA Stratification Column</code>, and
-<code>Number of Components</code>.</li>
-<li>Decide whether to turn on <code>Draw Ellipse</code>, switch
-<code>Plot Style</code>, or adjust <code>Plotting Symbols</code>.</li>
+<li>Choose <strong>Sample groups</strong> and set
+<code>Number of Components</code>. Leave <strong>Run separately by
+(optional)</strong> at <strong>None — analyze all samples</strong> for a
+single PCA.</li>
+<li>Decide whether to turn on <strong>Draw an ellipse around each sample
+group</strong>, switch <code>Plot Style</code>, or adjust
+<code>Plotting Symbols</code>.</li>
 <li>Read the individuals plot together with the scree and loadings
 views.</li>
 </ol>
@@ -245,7 +251,7 @@ class separation is the main question.</li>
 broader matrix-style pattern discovery.</li>
 </ul>
 <hr>
-<p><em>Last updated:</em> November 05, 2026</p>
+<p><em>Last updated:</em> November 07, 2026</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -47,16 +47,17 @@ Non-Diabetic (ND) subjects.
 
 The most important controls are:
 
-- `Comparison Column`: decides which categorical variable defines the
+- **Compare groups from** decides which categorical variable defines the
   comparison.
-- `Condition 1` and `Condition 2`: decide which two levels are
-  contrasted in the plot.
-- `SSMD Threshold`: controls how large the effect size must be before a
-  point is treated as a notable hit.
-- `Log2 Fold Change Threshold`: controls how large the fold change must
-  be.
-- `Top Labels`: controls how many of the top-ranked cytokines are
-  labeled.
+- **Group of interest** and **Reference group** set the direction of the
+  comparison. The fold change divides the first group’s mean by the
+  reference group’s mean.
+- **Minimum standardized difference (SSMD)** controls how large the
+  effect size must be before a point is treated as a notable hit.
+- **Minimum change (log2 fold change)** controls how large the fold
+  change must be.
+- **Maximum labels on the plot** controls how many of the top-ranked
+  cytokines are labeled.
 
 These thresholds are not cosmetic. They determine which cytokines get
 emphasized, so they should be set intentionally and reported clearly.
@@ -109,9 +110,10 @@ Additional cautions:
 
 1.  Filter the dataset to the two groups you want to compare.
 2.  Choose `Dual-Flashlight Plot`.
-3.  Select `Comparison Column`, `Condition 1`, and `Condition 2`.
-4.  Set `SSMD Threshold`, `Log2 Fold Change Threshold`, and
-    `Top Labels`.
+3.  Select **Compare groups from**, **Group of interest**, and
+    **Reference group**.
+4.  Set **Minimum standardized difference (SSMD)**, **Minimum change
+    (log2 fold change)**, and **Maximum labels on the plot**.
 5.  Review the highlighted cytokines as prioritized candidates for
     follow-up.
 
@@ -135,4 +137,4 @@ Related articles:
 
 ------------------------------------------------------------------------
 
-*Last updated:* November 05, 2026
+*Last updated:* November 07, 2026
