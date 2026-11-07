@@ -404,7 +404,7 @@ mod_update_inputs_server <- function(input, output, session, app_ctx) {
         shiny::updateSelectInput(
           session,
           "pca_group_col2",
-          selected = userState$pca_group_col2
+          selected = analysis_split_column(userState$pca_group_col2, filteredData()) %||% ""
         )
         shiny::updateNumericInput(
           session,
@@ -587,7 +587,7 @@ mod_update_inputs_server <- function(input, output, session, app_ctx) {
         shiny::updateSelectInput(
           session,
           "splsda_group_col2",
-          selected = userState$splsda_group_col2
+          selected = analysis_split_column(userState$splsda_group_col2, filteredData()) %||% ""
         )
         shiny::updateCheckboxInput(
           session,

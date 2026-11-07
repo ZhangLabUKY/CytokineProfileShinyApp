@@ -276,7 +276,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
           df,
           exclude = c(
             input$splsda_group_col,
-            input$splsda_group_col2,
+            analysis_split_column(input$splsda_group_col2, df),
             input$splsda_batch_col,
             input$splsda_multilevel
           )
@@ -302,7 +302,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
           df,
           exclude = c(
             input$mint_splsda_group_col,
-            input$mint_splsda_group_col2,
+            analysis_split_column(input$mint_splsda_group_col2, df),
             input$mint_splsda_batch_col
           )
         )
@@ -835,11 +835,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                   data = df,
                   progress = prog,
                   group_col = input$pca_group_col,
-                  group_col2 = if (nzchar(input$pca_group_col2)) {
-                    input$pca_group_col2
-                  } else {
-                    NULL
-                  },
+                  group_col2 = analysis_split_column(input$pca_group_col2, df),
                   comp_num = input$pca_comp_num,
                   scale = NULL,
                   ellipse = input$pca_ellipse,
@@ -984,7 +980,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                   data = df,
                   progress = prog,
                   group_col = input$splsda_group_col,
-                  group_col2 = input$splsda_group_col2,
+                  group_col2 = analysis_split_column(input$splsda_group_col2, df),
                   batch_col = batch_col,
                   multilevel_col = multilevel,
                   var_num = input$splsda_var_num,
@@ -1026,7 +1022,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
 
                   progress = prog,
                   group_col = input$mint_splsda_group_col,
-                  group_col2 = input$mint_splsda_group_col2,
+                  group_col2 = analysis_split_column(input$mint_splsda_group_col2, df),
                   batch_col = input$mint_splsda_batch_col,
                   var_num = input$mint_splsda_var_num,
                   comp_num = input$mint_splsda_comp_num,

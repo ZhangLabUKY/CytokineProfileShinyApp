@@ -42,7 +42,7 @@ ui_p_adjust_help_text <- function() {
   shiny::HTML(paste(
     "Use this when you are testing many cytokines or features at the same time.<br><br>",
     "Adjustment makes the reported p-values more conservative so fewer findings appear significant just by chance.<br><br>",
-    "A practical default is <b>Benjamini-Hochberg</b> when you are doing exploratory biomarker work and want to control the expected false discovery rate.<br><br>",
+    "The default is <b>Benjamini-Hochberg</b>, which controls the expected false discovery rate in exploratory biomarker work.<br><br>",
     "<b>None</b>: keep the raw p-values exactly as calculated; this is easiest to read but least protected against false positives across many tests.<br>",
     "<b>Bonferroni</b>: very strict; best when false positives would be especially costly and you prefer a small, high-confidence result set.<br>",
     "<b>Holm</b>: still controls family-wise error like Bonferroni, but is usually a bit less harsh.<br>",
@@ -57,6 +57,7 @@ ui_model_outcome_help_text <- function(model_name) {
   paste(
     "Choose the categorical column the", model_name, "model should learn to predict.",
     "This is the outcome or class label, such as case versus control, treatment group, or responder status.",
+    "Use Step 2 to keep this column and the numeric measurements used for prediction.",
     "Pick the column that represents the main biological or clinical question for this model.",
     "If the chosen column has many small groups, the model can become harder to train and interpret reliably."
   )
@@ -66,7 +67,7 @@ ui_train_fraction_help_text <- function() {
   paste(
     "Choose what fraction of the samples is used to train the model.",
     "The remaining samples are held back for testing so you can judge how the fitted model behaves on unseen data.",
-    "A value around 0.7 is a practical starting point for many datasets.",
+    "For example, 0.70 uses about 70% of the samples for training and sets aside the rest for testing.",
     "Larger fractions give the model more data to learn from, while smaller fractions leave a stronger holdout check but can make the trained model less stable."
   )
 }
@@ -618,4 +619,11 @@ ui_analysis_font_helper_spec <- function(func_name, field) {
   }
 
   func_spec[[field]]
+}
+
+analysis_split_column <- function(value, data) {
+  if (length(value) == 1L && !is.na(value) && nzchar(value) &&
+      value %in% step2_classify_columns(data)$categorical) {
+    value
+  }
 }

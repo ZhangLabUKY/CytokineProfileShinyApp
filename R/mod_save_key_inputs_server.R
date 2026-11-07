@@ -147,15 +147,21 @@ mod_save_key_inputs_server <- function(input, output, session, app_ctx) {
     userState$bp_bin_size <- input$bp_bin_size
   })
   shiny::observeEvent(input$bp_group_by, {
-    userState$bp_group_by <- input$bp_group_by
-  })
+    if (!is.null(input$bp_group_by) ||
+        (identical(currentPage(), "step4") && identical(selected_function(), "Boxplots"))) {
+      userState$bp_group_by <- input$bp_group_by
+    }
+  }, ignoreNULL = FALSE)
   shiny::observeEvent(input$bp_y_lim, {
     userState$bp_y_lim <- input$bp_y_lim
   })
   # For Violin Plots
   shiny::observeEvent(input$vio_group_by, {
-    userState$vio_group_by <- input$vio_group_by
-  })
+    if (!is.null(input$vio_group_by) ||
+        (identical(currentPage(), "step4") && identical(selected_function(), "Violin Plots"))) {
+      userState$vio_group_by <- input$vio_group_by
+    }
+  }, ignoreNULL = FALSE)
   shiny::observeEvent(input$vio_bin_size, {
     userState$vio_bin_size <- input$vio_bin_size
   })

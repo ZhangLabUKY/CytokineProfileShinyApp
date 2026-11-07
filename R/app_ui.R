@@ -45,6 +45,11 @@ app_ui <- function() {
             }
           }
         });
+
+        // Let shinyhelper open its dialog without activating the enclosing label.
+        $(document).on('click', 'label .shinyhelper-icon', function(event) {
+          event.preventDefault();
+        });
         "
       )),
       shiny::tags$style(shiny::HTML(

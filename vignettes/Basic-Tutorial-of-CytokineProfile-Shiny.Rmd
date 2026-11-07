@@ -106,7 +106,9 @@ When deciding among them, it helps to think in terms of interpretation:
 
 ## Step 4: Choosing the arguments that matter
 
-Step 4 exposes the method-specific controls. You do not need to tune every field for every analysis. Focus first on the arguments that change interpretation.
+In Step 4, start with the choices that describe your experiment. For example, select `Treatment` under **Group plots by (optional)** to compare distributions for Control and Treated samples. In a prediction model, use **Class to predict** to identify the column containing the groups you want the model to learn.
+
+The form separates data choices, analysis settings, and plot appearance when those sections apply. Open the question-mark or exclamation-point icon beside a setting for examples, defaults, and guidance on what it changes.
 
 Examples:
 
