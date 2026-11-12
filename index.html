@@ -27,7 +27,7 @@
 
     <a class="navbar-brand me-2" href="index.html">CytokineProfileShinyApp</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,7 +66,7 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><p><strong>Stable Build Status:</strong> <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/" class="external-link"><img src="https://img.shields.io/badge/version-0.0.1-green.svg"></a> <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/commits/master" class="external-link"><img src="https://img.shields.io/github/last-commit/ZhangLabUKY/CytokineProfileShinyApp.svg" alt="Last Commit"></a> <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></p>
-<p><strong>Development Version:</strong> <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/tree/devel" class="external-link"><img src="https://img.shields.io/badge/devel%20version-0.0.2-green.svg"></a> <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/actions/workflows/R-CMD-check.yaml/badge.svg?branch=devel" alt="R-CMD-check.yaml"></a> <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/commits/devel" class="external-link"><img src="https://img.shields.io/github/last-commit/ZhangLabUKY/CytokineProfileShinyApp/devel.svg" alt="Last Commit"></a> <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Development"></a></p>
+<p><strong>Development Version:</strong> <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/tree/devel" class="external-link"><img src="https://img.shields.io/badge/devel%20version-0.0.1.9000-green.svg"></a> <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/actions/workflows/R-CMD-check.yaml/badge.svg?branch=devel" alt="R-CMD-check.yaml"></a> <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/commits/devel" class="external-link"><img src="https://img.shields.io/github/last-commit/ZhangLabUKY/CytokineProfileShinyApp/devel.svg" alt="Last Commit"></a> <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Development"></a></p>
 <p><a href="https://www.codefactor.io/repository/github/zhanglabuky/cytokineprofileshinyapp/overview/devel" class="external-link"><img src="https://www.codefactor.io/repository/github/zhanglabuky/cytokineprofileshinyapp/badge" alt="CodeFactor"></a> <a href="https://app.codecov.io/gh/zhanglabuky/CytokineProfileShinyApp/tree/devel" class="external-link"><img src="https://codecov.io/gh/zhanglabuky/CytokineProfileShinyApp/branch/devel/graph/badge.svg?token=0SIQVV5WD3" alt="codecov"></a></p>
 <!-- badges: end -->
 <div class="section level1">
@@ -123,10 +123,9 @@
 <ul>
 <li>File Input: Upload your own data file (CSV, TXT, Excel).
 <ul>
-<li>For Excel files, choose one sheet.</li>
+<li>For Excel files, choose the desired sheet.</li>
 </ul>
 </li>
-<li>Optional Data Editor: Continue directly after uploading, or edit first. Save &amp; Use commits edits; Cancel discards them.</li>
 <li>Built-in Data: Choose from built-in data sets.</li>
 </ul>
 </div>
@@ -135,7 +134,7 @@
 </h3>
 <ul>
 <li>Column Selection: Choose the columns to analyze.</li>
-<li>Transformation: Use Configure Transformation to choose log2, log10, or Z-score and the numeric columns to transform, then click Apply. Cancel keeps the previous settings.
+<li>Transformation: Apply log2 transformation if needed.
 <ul>
 <li>Preview data distribution with and without transformation.</li>
 </ul>
@@ -144,7 +143,7 @@
 <li>Convert selected columns back to numeric while keeping non-parsable values as missing.</li>
 <li>Automatically recognize more numeric-looking columns even when common missing-value tokens are present.</li>
 <li>Filter Data: Apply filters to categorical variables.</li>
-<li>Missing Value Handling: Choose columns with missing data and an imputation method. Use Undo missing-value treatment in the same dialog to restore missing values while keeping other preprocessing choices.</li>
+<li>Missing Value Handling: Choose to impute them using various methods.</li>
 </ul>
 </div>
 <div class="section level3">

@@ -41,13 +41,12 @@ interpretation-oriented outputs:
 
 - `Scores Plot`
 - `Predicted vs Observed`
-- optional `Cross-validated Predictions` for standard PLSR
 - `Residuals vs Fitted`
 - `Loadings Plots`
 - `VIP Scores`
-- optional `Component CV Diagnostics`
+- optional `Cross-Validation`
 - optional `VIP > 1: Scores`
-- optional `VIP > 1: Component CV Diagnostics`
+- optional `VIP > 1: Cross-Validation`
 
 These views should be read together. A model can produce visually
 interesting components without actually predicting the outcome well.
@@ -56,31 +55,21 @@ interesting components without actually predicting the outcome well.
 
 The highest-value controls are:
 
-- **Numeric measurement to predict** selects the numeric outcome the
-  model is trying to predict.
-- **Measurements used to predict** selects the cytokines or other
-  numeric predictors included in the model.
+- `Response Column`: the numeric outcome the model is trying to predict.
+- `Predictor Columns`: the cytokines or other numeric predictors
+  included in the model.
 - `Number of Components`: how many latent components the model extracts.
-- **Use fewer measurements per component** selects whether the model
-  keeps all predictors or enforces variable selection.
-- **Measurements to keep per component** selects how many predictors are
-  retained per component when **Use fewer measurements per component**
-  is turned on.
-- **Check model performance (cross-validation)** and `Number of Folds`
-  control how the app holds back samples to check predictions.
-- **Color samples by (optional)** uses the same group colors across
-  score, prediction, and residual plots. `Ellipse` adds group ellipses
-  to score plots. The grouping column is excluded from the measurements
-  the model can use.
-- **Colors (optional)** assigns custom colors to the selected groups.
-  When no grouping column is selected, score plots use a continuous
-  scale for the observed response and the diagnostic plots use gray
-  points.
+- `Sparse PLSR`: whether the model keeps all predictors or enforces
+  variable selection.
+- `Number of Variables`: how many predictors are retained per component
+  when `Sparse PLSR` is turned on.
+- `Cross-validation` and `Number of Folds`: whether the app estimates
+  generalization performance.
+- `Grouping Column` and `Ellipse`: visual aids for the score plot only.
 
-In practice, **Numeric measurement to predict**, **Measurements used to
-predict**, and `Number of Components` define the model, while **Use
-fewer measurements per component** changes how simple or dense the
-predictor set remains.
+In practice, `Response Column`, `Predictor Columns`, and
+`Number of Components` define the model, while `Sparse PLSR` changes how
+simple or dense the predictor set remains.
 
 ## How to read the main outputs
 
@@ -89,31 +78,6 @@ predictor set remains.
 This plot shows the samples in the reduced component space. It is most
 useful for asking whether samples with similar response behavior also
 occupy similar positions in the latent space.
-
-The **Measurement patterns (X)** panel positions samples using patterns
-in the predictor measurements. The **Response patterns (Y)** panel shows
-the response-side scores. The axes identify Component 1 and Component 2.
-A one-component model shows samples along Component 1.
-
-With a grouping column selected, the legend pairs each group with its
-color swatch. Group colors match across the main scores, VIP scores,
-predictions, and residuals. Samples with missing group labels appear in
-gray and remain in the model. Without grouping, the **Observed \[outcome
-name\]** legend shows a fixed viridis gradient from dark purple for low
-values to yellow for high values. The main and VIP score plots use the
-same low, midpoint, and high values, so a given color represents the
-same observed value in both plots. The midpoint is halfway between the
-displayed limits.
-
-The heading identifies the response measurement. Beneath it, **Training
-R²** measures the linear association between observed and fitted values.
-It ranges from 0 to 1. Values near 0 indicate weak association, and
-values near 1 indicate strong association. A high R² can coexist with
-large prediction errors. **Training RMSE** is 0 or higher, with smaller
-values indicating smaller errors on the outcome scale supplied to the
-model. Use the original measurement units when the outcome was left
-untransformed, and the transformed scale when preprocessing changed it.
-Compare RMSE with the error you can tolerate for the measurement.
 
 Interpretation checklist:
 
@@ -124,19 +88,11 @@ Interpretation checklist:
 
 ### Predicted vs Observed
 
-This figure compares the observed response on the horizontal axis with
-the model’s predictions on the vertical axis. The response column is
-included in both axis labels. These are training predictions from
-samples used to fit the model.
+This is one of the most important plots because it shows how closely the
+fitted values track the true response.
 
-Both axes use the same limits and scale. The plot includes the full
-range of observed values and finite predictions, including negative
-predictions. Transparent points help show where samples overlap. In
-ungrouped prediction and residual plots, each gray point represents one
-sample.
-
-- points close to the dashed diagonal have smaller training errors
-- wide scatter indicates larger training errors
+- points close to the diagonal suggest stronger predictive agreement
+- wide scatter suggests weaker predictive value
 - systematic curvature or separation can suggest the model is missing
   structure
 
@@ -146,11 +102,6 @@ be interpreted cautiously.
 ### Residuals vs Fitted
 
 This plot helps you judge model misfit.
-
-The horizontal axis shows predicted response values. The vertical axis
-shows **Observed − predicted**, so a positive residual means the model
-predicted too low and a negative residual means it predicted too high.
-Points closer to zero have smaller errors.
 
 - a roughly patternless cloud is more reassuring
 - strong trends or funnels suggest the model error changes across the
@@ -175,64 +126,6 @@ useful for prioritization rather than formal hypothesis testing.
 A common rule of thumb is that predictors above 1 are more influential,
 which is why the app can also show `VIP > 1` views.
 
-### Cross-validated Predictions
-
-For standard PLSR, each point compares a sample’s outcome with the
-prediction from a model fitted without that sample. Leave-one-out
-cross-validation holds out one sample at a time. M-fold cross-validation
-uses one reproducible split into the chosen number of folds, taking
-turns holding out each fold. The component count stays fixed at the
-value chosen in Step 4.
-
-The plot compares two sets of errors on the same held-out samples.
-**PLSR** uses the predictor measurements. **Training-fold mean**
-predicts the average outcome among the samples used to fit that fold.
-Smaller RMSE and MAE indicate smaller prediction errors. Compare both on
-the outcome scale supplied to the model. For example, if you transformed
-the outcome in Step 2, the errors use that transformed scale.
-
-Step 2 filters, transformations, and imputation are applied before PLSR
-receives the data. The check uses the resulting values, including
-outcomes filled by imputation. Samples without a finite outcome or any
-finite selected predictor are excluded. Predictor screening and model
-fitting then use the training rows in each fold. The split treats rows
-as independent, so measurements from the same subject can appear in both
-training and validation folds. If a fold cannot fit the selected
-component count or predict every held-out sample, the app explains the
-issue and keeps the regular fit available.
-
-### Component CV Diagnostics
-
-This mixOmics figure identifies the validation method and displays **CV
-R²**, **Q² (total)**, and **scaled RMSEP** for the displayed component
-count. Its two panels show Q² (total) and scaled RMSEP across component
-counts. With M-fold CV, it summarizes 100 repeats and can differ from
-the single split in **Cross-validated Predictions**.
-
-- **CV R²** measures the linear association between observed values and
-  the cross-validated predictions produced by mixOmics. It ranges from 0
-  to 1, from weak to strong linear association. Use it alongside
-  prediction error.
-- **Q² (total)** summarizes predictive performance through the displayed
-  number of components relative to the reference error used by mixOmics.
-  Its upper limit is 1. Values above 0 indicate improvement, values on
-  the dashed zero line indicate no improvement, and values below 0
-  indicate worse performance relative to that reference.
-- **RMSEP (scaled)** is 0 or higher. Lower values indicate smaller
-  cross-validated prediction errors on the standardized outcome scale.
-  Compare results using the same outcome scaling and validation
-  procedure. For repeated M-fold CV, the app takes the square root of
-  the mean MSEP across repetitions.
-
-Interpret the CV summaries alongside the error curves and the number of
-components used. See the [mixOmics performance
-implementation](https://raw.githubusercontent.com/mixOmicsTeam/mixOmics/master/R/perf.R)
-for the metric definitions.
-
-The **VIP \> 1** score and CV figures use metrics from their own
-refitted model. CV for that preview assesses performance within the
-feature panel already selected from the full dataset.
-
 ## Common cautions
 
 Important limits to remember:
@@ -249,17 +142,14 @@ Important limits to remember:
 
 1.  Filter the dataset to the samples and cytokines you want to model.
 2.  Choose `Partial Least Squares Regression (PLSR)`.
-3.  Set **Numeric measurement to predict** and confirm the
-    **Measurements used to predict**.
+3.  Set `Response Column` and confirm the `Predictor Columns`.
 4.  Choose `Number of Components`.
-5.  Turn on **Use fewer measurements per component** only if you want a
-    smaller selected predictor set.
-6.  Add **Check model performance (cross-validation)** if you want a
-    better sense of model stability.
-7.  Use `Cross-validated Predictions` to compare standard PLSR with the
-    training-fold mean. Read `Predicted vs Observed`,
-    `Residuals vs Fitted`, `Loadings Plots`, and `VIP Scores` to
-    understand the fitted model.
+5.  Turn on `Sparse PLSR` only if you want a smaller selected predictor
+    set.
+6.  Add `Cross-validation` if you want a better sense of model
+    stability.
+7.  Read `Predicted vs Observed`, `Residuals vs Fitted`,
+    `Loadings Plots`, and `VIP Scores` together.
 
 ## What to read next
 

@@ -23,7 +23,7 @@ easily be added (e.g. loadings), but these two provide basic diagnostics."><meta
 
     <a class="navbar-brand me-2" href="../index.html">CytokineProfileShinyApp</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,7 +54,7 @@ easily be added (e.g. loadings), but these two provide basic diagnostics."><meta
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Perform Partial Least Squares Regression (PLSR) or sparse PLSR (sPLSR) analysis</h1>
-      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/devel/R/cyt_plsr.R" class="external-link"><code>R/cyt_plsr.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/master/R/cyt_plsr.R" class="external-link"><code>R/cyt_plsr.R</code></a></small>
       <div class="d-none name"><code>cyt_plsr.Rd</code></div>
     </div>
 
@@ -111,9 +111,8 @@ Must be numeric.</p></dd>
 
 
 <dt id="arg-group-col">group_col<a class="anchor" aria-label="anchor" href="#arg-group-col"></a></dt>
-<dd><p>Optional column used to color groups consistently across
-score, prediction, and residual plots. If <code>NULL</code>, score plots are colored
-by observed response values and diagnostic plots use gray points.</p></dd>
+<dd><p>The name of the column to use for grouping samples in the
+score plot. If <code>NULL</code>, no grouping is applied.</p></dd>
 
 
 <dt id="arg-ind-names">ind_names<a class="anchor" aria-label="anchor" href="#arg-ind-names"></a></dt>
@@ -137,8 +136,7 @@ Required if <code>sparse = TRUE</code>.</p></dd>
 <dt id="arg-cv-opt">cv_opt<a class="anchor" aria-label="anchor" href="#arg-cv-opt"></a></dt>
 <dd><p>Character string specifying the cross-validation option:
 "None", "LOOCV" (Leave-One-Out Cross-Validation), or "Mfold" (M-fold
-Cross-Validation). For standard PLSR, this also evaluates held-out
-predictions using the supplied data after any requested transformation.</p></dd>
+Cross-Validation).</p></dd>
 
 
 <dt id="arg-fold-num">fold_num<a class="anchor" aria-label="anchor" href="#arg-fold-num"></a></dt>
@@ -164,8 +162,7 @@ score plot.</p></dd>
 
 
 <dt id="arg-pls-colors">pls_colors<a class="anchor" aria-label="anchor" href="#arg-pls-colors"></a></dt>
-<dd><p>A character vector of colors for categorical groups,
-shared across score, prediction, residual, and VIP score plots.</p></dd>
+<dd><p>A character vector of colors to use for grouping.</p></dd>
 
 
 <dt id="arg-output-file">output_file<a class="anchor" aria-label="anchor" href="#arg-output-file"></a></dt>
@@ -196,14 +193,6 @@ text elements.</p></dd>
 <dt>cv_plot</dt>
 <dd><p>A recorded plot of cross-validation performance (Q2 and RMSEP), if <code>cv_opt</code> is not "None".</p></dd>
 
-<dt>whole_model_cv</dt>
-<dd><p>For standard PLSR with cross-validation enabled, a
-list with <code>plot</code> (recorded plot), <code>predictions</code> (one row per evaluated
-sample with its fold and baseline prediction), <code>metrics</code> (PLSR and
-baseline RMSE and MAE), <code>method</code>, <code>components</code>, <code>evaluated</code>, and
-<code>excluded</code>. An unavailable check returns a list with a <code>reason</code>.
-Otherwise returns <code>NULL</code>.</p></dd>
-
 <dt>loadings</dt>
 <dd><p>A list of recorded plots for loadings of each component.</p></dd>
 
@@ -219,8 +208,7 @@ with VIP &gt; 1, if applicable.</p></dd>
 variables with VIP &gt; 1, if applicable.</p></dd>
 
 <dt>metrics_text</dt>
-<dd><p>Training performance, component CV diagnostics,
-and held-out prediction errors, as available.</p></dd>
+<dd><p>Text summary of Q2 values, if available.</p></dd>
 
 <dt>pdf_file</dt>
 <dd><p>The path to the generated PDF file, if <code>output_file</code> was

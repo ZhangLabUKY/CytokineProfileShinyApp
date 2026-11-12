@@ -32,28 +32,23 @@ compares Non-Diabetic (ND), Pre-Diabetic (PreT2D), and Type 2 Diabetes
 
 The settings that most strongly affect interpretation are:
 
-- **Class to predict** identifies the column the model should learn to
-  predict, such as `Group` for Control vs. Treated.
-- **Run separately by (optional)** defaults to **None — analyze all
-  samples** and fits one model on the samples remaining after Step 2.
-  Choose a categorical column such as `Treatment` to fit one model per
-  treatment level. To split by numeric time points, mark the time column
-  as categorical in Step 2.
-- **Measurements to keep per component** controls how many cytokines are
-  kept on each component.
-- **Check model performance (cross-validation)** and `Number of Folds`
-  control how the app splits the data to check classification
-  performance.
+- `sPLS-DA Comparison Column`: defines the classes the model is trying
+  to separate.
+- `sPLS-DA Stratification Column`: adds a second visual grouping layer
+  when you want shapes or labels within the main classes.
+- `Number of Variables`: controls how many cytokines are kept on each
+  component.
+- `Cross-Validation Option` and `Number of Folds`: control how model
+  stability is checked.
 - `Number of Components`: controls how much latent structure the model
   calculates and displays.
-- **Show correct and incorrect classifications (confusion matrix)** and
-  `Plot ROC` summarize classification performance. `Draw Ellipse` and
-  **Shade the predicted class regions** change how groups are shown on
-  the plot.
-- Use **Adjust for experimental batches** with the **Experimental batch
-  column** to account for a technical source such as a plate or run. Use
-  **Account for repeated measurements** with the **Subject ID column**
-  to link samples from the same subject.
+- `Plot ROC`, `Draw Ellipse`, `Shaded Background Prediction`, and
+  `Confusion Matrix`: add validation and visual aids that help you judge
+  how convincing the separation really is.
+- `Perform Batch Correction?`, `Select Batch Column`,
+  `Perform Multilevel Analysis?`, and `Select Repeated Measures Column`:
+  matter only when your study includes known batch effects or repeated
+  measurements.
 
 For app users, the most practical rule is to avoid changing many of
 these at once. Start with a reasonable number of variables and
@@ -69,18 +64,6 @@ the model is actually supporting the visual separation.
 This plot shows where samples fall after the cytokine data are
 compressed into latent components. Clearer clustering and less overlap
 between groups suggest stronger discrimination.
-
-The current app gives the score plot a two-line heading. The first line
-identifies the class column and, for separate analyses, the subgroup,
-such as **sPLS-DA Group — Vehicle**. The second line shows **Acc
-(Train)** and **Acc (CV)**.
-
-**Acc (Train)** is the percentage correctly classified when the fitted
-model predicts its training samples. **Acc (CV)** is the percentage
-correctly classified during cross-validation with the same number of
-fitted components and the same classification rule. When
-cross-validation is disabled, the heading shows **CV not run**. An
-undefined CV estimate is shown as **CV unavailable**.
 
 In this example, the group separation is only moderate. The displayed
 model accuracy is about 55.6%, which is not strong for a three-class
@@ -106,11 +89,6 @@ cytokines that are driving the component most strongly.
 Variable Importance in Projection (VIP) scores summarize how influential
 each cytokine is in the fitted model. A common rule of thumb is that VIP
 values above 1 indicate particularly influential variables.
-
-The **VIP \> 1** score plot reports training and CV accuracy for its own
-refitted model. Its CV assesses performance within the feature panel
-selected from the full dataset. An independent dataset is needed to
-assess how that selected panel generalizes.
 
 VIP is useful because it gives a more model-level view of importance
 than a single loading plot. If the same cytokines appear important in
@@ -139,11 +117,6 @@ Cross-validation is one of the most important outputs in supervised
 multivariate analysis. It tells you whether the apparent separation is
 likely to generalize beyond the current dataset.
 
-The dashed line identifies the number of fitted components. The CV
-accuracy in the score heading and on the error-rate figure uses that
-component count. Each separately fitted subgroup has its own performance
-estimates.
-
 In the example, the error rate remains fairly high, which matches the
 modest overall accuracy. That agreement is useful: it means the
 validation outputs are reinforcing the same cautious interpretation.
@@ -168,13 +141,11 @@ Keep these points in mind when using sPLS-DA:
     compare.
 2.  Choose
     `Sparse Partial Least Squares - Discriminant Analysis (sPLS-DA)`.
-3.  Choose **Class to predict** and set **Measurements to keep per
-    component** and `Number of Components`. Leave **Run separately by
-    (optional)** at **None — analyze all samples** for one model.
-4.  Decide whether to turn on **Check model performance
-    (cross-validation)**, `Plot ROC`, `Draw Ellipse`, **Shade the
-    predicted class regions**, and **Show correct and incorrect
-    classifications (confusion matrix)**.
+3.  Set `sPLS-DA Comparison Column`, `Number of Variables`, and
+    `Number of Components`.
+4.  Decide whether to turn on `Cross-Validation Option`, `Plot ROC`,
+    `Draw Ellipse`, `Shaded Background Prediction`, and
+    `Confusion Matrix`.
 5.  Review the score plot, loadings, VIP scores, and validation metrics
     together.
 

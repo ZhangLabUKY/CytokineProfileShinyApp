@@ -7,7 +7,7 @@ Commit](https://img.shields.io/github/last-commit/ZhangLabUKY/CytokineProfileShi
 [![R-CMD-check](https://github.com/ZhangLabUKY/CytokineProfileShinyApp/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ZhangLabUKY/CytokineProfileShinyApp/actions/workflows/R-CMD-check.yaml)
 
 **Development Version:**
-[![](https://img.shields.io/badge/devel%20version-0.0.2-green.svg)](https://github.com/ZhangLabUKY/CytokineProfileShinyApp/tree/devel)
+[![](https://img.shields.io/badge/devel%20version-0.0.1.9000-green.svg)](https://github.com/ZhangLabUKY/CytokineProfileShinyApp/tree/devel)
 [![R-CMD-check.yaml](https://github.com/ZhangLabUKY/CytokineProfileShinyApp/actions/workflows/R-CMD-check.yaml/badge.svg?branch=devel)](https://github.com/ZhangLabUKY/CytokineProfileShinyApp/actions/workflows/R-CMD-check.yaml)
 [![Last
 Commit](https://img.shields.io/github/last-commit/ZhangLabUKY/CytokineProfileShinyApp/devel.svg)](https://github.com/ZhangLabUKY/CytokineProfileShinyApp/commits/devel)
@@ -80,17 +80,13 @@ The app is structured as a multi-step wizard:
 ### Step 1: Data Upload
 
 - File Input: Upload your own data file (CSV, TXT, Excel).
-  - For Excel files, choose one sheet.
-- Optional Data Editor: Continue directly after uploading, or edit
-  first. Save & Use commits edits; Cancel discards them.
+  - For Excel files, choose the desired sheet.
 - Built-in Data: Choose from built-in data sets.
 
 ### Step 2: Column Selection and Filtering
 
 - Column Selection: Choose the columns to analyze.
-- Transformation: Use Configure Transformation to choose log2, log10, or
-  Z-score and the numeric columns to transform, then click Apply. Cancel
-  keeps the previous settings.
+- Transformation: Apply log2 transformation if needed.
   - Preview data distribution with and without transformation.
 - Convert columns to categorical variables.
 - Convert selected columns back to numeric while keeping non-parsable
@@ -98,9 +94,7 @@ The app is structured as a multi-step wizard:
 - Automatically recognize more numeric-looking columns even when common
   missing-value tokens are present.
 - Filter Data: Apply filters to categorical variables.
-- Missing Value Handling: Choose columns with missing data and an
-  imputation method. Use Undo missing-value treatment in the same dialog
-  to restore missing values while keeping other preprocessing choices.
+- Missing Value Handling: Choose to impute them using various methods.
 
 ### Step 3: Analysis Selection
 

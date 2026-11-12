@@ -47,19 +47,15 @@ Non-Diabetic (ND) subjects.
 
 The main settings to pay attention to are:
 
-- **Compare groups from** decides which categorical variable defines the
+- `Comparison Column`: decides which categorical variable defines the
   two groups being compared.
-- **Group of interest** and **Reference group** set the direction of the
-  comparison. The fold change divides the first group’s mean by the
-  reference group’s mean.
-- **Minimum fold change** takes a ratio. Enter `2` for a two-fold change
-  in either direction. The default of `1` applies no minimum size
-  cutoff.
-- **Raw p-value cutoff** sets the threshold applied to the unadjusted
-  two-group test p-values.
-- **Maximum labels on the plot** affects readability only. It changes
-  how many of the strongest points get labeled, not the underlying
-  calculations.
+- `Condition 1` and `Condition 2`: decide which two levels of that
+  column are contrasted.
+- `Log2 Fold Change Threshold`: determines how large a change must be
+  before you visually treat it as biologically substantial.
+- `P-Value Threshold`: controls the statistical evidence cutoff.
+- `Top Labels`: affects readability only. It changes how many of the
+  strongest points get labeled, not the underlying calculations.
 
 A good workflow is to set the comparison first, keep the default
 thresholds, and then tighten or relax the thresholds only if you have a
@@ -113,10 +109,9 @@ Keep these limits in mind when reading volcano plots:
 
 1.  Load a dataset and filter it to the two groups you want to compare.
 2.  Choose `Volcano Plot`.
-3.  Select **Compare groups from**, **Group of interest**, and
-    **Reference group**.
-4.  Adjust **Minimum fold change**, **Raw p-value cutoff**, and
-    **Maximum labels on the plot** only if needed.
+3.  Select `Comparison Column`, `Condition 1`, and `Condition 2`.
+4.  Adjust `Log2 Fold Change Threshold`, `P-Value Threshold`, and
+    `Top Labels` only if needed.
 5.  Review the highlighted points together with the labels and any
     follow-up plots.
 

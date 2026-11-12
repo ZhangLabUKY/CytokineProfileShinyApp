@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CytokineProfileShinyApp</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,7 +70,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Understanding Volcano Plot</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/devel/vignettes/Understanding-Volcano-Plot.Rmd" class="external-link"><code>vignettes/Understanding-Volcano-Plot.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/master/vignettes/Understanding-Volcano-Plot.Rmd" class="external-link"><code>vignettes/Understanding-Volcano-Plot.Rmd</code></a></small>
       <div class="d-none name"><code>Understanding-Volcano-Plot.Rmd</code></div>
     </div>
 
@@ -135,23 +135,22 @@ example, <code>-log10(p-value) = 2</code>, which corresponds to
 <p>The main settings to pay attention to are:</p>
 <ul>
 <li>
-<strong>Compare groups from</strong> decides which categorical
-variable defines the two groups being compared.</li>
+<code>Comparison Column</code>: decides which categorical variable
+defines the two groups being compared.</li>
 <li>
-<strong>Group of interest</strong> and <strong>Reference
-group</strong> set the direction of the comparison. The fold change
-divides the first group’s mean by the reference group’s mean.</li>
+<code>Condition 1</code> and <code>Condition 2</code>: decide which
+two levels of that column are contrasted.</li>
 <li>
-<strong>Minimum fold change</strong> takes a ratio. Enter
-<code>2</code> for a two-fold change in either direction. The default of
-<code>1</code> applies no minimum size cutoff.</li>
+<code>Log2 Fold Change Threshold</code>: determines how large a
+change must be before you visually treat it as biologically
+substantial.</li>
 <li>
-<strong>Raw p-value cutoff</strong> sets the threshold applied to
-the unadjusted two-group test p-values.</li>
+<code>P-Value Threshold</code>: controls the statistical evidence
+cutoff.</li>
 <li>
-<strong>Maximum labels on the plot</strong> affects readability
-only. It changes how many of the strongest points get labeled, not the
-underlying calculations.</li>
+<code>Top Labels</code>: affects readability only. It changes how
+many of the strongest points get labeled, not the underlying
+calculations.</li>
 </ul>
 <p>A good workflow is to set the comparison first, keep the default
 thresholds, and then tighten or relax the thresholds only if you have a
@@ -212,10 +211,10 @@ checking the raw distributions.</li>
 <li>Load a dataset and filter it to the two groups you want to
 compare.</li>
 <li>Choose <code>Volcano Plot</code>.</li>
-<li>Select <strong>Compare groups from</strong>, <strong>Group of
-interest</strong>, and <strong>Reference group</strong>.</li>
-<li>Adjust <strong>Minimum fold change</strong>, <strong>Raw p-value
-cutoff</strong>, and <strong>Maximum labels on the plot</strong> only if
+<li>Select <code>Comparison Column</code>, <code>Condition 1</code>, and
+<code>Condition 2</code>.</li>
+<li>Adjust <code>Log2 Fold Change Threshold</code>,
+<code>P-Value Threshold</code>, and <code>Top Labels</code> only if
 needed.</li>
 <li>Review the highlighted points together with the labels and any
 follow-up plots.</li>

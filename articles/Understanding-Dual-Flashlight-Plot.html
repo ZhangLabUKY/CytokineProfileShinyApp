@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CytokineProfileShinyApp</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,7 +70,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Understanding Dual-Flashlight Plot</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/devel/vignettes/Understanding-Dual-Flashlight-Plot.Rmd" class="external-link"><code>vignettes/Understanding-Dual-Flashlight-Plot.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/master/vignettes/Understanding-Dual-Flashlight-Plot.Rmd" class="external-link"><code>vignettes/Understanding-Dual-Flashlight-Plot.Rmd</code></a></small>
       <div class="d-none name"><code>Understanding-Dual-Flashlight-Plot.Rmd</code></div>
     </div>
 
@@ -136,22 +136,20 @@ ranking criterion used in the app.</li>
 <p>The most important controls are:</p>
 <ul>
 <li>
-<strong>Compare groups from</strong> decides which categorical
-variable defines the comparison.</li>
+<code>Comparison Column</code>: decides which categorical variable
+defines the comparison.</li>
 <li>
-<strong>Group of interest</strong> and <strong>Reference
-group</strong> set the direction of the comparison. The fold change
-divides the first group’s mean by the reference group’s mean.</li>
+<code>Condition 1</code> and <code>Condition 2</code>: decide which
+two levels are contrasted in the plot.</li>
 <li>
-<strong>Minimum standardized difference (SSMD)</strong> controls how
-large the effect size must be before a point is treated as a notable
-hit.</li>
+<code>SSMD Threshold</code>: controls how large the effect size must
+be before a point is treated as a notable hit.</li>
 <li>
-<strong>Minimum change (log2 fold change)</strong> controls how
-large the fold change must be.</li>
+<code>Log2 Fold Change Threshold</code>: controls how large the fold
+change must be.</li>
 <li>
-<strong>Maximum labels on the plot</strong> controls how many of the
-top-ranked cytokines are labeled.</li>
+<code>Top Labels</code>: controls how many of the top-ranked
+cytokines are labeled.</li>
 </ul>
 <p>These thresholds are not cosmetic. They determine which cytokines get
 emphasized, so they should be set intentionally and reported
@@ -210,11 +208,11 @@ always confirm which group is treated as the reference.</li>
 <ol style="list-style-type: decimal">
 <li>Filter the dataset to the two groups you want to compare.</li>
 <li>Choose <code>Dual-Flashlight Plot</code>.</li>
-<li>Select <strong>Compare groups from</strong>, <strong>Group of
-interest</strong>, and <strong>Reference group</strong>.</li>
-<li>Set <strong>Minimum standardized difference (SSMD)</strong>,
-<strong>Minimum change (log2 fold change)</strong>, and <strong>Maximum
-labels on the plot</strong>.</li>
+<li>Select <code>Comparison Column</code>, <code>Condition 1</code>, and
+<code>Condition 2</code>.</li>
+<li>Set <code>SSMD Threshold</code>,
+<code>Log2 Fold Change Threshold</code>, and
+<code>Top Labels</code>.</li>
 <li>Review the highlighted cytokines as prioritized candidates for
 follow-up.</li>
 </ol>

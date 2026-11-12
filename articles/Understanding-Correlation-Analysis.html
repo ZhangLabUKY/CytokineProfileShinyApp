@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CytokineProfileShinyApp</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,7 +70,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Understanding Correlation Analysis</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/devel/vignettes/Understanding-Correlation-Analysis.Rmd" class="external-link"><code>vignettes/Understanding-Correlation-Analysis.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/master/vignettes/Understanding-Correlation-Analysis.Rmd" class="external-link"><code>vignettes/Understanding-Correlation-Analysis.Rmd</code></a></small>
       <div class="d-none name"><code>Understanding-Correlation-Analysis.Rmd</code></div>
     </div>
 
@@ -119,16 +119,14 @@ compares it with all other numeric variables in the dataset.</p>
 <p>The most important settings are:</p>
 <ul>
 <li>
-<strong>Measurement to compare with the others</strong> selects the
-numeric measurement you want to compare against the rest of the
-dataset.</li>
+<code>Response Variable</code>: the numeric measurement you want to
+compare against the rest of the dataset.</li>
 <li>
-<strong>Group column for separate correlations</strong> selects the
-optional grouping column used to split the correlations into
-subgroups.</li>
+<code>Stratification Variable</code>: the optional grouping column
+used to split the correlations into subgroups.</li>
 <li>
-<strong>Calculate correlations within groups</strong> adds subgroup
-heatmaps alongside the overall results.</li>
+<code>Per-group Heatmaps</code>: whether the app should render
+separate subgroup-specific heatmaps.</li>
 </ul>
 <div class="section level3">
 <h3 id="choosing-pearson-versus-spearman">Choosing Pearson versus Spearman<a class="anchor" aria-label="anchor" href="#choosing-pearson-versus-spearman"></a>
@@ -155,9 +153,8 @@ often a safer first look.</p>
 overall table.</li>
 <li>Compare the Pearson and Spearman views to see whether the
 relationship looks consistently strong across methods.</li>
-<li>If <strong>Calculate correlations within groups</strong> is enabled,
-check whether the overall relationships are consistent across
-subgroups.</li>
+<li>If a <code>Stratification Variable</code> is selected, check whether
+those same relationships are consistent across subgroups.</li>
 </ol>
 <p>Interpretation tips:</p>
 <ul>
@@ -192,10 +189,10 @@ many variables.</li>
 <ol style="list-style-type: decimal">
 <li>Choose a numeric target variable with biological interest.</li>
 <li>Choose <code>Correlation Plots</code>.</li>
-<li>Set <strong>Measurement to compare with the others</strong>.</li>
-<li>Add a <strong>Group column for separate correlations</strong> and
-turn on <strong>Calculate correlations within groups</strong> if you
-want to compare biological subgroups.</li>
+<li>Set <code>Response Variable</code>.</li>
+<li>Add a <code>Stratification Variable</code> and turn on
+<code>Per-group Heatmaps</code> if you want to compare biological
+subgroups.</li>
 <li>Use the table and the plot together to decide which associations
 deserve follow-up.</li>
 </ol>

@@ -96,21 +96,19 @@ groups.
 
 The most important settings are:
 
-- In `Multi-level Univariate Tests (Anova, Kruskal-Wallis)`, **Overall
-  test across groups** selects ANOVA or Kruskal-Wallis. If you choose
-  Kruskal-Wallis, **Adjust follow-up p-values** controls the follow-up
-  multiple-testing correction.
-- In `Two-way ANOVA`, **Main grouping column**, **Second grouping
-  column**, and **Test whether the main group effect differs across the
-  second groups** define the fitted design.
-- In `ANCOVA`, **Main grouping column**, **Second grouping column
-  (optional)**, and **Numeric measurement to adjust for (covariate)**
-  define the adjusted model.
-- In `ANCOVA`, **Test whether the main group effect differs across the
-  second groups**, **Allow the covariate relationship to differ by main
-  group**, and **Allow the covariate relationship to differ by second
-  group** determine whether the model includes effect-modification
-  terms.
+- In `Multi-level Univariate Tests (Anova, Kruskal-Wallis)`,
+  `Global Test Method` controls whether the overall test is ANOVA or
+  Kruskal-Wallis. If you choose Kruskal-Wallis,
+  `Pairwise P-Value Adjustment` controls the follow-up multiple-testing
+  correction.
+- In `Two-way ANOVA`, `Primary Factor`, `Secondary Factor`, and
+  `Include primary:secondary interaction` define the fitted design.
+- In `ANCOVA`, `Primary Factor`, `Secondary Factor (Optional)`, and
+  `Covariate` define the adjusted model.
+- In `ANCOVA`, `Include primary:secondary interaction`,
+  `Include primary:covariate interaction`, and
+  `Include secondary:covariate interaction` determine whether the model
+  includes effect-modification terms.
 
 These are not cosmetic settings. They change the scientific question the
 app is answering for each cytokine.

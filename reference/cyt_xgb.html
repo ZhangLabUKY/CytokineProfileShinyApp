@@ -11,7 +11,7 @@ and visualizes feature importance."><meta property="og:image" content="https://s
 
     <a class="navbar-brand me-2" href="../index.html">CytokineProfileShinyApp</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,7 +42,7 @@ and visualizes feature importance."><meta property="og:image" content="https://s
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Run XGBoost Classification on Cytokine Data</h1>
-      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/devel/R/cyt_xgb.R" class="external-link"><code>R/cyt_xgb.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/master/R/cyt_xgb.R" class="external-link"><code>R/cyt_xgb.R</code></a></small>
       <div class="d-none name"><code>cyt_xgb.Rd</code></div>
     </div>
 
@@ -89,13 +89,13 @@ and visualizes feature importance.</p>
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
 <dd><p>A data frame containing numeric predictor variables and one
-grouping column. Remove non-numeric predictor columns before fitting.</p></dd>
+grouping column.  Non-numeric predictor columns will be coerced to
+numeric if possible.</p></dd>
 
 
 <dt id="arg-group-col">group_col<a class="anchor" aria-label="anchor" href="#arg-group-col"></a></dt>
 <dd><p>Character string naming the column that contains the class
-labels (target variable). Required. All other columns must be numeric;
-remove categorical metadata columns before fitting.</p></dd>
+labels (target variable).  Required.</p></dd>
 
 
 <dt id="arg-train-fraction">train_fraction<a class="anchor" aria-label="anchor" href="#arg-train-fraction"></a></dt>

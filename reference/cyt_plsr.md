@@ -52,9 +52,8 @@ cyt_plsr(
 
 - group_col:
 
-  Optional column used to color groups consistently across score,
-  prediction, and residual plots. If `NULL`, score plots are colored by
-  observed response values and diagnostic plots use gray points.
+  The name of the column to use for grouping samples in the score plot.
+  If `NULL`, no grouping is applied.
 
 - ind_names:
 
@@ -78,9 +77,7 @@ cyt_plsr(
 
   Character string specifying the cross-validation option: "None",
   "LOOCV" (Leave-One-Out Cross-Validation), or "Mfold" (M-fold
-  Cross-Validation). For standard PLSR, this also evaluates held-out
-  predictions using the supplied data after any requested
-  transformation.
+  Cross-Validation).
 
 - fold_num:
 
@@ -104,8 +101,7 @@ cyt_plsr(
 
 - pls_colors:
 
-  A character vector of colors for categorical groups, shared across
-  score, prediction, residual, and VIP score plots.
+  A character vector of colors to use for grouping.
 
 - output_file:
 
@@ -140,15 +136,6 @@ A list containing:
   A recorded plot of cross-validation performance (Q2 and RMSEP), if
   `cv_opt` is not "None".
 
-- whole_model_cv:
-
-  For standard PLSR with cross-validation enabled, a list with `plot`
-  (recorded plot), `predictions` (one row per evaluated sample with its
-  fold and baseline prediction), `metrics` (PLSR and baseline RMSE and
-  MAE), `method`, `components`, `evaluated`, and `excluded`. An
-  unavailable check returns a list with a `reason`. Otherwise returns
-  `NULL`.
-
 - loadings:
 
   A list of recorded plots for loadings of each component.
@@ -169,8 +156,7 @@ A list containing:
 
 - metrics_text:
 
-  Training performance, component CV diagnostics, and held-out
-  prediction errors, as available.
+  Text summary of Q2 values, if available.
 
 - pdf_file:
 

@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CytokineProfileShinyApp</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,7 +70,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Basic Tutorial of CytokineProfile Shiny</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/devel/vignettes/Basic-Tutorial-of-CytokineProfile-Shiny.Rmd" class="external-link"><code>vignettes/Basic-Tutorial-of-CytokineProfile-Shiny.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/master/vignettes/Basic-Tutorial-of-CytokineProfile-Shiny.Rmd" class="external-link"><code>vignettes/Basic-Tutorial-of-CytokineProfile-Shiny.Rmd</code></a></small>
       <div class="d-none name"><code>Basic-Tutorial-of-CytokineProfile-Shiny.Rmd</code></div>
     </div>
 
@@ -109,12 +109,6 @@ selection.</li>
 <p>The app supports common tabular formats such as CSV, XLS/X, and TXT.
 It also includes example datasets so you can learn the workflow before
 analyzing your own data.</p>
-<p>Choose one sheet for an Excel upload. Once the file is readable, you
-can continue directly to Step 2. The Data Editor is optional: use
-<strong>Save &amp; Use</strong> to commit edits or
-<strong>Cancel</strong> to discard the draft. Saving actual changes,
-selecting another sheet, or replacing the file resets previous
-preprocessing and results.</p>
 <p>At this step, your main job is to confirm that the dataset loaded the
 way you expect:</p>
 <ul>
@@ -143,32 +137,6 @@ subsets you want to compare.</li>
 <li>Exclude samples only when you have a clear reason, such as failed
 quality control or a predefined exclusion rule.</li>
 </ul>
-<div class="section level3">
-<h3 id="transform-selected-columns">Transform selected columns<a class="anchor" aria-label="anchor" href="#transform-selected-columns"></a>
-</h3>
-<p>Use <strong>Configure Transformation</strong> to choose a method and
-specific numeric columns, then click <strong>Apply</strong>. Unchosen
-columns retain their original values. <strong>Cancel</strong> leaves the
-applied settings unchanged, and choosing <strong>None</strong> removes
-the transformation. The app transforms values after filtering and row
-deletions, before imputation.</p>
-</div>
-<div class="section level3">
-<h3 id="impute-missing-values">Impute missing values<a class="anchor" aria-label="anchor" href="#impute-missing-values"></a>
-</h3>
-<p><strong>Impute Missing Values</strong> lists the columns with missing
-values in the current data and shows the count beside each name. After
-applying imputation, reopen the dialog and click <strong>Undo
-missing-value treatment</strong> to restore the missing values while
-keeping your filters, transformations, type overrides, and row
-deletions.</p>
-<p>Changing the source data or preprocessing clears imputation and
-prompts you to apply it again. You can move between wizard steps and
-keep imputation as long as the data and preprocessing stay the same.</p>
-</div>
-<div class="section level3">
-<h3 id="review-the-working-data">Review the working data<a class="anchor" aria-label="anchor" href="#review-the-working-data"></a>
-</h3>
 <p>The live data preview is especially helpful here. It lets you verify
 that the app is analyzing the samples and categories you intended before
 you move on.</p>
@@ -181,7 +149,6 @@ interpret.</li>
 and multi-level univariate analysis are often more informative.</li>
 </ul>
 <p><img src="../reference/figures/Shiny_Step2.gif"></p>
-</div>
 </div>
 <div class="section level2">
 <h2 id="step-3-choosing-the-analysis-family">Step 3: Choosing the analysis family<a class="anchor" aria-label="anchor" href="#step-3-choosing-the-analysis-family"></a>
@@ -216,16 +183,9 @@ require more care to avoid over-interpreting apparent separation.</li>
 <div class="section level2">
 <h2 id="step-4-choosing-the-arguments-that-matter">Step 4: Choosing the arguments that matter<a class="anchor" aria-label="anchor" href="#step-4-choosing-the-arguments-that-matter"></a>
 </h2>
-<p>In Step 4, start with the choices that describe your experiment. For
-example, select <code>Treatment</code> under <strong>Group plots by
-(optional)</strong> to compare distributions for Control and Treated
-samples. In a prediction model, use <strong>Class to predict</strong> to
-identify the column containing the groups you want the model to
-learn.</p>
-<p>The form separates data choices, analysis settings, and plot
-appearance when those sections apply. Open the question-mark or
-exclamation-point icon beside a setting for examples, defaults, and
-guidance on what it changes.</p>
+<p>Step 4 exposes the method-specific controls. You do not need to tune
+every field for every analysis. Focus first on the arguments that change
+interpretation.</p>
 <p>Examples:</p>
 <ul>
 <li>Threshold arguments change which points are highlighted or labeled

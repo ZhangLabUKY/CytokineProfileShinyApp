@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CytokineProfileShinyApp</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,52 +38,18 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/devel/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.0.2" id="cytokineprofileshinyapp-002">CytokineProfileShinyApp 0.0.2<a class="anchor" aria-label="anchor" href="#cytokineprofileshinyapp-002"></a></h2>
-<div class="section level3">
-<h3 id="whats-new-0-0-2">What’s New<a class="anchor" aria-label="anchor" href="#whats-new-0-0-2"></a></h3>
-<ul><li>Transformations now have an Apply/Cancel popup for choosing a method and specific numeric columns. Transformation previews and analyses use only the applied choices.</li>
-<li>The Impute Missing Values dialog lists only columns with missing data and shows the count for each column. Undo is available in the same dialog and preserves filters, transformations, type overrides, and row deletions.</li>
-<li>XGBoost now supports a single numeric predictor, stratifies the holdout split by outcome group, and validates predictor types, group sizes, and cross-validation folds before fitting. Validation guidance appears in the app.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="easier-to-use-0-0-2">Easier to Use<a class="anchor" aria-label="anchor" href="#easier-to-use-0-0-2"></a></h3>
-<ul><li>Continue straight after uploading data or choosing one Excel sheet. The optional Data Editor lets you discard draft edits with Cancel or apply them with Save &amp; Use. Saving changed data resets preprocessing.</li>
-<li>Cards in Steps 1–2 stack on narrower screens. Buttons and long filenames wrap, and wide tables scroll inside their cards. The Data Editor and preprocessing dialogs keep footer actions within reach as you scroll.</li>
-<li>Both Filtered Data Explorer views show a clear message when filters or row exclusions leave zero rows. Applied transformation settings take effect again when matching rows return.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="better-figures-0-0-2">Better Figures<a class="anchor" aria-label="anchor" href="#better-figures-0-0-2"></a></h3>
-<ul><li>Grouped plots stay distinct even when group labels differ only by punctuation or contain Unicode.</li>
-<li>sPLS-DA score plots show training and cross-validation accuracy on a second heading line. Main models, separate subgroups, VIP &gt; 1 refits, and PDF exports report their own performance at the fitted component count.</li>
-<li>PLSR figures identify the response measurement and label training predictions and residuals. Cross-validation figures explain component-wise CV R², Q², and scaled prediction error, with matching summaries for VIP &gt; 1 refits.</li>
-<li>PLSR score panels identify measurement and response patterns. Group colors match across score, prediction, residual, and VIP score plots. Ungrouped score plots show observed response values on a shared color scale, and prediction scatterplots use equal axes with room for overlapping samples.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="bug-fixes-0-0-2">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-0-2"></a></h3>
-<ul><li>Replacing a file on Step 1 refreshes the sheet picker, preview, and editor. Switching built-in datasets and replacing uploads verify the staged source before reading it. A source replacement clears previous preprocessing and results.</li>
-<li>Changing source data, filters, row deletions, applied column types, or transformations now clears stale imputation and asks users to reapply it. Navigation preserves valid imputation.</li>
-<li>Changing themes preserves the upload and controls in Steps 1–2. Step 2 also updates column and type selections in place.</li>
-<li>Repeated sPLS-DA runs replace obsolete interactive-modal observers.</li>
-<li>Result displays refresh after an analysis completes, including when the previous cached display was empty.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="behind-the-scenes-0-0-2">Behind the Scenes<a class="anchor" aria-label="anchor" href="#behind-the-scenes-0-0-2"></a></h3>
-<ul><li>The development and deployment renv environment uses R 4.6.1 and Bioconductor 3.23. The declared R minimum is 4.4. Older R installations need compatible dependency versions and separate compatibility validation.</li>
-<li>Local browser tests cover the new workflows using the pinned Chrome version and reviewed screenshots. GitHub runs package, server, analysis, coverage, and locked-environment checks.</li>
-<li>Connect Cloud deployments use <code>renv.lock</code> directly. CI checks the locked R and Bioconductor environment. The one-time migration and publishing scripts were removed.</li>
-<li>Installed apps include the privacy and tutorial pages. Package and deployment bundles exclude generated plot PDFs.</li>
-<li>Runtime dependencies and test-only dependencies are declared separately. Ordinary startup only activates renv.</li>
-</ul></div>
+<h2 class="pkg-version" data-toc-text="0.0.1" id="cytokineprofileshinyapp-001">CytokineProfileShinyApp 0.0.1<a class="anchor" aria-label="anchor" href="#cytokineprofileshinyapp-001"></a></h2>
+<p><em>To be updated.</em></p>
 </div>
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.0.1" id="cytokineprofileshinyapp-001">CytokineProfileShinyApp 0.0.1<a class="anchor" aria-label="anchor" href="#cytokineprofileshinyapp-001"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.0.0.9000" id="cytokineprofileshinyapp-0009000">CytokineProfileShinyApp 0.0.0.9000<a class="anchor" aria-label="anchor" href="#cytokineprofileshinyapp-0009000"></a></h2>
 <p>This development build focuses on making the app easier to use, easier to read, and more reliable.</p>
 <div class="section level3">
-<h3 id="whats-new-0-0-1">What’s New<a class="anchor" aria-label="anchor" href="#whats-new-0-0-1"></a></h3>
+<h3 id="whats-new-0-0-0-9000">What’s New<a class="anchor" aria-label="anchor" href="#whats-new-0-0-0-9000"></a></h3>
 <ul><li>You can now run <code>Two-way ANOVA</code> and <code>ANCOVA</code> directly in the app.</li>
 <li>ANCOVA now supports optional <code>secondary:covariate</code> interactions, with clearer slope checks and more appropriate follow-up comparisons when factor-by-covariate effects are included.</li>
 <li>The app now gives clearer warnings when interaction effects may make results harder to interpret on their own.</li>
@@ -91,7 +57,7 @@
 <li>Random Forest and XGBoost outputs now report model setup details more clearly, including split settings, class balance, cross-validation status, and key tuning choices.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="easier-to-use-0-0-1">Easier to Use<a class="anchor" aria-label="anchor" href="#easier-to-use-0-0-1"></a></h3>
+<h3 id="easier-to-use-0-0-0-9000">Easier to Use<a class="anchor" aria-label="anchor" href="#easier-to-use-0-0-0-9000"></a></h3>
 <ul><li>Re-uploading a file now refreshes the saved copy right away, even if the file has the same name as before.</li>
 <li>Excel imports are more reliable. If a previously chosen sheet is no longer available, the app now switches safely instead of failing.</li>
 <li>When you upload a new file, saved editor choices from the previous file are cleared more cleanly.</li>
@@ -109,7 +75,7 @@
 <li>Progress notifications are easier to read during longer analyses, with cleaner spacing and clearer separation between the main task and detail text.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="better-figures-0-0-1">Better Figures<a class="anchor" aria-label="anchor" href="#better-figures-0-0-1"></a></h3>
+<h3 id="better-figures-0-0-0-9000">Better Figures<a class="anchor" aria-label="anchor" href="#better-figures-0-0-0-9000"></a></h3>
 <ul><li>Plot text is now more customizable across many figure types.</li>
 <li>PCA, PLSR, sPLS-DA, and MINT sPLS-DA figures now use more readable default text sizes.</li>
 <li>Correlation circle plots in PCA and MINT sPLS-DA now behave more reliably.</li>
@@ -117,7 +83,7 @@
 <li>Volcano plot now displays p-value in different sizes depending on how small the p-values are. Additionally, it shows upregulated vs. downregulated variables clearly.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="bug-fixes-0-0-1">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-0-1"></a></h3>
+<h3 id="bug-fixes-0-0-0-9000">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-0-0-9000"></a></h3>
 <ul><li>Some result tables are now labeled more accurately when column names contain underscores.</li>
 <li>The app handles empty analysis results more gracefully instead of returning confusing output.</li>
 <li>The XGBoost workflow now chooses the best training step more reliably across different scoring methods.</li>
@@ -134,7 +100,7 @@
 <li>Input validation and export failures now use friendlier app messages, and common missing analysis settings are checked before model code runs.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="behind-the-scenes-0-0-1">Behind the Scenes<a class="anchor" aria-label="anchor" href="#behind-the-scenes-0-0-1"></a></h3>
+<h3 id="behind-the-scenes-0-0-0-9000">Behind the Scenes<a class="anchor" aria-label="anchor" href="#behind-the-scenes-0-0-0-9000"></a></h3>
 <ul><li>Several parts of the app were cleaned up to reduce small startup and package-loading problems.</li>
 <li>Internal helper code and UI regression checks were cleaned up so package checks behave more consistently across local testing and staged installs.</li>
 <li>The server pipeline was re-extracted into dedicated <code>mod_*_server()</code> stage files, with shared stage helpers now centralized in <code>R/app_stage_helpers.R</code>.</li>

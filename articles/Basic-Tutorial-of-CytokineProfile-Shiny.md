@@ -31,12 +31,6 @@ The app supports common tabular formats such as CSV, XLS/X, and TXT. It
 also includes example datasets so you can learn the workflow before
 analyzing your own data.
 
-Choose one sheet for an Excel upload. Once the file is readable, you can
-continue directly to Step 2. The Data Editor is optional: use **Save &
-Use** to commit edits or **Cancel** to discard the draft. Saving actual
-changes, selecting another sheet, or replacing the file resets previous
-preprocessing and results.
-
 At this step, your main job is to confirm that the dataset loaded the
 way you expect:
 
@@ -64,28 +58,6 @@ Use this step to:
   subsets you want to compare.
 - Exclude samples only when you have a clear reason, such as failed
   quality control or a predefined exclusion rule.
-
-### Transform selected columns
-
-Use **Configure Transformation** to choose a method and specific numeric
-columns, then click **Apply**. Unchosen columns retain their original
-values. **Cancel** leaves the applied settings unchanged, and choosing
-**None** removes the transformation. The app transforms values after
-filtering and row deletions, before imputation.
-
-### Impute missing values
-
-**Impute Missing Values** lists the columns with missing values in the
-current data and shows the count beside each name. After applying
-imputation, reopen the dialog and click **Undo missing-value treatment**
-to restore the missing values while keeping your filters,
-transformations, type overrides, and row deletions.
-
-Changing the source data or preprocessing clears imputation and prompts
-you to apply it again. You can move between wizard steps and keep
-imputation as long as the data and preprocessing stay the same.
-
-### Review the working data
 
 The live data preview is especially helpful here. It lets you verify
 that the app is analyzing the samples and categories you intended before
@@ -132,16 +104,9 @@ When deciding among them, it helps to think in terms of interpretation:
 
 ## Step 4: Choosing the arguments that matter
 
-In Step 4, start with the choices that describe your experiment. For
-example, select `Treatment` under **Group plots by (optional)** to
-compare distributions for Control and Treated samples. In a prediction
-model, use **Class to predict** to identify the column containing the
-groups you want the model to learn.
-
-The form separates data choices, analysis settings, and plot appearance
-when those sections apply. Open the question-mark or exclamation-point
-icon beside a setting for examples, defaults, and guidance on what it
-changes.
+Step 4 exposes the method-specific controls. You do not need to tune
+every field for every analysis. Focus first on the arguments that change
+interpretation.
 
 Examples:
 
