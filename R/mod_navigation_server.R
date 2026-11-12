@@ -537,8 +537,7 @@ mod_navigation_server <- function(input, output, session, app_ctx) {
       if (page %in% c("step1", "step2")) {
         page
       } else {
-        list(page, currentStep(), input$theme_choice, bslib::bs_current_theme(),
-             if (page == "step4") selected_function())
+        list(page, currentStep(), if (page == "step4") selected_function())
       }
     })
 

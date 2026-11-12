@@ -10,35 +10,26 @@ mod_theme_server <- function(input, output, session, app_ctx) {
   )
 
   system_theme <- shiny::reactive({
-    if (is.null(input$system_theme)) "flatly" else input$system_theme
+    if (identical(input$system_theme, "darkly")) "darkly" else "flatly"
   })
 
-  theme_choice_rv <- shiny::reactiveVal("auto")
+  effective_theme <- shiny::reactive({
+    choice <- input$theme_choice
+    if (identical(choice, "darkly") || identical(choice, "flatly")) {
+      return(choice)
+    }
+    system_theme()
+  })
 
-  # IMPORTANT: do NOT ignore init; we want the initial value on refresh
-  shiny::observeEvent(
-    input$theme_choice,
-    {
-      shiny::req(input$theme_choice)
-      theme_choice_rv(input$theme_choice)
-
-      # persist per-browser
-      shinyjs::runjs(sprintf(
-        "localStorage.setItem('user_theme', '%s');",
-        input$theme_choice
-      ))
-    },
-    ignoreInit = FALSE
-  )
-
-  # Apply theme whenever either theme_choice_rv() or system_theme() changes
   shiny::observe({
-    choice <- theme_choice_rv()
-    bootswatch <- if (identical(choice, "auto")) system_theme() else choice
-
+    bootswatch <- effective_theme()
     session$setCurrentTheme(
       bslib::bs_theme_update(base_theme, bootswatch = bootswatch)
     )
+    shinyjs::runjs(sprintf(
+      "document.body.dataset.appTheme = '%s';",
+      bootswatch
+    ))
   })
 
   invisible(app_stage_commit(app_ctx, stage_env))

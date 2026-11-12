@@ -33,19 +33,9 @@ app_ui <- function() {
     ),
     theme = bslib::bs_theme(),
     shiny::tags$head(
+      shiny::includeScript(app_content_file("www", "theme.js")),
       shiny::tags$script(shiny::HTML(
         "
-        $(document).on('shiny:connected', function() {
-          var saved = localStorage.getItem('user_theme');
-          if (saved) {
-            var el = document.getElementById('theme_choice');
-            if (el) {
-              el.value = saved;
-              $(el).trigger('change');
-            }
-          }
-        });
-
         // Let shinyhelper open its dialog without activating the enclosing label.
         $(document).on('click', 'label .shinyhelper-icon', function(event) {
           event.preventDefault();
@@ -185,21 +175,27 @@ app_ui <- function() {
         .main-panel .text-center {
           text-align: center !important;
         }
-        body:not([data-bs-theme='darkly']) .nav-tabs .nav-link {
+        body {
+          --app-helper-color: blue;
+        }
+        body[data-app-theme='darkly'] {
+          --app-helper-color: red;
+        }
+        body:not([data-app-theme='darkly']) .nav-tabs .nav-link {
           background-color: #f8f9fa;
           color: #333;
           border: 1px solid rgba(0, 0, 0, 0.1);
         }
-        body:not([data-bs-theme='darkly']) .nav-tabs .nav-link.active {
+        body:not([data-app-theme='darkly']) .nav-tabs .nav-link.active {
           background-color: #375a7f !important;
           color: #fff !important;
           border-color: #375a7f !important;
         }
-        body:not([data-bs-theme='darkly']) .nav-pills .nav-link {
+        body:not([data-app-theme='darkly']) .nav-pills .nav-link {
           background-color: #f8f9fa;
           color: #333;
         }
-        body:not([data-bs-theme='darkly']) .nav-pills .nav-link.active {
+        body:not([data-app-theme='darkly']) .nav-pills .nav-link.active {
           background-color: #375a7f !important;
           color: #fff !important;
         }
@@ -294,12 +290,12 @@ app_ui <- function() {
           font-weight: 500;
           letter-spacing: 0.01em;
         }
-        [data-bs-theme='flatly'] #brand .app-version {
+        body:not([data-app-theme='darkly']) #brand .app-version {
           background: rgba(0, 0, 0, 0.04);
           border: 1px solid rgba(0, 0, 0, 0.18);
           color: #212529;
         }
-        [data-bs-theme='darkly'] #brand .app-version {
+        body[data-app-theme='darkly'] #brand .app-version {
           background: rgba(255, 255, 255, 0.14);
           border: 1px solid rgba(255, 255, 255, 0.28);
           color: #fff;
@@ -430,7 +426,7 @@ app_ui <- function() {
             "theme_choice",
             "Theme",
             choices = c("Auto" = "auto", "Light" = "flatly", "Dark" = "darkly"),
-            selected = "Light",
+            selected = "auto",
             width = "100px"
           ),
           class = "visually-hidden",

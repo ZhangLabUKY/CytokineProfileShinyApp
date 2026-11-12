@@ -556,13 +556,15 @@ test_that("announcement_banner and app_ui include the expected structure", {
     .package = "CytokineProfileShinyApp"
   )
 
-  ui_html <- app_test_render_html(app_ui())
+  rendered_ui <- htmltools::renderTags(app_ui())
+  ui_html <- rendered_ui$html
 
   expect_true(registered_resources)
   expect_match(ui_html, "<strong>Important</strong> update", fixed = TRUE)
   expect_match(ui_html, "assets/logo.png", fixed = TRUE)
   expect_match(ui_html, "v1.2.3", fixed = TRUE)
   expect_match(ui_html, "theme_choice", fixed = TRUE)
+  expect_match(rendered_ui$head, "prefers-color-scheme: dark", fixed = TRUE)
   expect_match(ui_html, "GitHub Repository", fixed = TRUE)
   expect_match(ui_html, "https://shinyinfo.cytokineprofile.org", fixed = TRUE)
   expect_match(ui_html, "stepHeader", fixed = TRUE)

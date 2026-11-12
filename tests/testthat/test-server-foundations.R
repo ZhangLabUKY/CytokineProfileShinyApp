@@ -21,14 +21,28 @@ test_that("theme module tracks system and manual theme choices", {
       app_ctx
     ),
     {
-      expect_equal(app_ctx$system_theme(), "flatly")
-      expect_equal(app_ctx$theme_choice_rv(), "auto")
+      expect_identical(app_ctx$effective_theme(), "flatly")
+
+      set_test_input(session, "theme_choice", "auto")
+      set_test_input(session, "system_theme", "darkly")
+      expect_identical(app_ctx$effective_theme(), "darkly")
+
+      set_test_input(session, "theme_choice", "flatly")
+      expect_identical(app_ctx$effective_theme(), "flatly")
+
+      set_test_input(session, "system_theme", "flatly")
+      set_test_input(session, "theme_choice", "darkly")
+      expect_identical(app_ctx$effective_theme(), "darkly")
+
+      set_test_input(session, "theme_choice", "auto")
+      expect_identical(app_ctx$effective_theme(), "flatly")
+
+      set_test_input(session, "system_theme", "darkly")
+      set_test_input(session, "theme_choice", "minty")
+      expect_identical(app_ctx$effective_theme(), "darkly")
 
       set_test_input(session, "system_theme", "minty")
-      expect_equal(app_ctx$system_theme(), "minty")
-
-      set_test_input(session, "theme_choice", "darkly")
-      expect_equal(app_ctx$theme_choice_rv(), "darkly")
+      expect_identical(app_ctx$effective_theme(), "flatly")
     }
   )
 })
