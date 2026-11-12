@@ -48,7 +48,8 @@ Required if \code{sparse = TRUE}.}
 
 \item{cv_opt}{Character string specifying the cross-validation option:
 "None", "LOOCV" (Leave-One-Out Cross-Validation), or "Mfold" (M-fold
-Cross-Validation).}
+Cross-Validation). For standard PLSR, this also evaluates held-out
+predictions using the supplied data after any requested transformation.}
 
 \item{fold_num}{The number of folds for M-fold cross-validation. Only
 applicable if \code{cv_opt = "Mfold"}.}
@@ -80,14 +81,20 @@ A list containing:
 \item{pred_vs_obs}{A recorded plot of predicted vs. observed response values.}
 \item{residuals_plot}{A recorded plot of residuals vs. fitted values.}
 \item{cv_plot}{A recorded plot of cross-validation performance (Q2 and RMSEP), if \code{cv_opt} is not "None".}
+\item{whole_model_cv}{For standard PLSR with cross-validation enabled, a
+list with \code{plot} (recorded plot), \code{predictions} (one row per evaluated
+sample with its fold and baseline prediction), \code{metrics} (PLSR and
+baseline RMSE and MAE), \code{method}, \code{components}, \code{evaluated}, and
+\code{excluded}. An unavailable check returns a list with a \code{reason}.
+Otherwise returns \code{NULL}.}
 \item{loadings}{A list of recorded plots for loadings of each component.}
 \item{vip_scores}{A list of \code{ggplot} objects of VIP scores for each component.}
 \item{vip_scores_indiv}{A recorded plot of the PLSR scores for variables
 with VIP > 1, if applicable.}
 \item{vip_cv_plot}{A recorded plot of cross-validation performance for
 variables with VIP > 1, if applicable.}
-\item{metrics_text}{Training performance and CV R2, Q2 (total),
-and scaled RMSEP summaries, when cross-validation is enabled.}
+\item{metrics_text}{Training performance, component CV diagnostics,
+and held-out prediction errors, as available.}
 \item{pdf_file}{The path to the generated PDF file, if \code{output_file} was
 provided.}
 }

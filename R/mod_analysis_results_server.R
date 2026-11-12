@@ -1890,6 +1890,19 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                   type = 8
                 )
               ),
+              if (!is.null(res$whole_model_cv)) {
+                shiny::tabPanel(
+                  "Cross-validated Predictions",
+                  if (!is.null(res$whole_model_cv$reason)) {
+                    shiny::p(res$whole_model_cv$reason)
+                  } else {
+                    shinycssloaders::withSpinner(
+                      shiny::plotOutput("plsr_cvPredPlot", height = "520px"),
+                      type = 8
+                    )
+                  }
+                )
+              },
               shiny::tabPanel(
                 "Residuals vs Fitted",
                 shinycssloaders::withSpinner(
@@ -1913,7 +1926,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
               ),
               if (!is.null(res$cv_plot)) {
                 shiny::tabPanel(
-                  "Cross-Validation",
+                  "Component CV Diagnostics",
                   shinycssloaders::withSpinner(
                     shiny::plotOutput("plsr_cvPlot", height = "460px"),
                     type = 8
@@ -1931,7 +1944,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
               },
               if (!is.null(res$vip_cv_plot)) {
                 shiny::tabPanel(
-                  "VIP > 1: Cross-Validation",
+                  "VIP > 1: Component CV Diagnostics",
                   shinycssloaders::withSpinner(
                     shiny::plotOutput("plsr_vipCVPlot", height = "460px"),
                     type = 8
@@ -3042,6 +3055,11 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
       output$plsr_predPlot <- shiny::renderPlot({
         shiny::req(res$pred_vs_obs)
         grDevices::replayPlot(res$pred_vs_obs)
+      })
+
+      output$plsr_cvPredPlot <- shiny::renderPlot({
+        shiny::req(res$whole_model_cv$plot)
+        grDevices::replayPlot(res$whole_model_cv$plot)
       })
 
       # Residuals vs Fitted (recordedplot)

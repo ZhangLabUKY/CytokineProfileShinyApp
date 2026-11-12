@@ -25,7 +25,8 @@
 #'   Required if `sparse = TRUE`.
 #' @param cv_opt Character string specifying the cross-validation option:
 #'   "None", "LOOCV" (Leave-One-Out Cross-Validation), or "Mfold" (M-fold
-#'   Cross-Validation).
+#'   Cross-Validation). For standard PLSR, this also evaluates held-out
+#'   predictions using the supplied data after any requested transformation.
 #' @param fold_num The number of folds for M-fold cross-validation. Only
 #'   applicable if `cv_opt = "Mfold"`.
 #' @param scale Character string specifying an optional transformation for
@@ -47,14 +48,20 @@
 #'   \item{pred_vs_obs}{A recorded plot of predicted vs. observed response values.}
 #'   \item{residuals_plot}{A recorded plot of residuals vs. fitted values.}
 #'   \item{cv_plot}{A recorded plot of cross-validation performance (Q2 and RMSEP), if `cv_opt` is not "None".}
+#'   \item{whole_model_cv}{For standard PLSR with cross-validation enabled, a
+#'     list with `plot` (recorded plot), `predictions` (one row per evaluated
+#'     sample with its fold and baseline prediction), `metrics` (PLSR and
+#'     baseline RMSE and MAE), `method`, `components`, `evaluated`, and
+#'     `excluded`. An unavailable check returns a list with a `reason`.
+#'     Otherwise returns `NULL`.}
 #'   \item{loadings}{A list of recorded plots for loadings of each component.}
 #'   \item{vip_scores}{A list of `ggplot` objects of VIP scores for each component.}
 #'   \item{vip_scores_indiv}{A recorded plot of the PLSR scores for variables
 #'     with VIP > 1, if applicable.}
 #'   \item{vip_cv_plot}{A recorded plot of cross-validation performance for
 #'     variables with VIP > 1, if applicable.}
-#'   \item{metrics_text}{Training performance and CV R2, Q2 (total),
-#'     and scaled RMSEP summaries, when cross-validation is enabled.}
+#'   \item{metrics_text}{Training performance, component CV diagnostics,
+#'     and held-out prediction errors, as available.}
 #'   \item{pdf_file}{The path to the generated PDF file, if `output_file` was
 #'     provided.}
 #'
@@ -96,6 +103,8 @@ cyt_plsr <- function(
   if (!is.numeric(data[[response_col]])) {
     stop("`response_col` must be numeric for regression.")
   }
+  # Preserve input row identities when rows are dropped from a tibble.
+  data <- as.data.frame(data)
 
   analysis_label <- paste0(
     "Running ",
@@ -146,23 +155,22 @@ cyt_plsr <- function(
     )
   }
 
-  # --- build X (numeric) / y
-  .x_y <- function(df) {
-    exclude <- unique(c(id_cols, "..cyto_id..", "cyto_id"))
+  # Keep the selected predictor pool available for screening inside CV folds.
+  exclude <- unique(c(id_cols, "..cyto_id..", "cyto_id"))
+  selected_x <- data[, setdiff(names(data), exclude), drop = FALSE]
+  selected_x <- selected_x[, vapply(selected_x, is.numeric, logical(1)), drop = FALSE]
+  if (!is.null(predictor_cols) && length(predictor_cols)) {
+    selected_x <- selected_x[, intersect(names(selected_x), predictor_cols), drop = FALSE]
+  }
+  selected_y <- data[[response_col]]
 
-    X <- df[, setdiff(names(df), exclude), drop = FALSE]
-    X <- X[, vapply(X, is.numeric, logical(1)), drop = FALSE]
-    # --- restrict to user-chosen predictors if provided ---
-    if (!is.null(predictor_cols) && length(predictor_cols)) {
-      X <- X[, intersect(names(X), predictor_cols), drop = FALSE]
-    }
-
+  # --- build X (numeric) / y for the full fit
+  .x_y <- function(X, y_all) {
     if (ncol(X) < 2) {
       stop(
         "Need at least 2 numeric predictors. Check your predictor column selection."
       )
     }
-    y_all <- df[[response_col]]
     keep_y <- !is.na(y_all)
     X <- X[keep_y, , drop = FALSE]
     y <- y_all[keep_y]
@@ -173,42 +181,8 @@ cyt_plsr <- function(
       )
     }
 
-    predictor_issues <- lapply(names(X), function(col) {
-      vals <- X[[col]]
-      observed_vals <- vals[!is.na(vals)]
-      finite_vals <- observed_vals[is.finite(observed_vals)]
-      reasons <- character(0)
-
-      if (any(!is.finite(observed_vals))) {
-        reasons <- c(reasons, "contains non-finite observed values")
-      }
-      if (length(finite_vals) < 3L) {
-        reasons <- c(
-          reasons,
-          sprintf("fewer than 3 observed X/Y pairs (n=%d)", length(finite_vals))
-        )
-      }
-
-      sdv <- stats::sd(finite_vals)
-      if (is.na(sdv) || !is.finite(sdv) || sdv == 0) {
-        reasons <- c(reasons, "zero or undefined SD")
-      }
-
-      if (!length(reasons)) {
-        return(NULL)
-      }
-
-      data.frame(
-        predictor = col,
-        observed_pairs = length(finite_vals),
-        reasons = paste(unique(reasons), collapse = ", "),
-        stringsAsFactors = FALSE
-      )
-    })
-
-    predictor_issues <- Filter(Negate(is.null), predictor_issues)
-    if (length(predictor_issues)) {
-      predictor_issues <- do.call(rbind, predictor_issues)
+    predictor_issues <- plsr_predictor_issues(X)
+    if (!is.null(predictor_issues)) {
       warning(
         paste(
           "PLSR dropped unusable predictors before fitting:",
@@ -313,7 +287,7 @@ cyt_plsr <- function(
   if (!is.null(progress)) {
     progress$inc(0.1, detail = "Preparing data")
   }
-  xy <- .x_y(data)
+  xy <- .x_y(selected_x, selected_y)
   X <- xy$X
   y <- xy$y
   groups <- droplevels(factor(grp[xy$ok]))
@@ -974,30 +948,27 @@ cyt_plsr <- function(
     subtitle = training_subtitle
   ))
 
-  pvo <- .record_plot({
-    dfp <- data.frame(
-      Sample = sample_ids, Observed = y, Predicted = yhat,
-      Group = factor(group_by_id[sample_ids], levels = names(cols))
+  diagnostic_points <- if (has_group) {
+    ggplot2::geom_point(
+      ggplot2::aes(colour = .data[["Group"]]), alpha = 0.65, show.legend = TRUE
     )
-    prediction_range <- range(c(y, yhat), finite = TRUE)
+  } else {
+    ggplot2::geom_point(colour = "#555555", alpha = 0.65)
+  }
+  .prediction_plot <- function(predictions, title, subtitle) {
+    predictions$Group <- factor(group_by_id[predictions$Sample], levels = names(cols))
+    prediction_range <- range(c(predictions$Observed, predictions$Predicted), finite = TRUE)
     prediction_padding <- diff(prediction_range) * 0.05
     prediction_limits <- prediction_range + c(-prediction_padding, prediction_padding)
-    diagnostic_points <- if (has_group) {
-      ggplot2::geom_point(
-        ggplot2::aes(colour = .data[["Group"]]), alpha = 0.65, show.legend = TRUE
-      )
-    } else {
-      ggplot2::geom_point(colour = "#555555", alpha = 0.65)
-    }
-    p <- ggplot2::ggplot(dfp, ggplot2::aes(Observed, Predicted)) +
+    p <- ggplot2::ggplot(predictions, ggplot2::aes(Observed, Predicted)) +
       diagnostic_points +
       ggplot2::geom_abline(slope = 1, intercept = 0, linetype = 2) +
       ggplot2::coord_fixed(
         ratio = 1, xlim = prediction_limits, ylim = prediction_limits, expand = FALSE
       ) +
       ggplot2::labs(
-        title = paste0("Predicted vs observed \u2014 ", response_col),
-        subtitle = training_subtitle,
+        title = title,
+        subtitle = subtitle,
         x = paste("Observed", response_col),
         y = paste("Predicted", response_col),
         caption = paste(c(
@@ -1008,9 +979,13 @@ cyt_plsr <- function(
       ) +
       metric_theme
     if (has_group) p <- p + group_colour_scale + sample_legend_theme
-    p <- apply_font_settings_ggplot(p, resolved_fonts)
-    print(p)
-  })
+    apply_font_settings_ggplot(p, resolved_fonts)
+  }
+  pvo <- .record_plot(print(.prediction_plot(
+    data.frame(Sample = sample_ids, Observed = y, Predicted = yhat),
+    paste0("Predicted vs observed \u2014 ", response_col),
+    training_subtitle
+  )))
   res_plot <- .record_plot({
     dfr <- data.frame(
       Sample = sample_ids, Fitted = yhat, Residuals = y - yhat,
@@ -1033,39 +1008,66 @@ cyt_plsr <- function(
 
   # --- CV performance (optional)
   cv_plot <- NULL
+  whole_model_cv <- NULL
+  whole_model_cv_text <- character(0)
   cv_metrics_text <- vip_cv_metrics_text <- character(0)
+
+  .component_cv <- function(model, n, vip = FALSE) {
+    tryCatch({
+      set.seed(123)
+      if (identical(cv_opt, "loocv")) {
+        cv_res <- mixOmics::perf(model, validation = "loo", progressBar = FALSE)
+        label <- "LOOCV"
+      } else if (identical(cv_opt, "mfold")) {
+        folds_safe <- max(2, min(fold_num, n))
+        cv_res <- mixOmics::perf(model, validation = "Mfold", folds = folds_safe,
+                                 nrepeat = 100, progressBar = FALSE)
+        label <- sprintf("M-fold (k=%d, nrepeat=100)", folds_safe)
+      } else {
+        return(NULL)
+      }
+      if (!is.null(cv_res)) .cv_summary(cv_res, model, label, vip = vip)
+    }, error = function(error) {
+      label <- if (vip) "VIP > 1 component diagnostics" else "Component CV diagnostics"
+      list(text = paste0(label, " unavailable: ", conditionMessage(error)))
+    })
+  }
 
   if (!is.null(cv_opt)) {
     if (!is.null(progress)) {
       progress$inc(0.1, detail = "Running cross-validation")
     }
-    # 1) Run perf() to perform cross-validation
-    set.seed(123)
-    cv_res <- if (identical(cv_opt, "loocv")) {
-      mixOmics::perf(mdl, validation = "loo", progressBar = FALSE)
-    } else if (identical(cv_opt, "mfold")) {
-      folds_safe <- max(2, min(fold_num, nrow(X)))
-      mixOmics::perf(
-        mdl,
-        validation = "Mfold",
-        folds = folds_safe,
-        nrepeat = 100,
-        progressBar = FALSE
-      )
-    } else {
-      NULL
+
+    if (!isTRUE(sparse) && cv_opt %in% c("loocv", "mfold")) {
+      whole_model_cv <- tryCatch({
+        if (comp_num_eff != comp_num) {
+          stop("The requested component count exceeds what the supplied data can support.",
+               call. = FALSE)
+        }
+        plsr_cross_validate(selected_x, selected_y, comp_num, cv_opt, fold_num, .predict_pls)
+      }, error = function(error) list(reason = conditionMessage(error)))
+
+      if (is.null(whole_model_cv$reason)) {
+        metrics <- whole_model_cv$metrics
+        whole_model_cv_text <- c(
+          sprintf("%s | Components %d", whole_model_cv$method, whole_model_cv$components),
+          sprintf("Samples: %d evaluated | %d excluded",
+                  whole_model_cv$evaluated, whole_model_cv$excluded),
+          sprintf("%s | RMSE %s | MAE %s", metrics$Method,
+                  .format_metric(metrics$RMSE), .format_metric(metrics$MAE))
+        )
+        whole_model_cv$plot <- .record_plot(print(.prediction_plot(
+          whole_model_cv$predictions, "Cross-validated Predicted vs Observed",
+          paste(whole_model_cv_text, collapse = "\n")
+        )))
+      } else {
+        whole_model_cv_text <- paste("Cross-validated predictions unavailable.", whole_model_cv$reason)
+      }
     }
 
-    if (!is.null(cv_res)) {
-      cv_title <- if (identical(cv_opt, "loocv")) {
-        "LOOCV"
-      } else {
-        sprintf("M-fold (k=%d, nrepeat=100)", folds_safe)
-      }
-      cv_summary <- .cv_summary(cv_res, mdl, cv_title)
-      cv_plot <- cv_summary$plot
-      cv_metrics_text <- cv_summary$text
-    }
+    cv_summary <- .component_cv(mdl, nrow(X))
+    cv_plot <- cv_summary$plot
+    cv_metrics_text <- cv_summary$text
   }
 
   # --- loadings
@@ -1191,36 +1193,9 @@ cyt_plsr <- function(
           )
         ))
         if (!is.null(cv_opt)) {
-          set.seed(123)
-
-          # Define cv_title and run perf()
-          cv_title <- NULL
-          per2 <- if (identical(cv_opt, "loocv")) {
-            cv_title <- "LOOCV"
-            mixOmics::perf(
-              mdl_vip,
-              validation = "loo",
-              progressBar = FALSE
-            )
-          } else if (identical(cv_opt, "mfold")) {
-            folds_safe_vip <- max(2, min(fold_num, nrow(Xvip_fit)))
-            cv_title <- sprintf("M-fold (k=%d, nrepeat=100)", folds_safe_vip)
-            mixOmics::perf(
-              mdl_vip,
-              validation = "Mfold",
-              folds = folds_safe_vip,
-              nrepeat = 100,
-              progressBar = FALSE
-            )
-          } else {
-            NULL
-          }
-
-          if (!is.null(per2)) {
-            cv_summary <- .cv_summary(per2, mdl_vip, cv_title, vip = TRUE)
-            vip_cv_plot <- cv_summary$plot
-            vip_cv_metrics_text <- cv_summary$text
-          }
+          cv_summary <- .component_cv(mdl_vip, nrow(Xvip_fit), vip = TRUE)
+          vip_cv_plot <- cv_summary$plot
+          vip_cv_metrics_text <- cv_summary$text
         }
       }
     }
@@ -1241,6 +1216,7 @@ cyt_plsr <- function(
       subtitle = training_subtitle
     )
     print(grDevices::replayPlot(pvo))
+    if (!is.null(whole_model_cv$plot)) grDevices::replayPlot(whole_model_cv$plot)
     print(grDevices::replayPlot(res_plot))
     if (!is.null(cv_plot)) {
       print(grDevices::replayPlot(cv_plot))
@@ -1279,6 +1255,8 @@ cyt_plsr <- function(
         .format_metric(r2_train), .format_metric(rmse_train)
       ),
       training_guidance,
+      if (!is.null(whole_model_cv$plot)) "Cross-validated predictions on the supplied outcome scale.",
+      whole_model_cv_text,
       if (is.null(cv_opt)) "No cross-validation performed." else cv_metrics_text,
       vip_cv_metrics_text,
       unique(metrics_notes)
@@ -1294,6 +1272,7 @@ cyt_plsr <- function(
     pred_vs_obs = pvo,
     residuals_plot = res_plot,
     cv_plot = cv_plot,
+    whole_model_cv = whole_model_cv,
     loadings = loadings,
     vip_scores = vip_scores,
     vip_scores_indiv = vip_indiv_plot,

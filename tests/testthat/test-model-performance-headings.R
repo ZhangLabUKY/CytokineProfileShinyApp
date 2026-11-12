@@ -209,6 +209,7 @@ test_that("PLSR one-component and missing CV metrics retain valid diagnostics", 
   })
   expect_s3_class(result$scores_plot, "recordedplot")
   expect_s3_class(result$pred_vs_obs, "recordedplot")
+  expect_null(result$whole_model_cv)
   expect_s3_class(result$cv_plot, "recordedplot")
   expect_match(result$metrics_text, "CV R2 unavailable | Q\u00b2 (total) unavailable", fixed = TRUE)
   cv <- Filter(function(x) identical(x$title, "Cross-validation \u2014 Outcome"), captured)[[1]]
@@ -222,6 +223,7 @@ test_that("PLSR one-component and missing CV metrics retain valid diagnostics", 
   })
   expect_null(no_cv$cv_plot)
   expect_match(no_cv$metrics_text, "No cross-validation performed.", fixed = TRUE)
+  expect_null(no_cv$whole_model_cv)
 })
 
 test_that("PLSR group colors remain aligned after filtering and VIP row removal", {

@@ -22,7 +22,7 @@ jobs:
         with:
           r-version: '4.6.1'
       - uses: r-lib/actions/setup-renv@v2
-      - name: Validate lockfile deployment inputs without modifying them
+      - name: Validate the restored environment against renv.lock
         shell: Rscript {0}
         run: |
           paths <- c("renv.lock", "renv/settings.json")
@@ -32,6 +32,7 @@ jobs:
           if (file.exists("manifest.json")) {
             stop("Remove manifest.json: Connect Cloud must use renv.lock for this project.")
           }
+          stopifnot(as.character(getRversion()) == "4.6.1")
           stopifnot(identical(lock$R$Version, "4.6.1"))
           stopifnot(identical(lock$Bioconductor$Version, "3.23"))
           stopifnot(identical(settings$bioconductor.version, lock$Bioconductor$Version))
@@ -40,13 +41,31 @@ jobs:
           stopifnot(identical(bioc[[1]]$URL, "https://bioconductor.org/packages/3.23/bioc"))
           bioc_packages <- names(Filter(function(pkg) identical(pkg$Source, "Bioconductor"), lock$Packages))
           stopifnot(all(c("BiocVersion", "BiocParallel", "impute", "mixOmics") %in% bioc_packages))
+          stopifnot(isTRUE(grepl("^3[.]23([.]|$)", lock$Packages$BiocVersion$Version)))
+
+          expected <- vapply(lock$Packages, function(pkg) pkg$Version, character(1))
+          installed <- vapply(names(expected), function(package) {
+            descriptions <- file.path(.libPaths(), package, "DESCRIPTION")
+            description <- descriptions[file.exists(descriptions)][1L]
+            if (is.na(description)) return(NA_character_)
+            read.dcf(description, fields = "Version")[1L, "Version"]
+          }, character(1))
+          mismatches <- is.na(installed) | installed != expected
+          if (any(mismatches)) {
+            details <- sprintf(
+              "  %s (expected %s, installed %s)",
+              names(expected)[mismatches],
+              expected[mismatches],
+              ifelse(is.na(installed[mismatches]), "<missing>", installed[mismatches])
+            )
+            stop(paste(c("Installed packages do not match renv.lock.", details), collapse = "\n"),
+                 call. = FALSE)
+          }
+          message(sprintf("All %d package versions match renv.lock.", length(expected)))
           stopifnot(identical(before, tools::md5sum(paths)))
       - name: Test the locked environment
         shell: Rscript {0}
         run: |
-          stopifnot(as.character(getRversion()) == "4.6.1")
-          stopifnot(as.character(BiocManager::version()) == "3.23")
-          stopifnot(isTRUE(BiocManager::valid()))
           devtools::test(stop_on_failure = TRUE)
       - name: Verify restore did not change the lockfile
         run: git diff --exit-code -- renv.lock renv/settings.json
