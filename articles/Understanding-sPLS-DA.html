@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CytokineProfileShinyApp</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,7 +70,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Understanding (s)PLS-DA</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/master/vignettes/Understanding-sPLS-DA.Rmd" class="external-link"><code>vignettes/Understanding-sPLS-DA.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/devel/vignettes/Understanding-sPLS-DA.Rmd" class="external-link"><code>vignettes/Understanding-sPLS-DA.Rmd</code></a></small>
       <div class="d-none name"><code>Understanding-sPLS-DA.Rmd</code></div>
     </div>
 
@@ -113,33 +113,35 @@ treatment condition and compares Non-Diabetic (ND), Pre-Diabetic
 <p>The settings that most strongly affect interpretation are:</p>
 <ul>
 <li>
-<code>sPLS-DA Comparison Column</code>: defines the classes the
-model is trying to separate.</li>
+<strong>Class to predict</strong> identifies the column the model
+should learn to predict, such as <code>Group</code> for Control
+vs. Treated.</li>
 <li>
-<code>sPLS-DA Stratification Column</code>: adds a second visual
-grouping layer when you want shapes or labels within the main
-classes.</li>
+<strong>Run separately by (optional)</strong> defaults to
+<strong>None — analyze all samples</strong> and fits one model on the
+samples remaining after Step 2. Choose a categorical column such as
+<code>Treatment</code> to fit one model per treatment level. To split by
+numeric time points, mark the time column as categorical in Step 2.</li>
 <li>
-<code>Number of Variables</code>: controls how many cytokines are
-kept on each component.</li>
+<strong>Measurements to keep per component</strong> controls how
+many cytokines are kept on each component.</li>
 <li>
-<code>Cross-Validation Option</code> and
-<code>Number of Folds</code>: control how model stability is
-checked.</li>
+<strong>Check model performance (cross-validation)</strong> and
+<code>Number of Folds</code> control how the app splits the data to
+check classification performance.</li>
 <li>
 <code>Number of Components</code>: controls how much latent
 structure the model calculates and displays.</li>
 <li>
-<code>Plot ROC</code>, <code>Draw Ellipse</code>,
-<code>Shaded Background Prediction</code>, and
-<code>Confusion Matrix</code>: add validation and visual aids that help
-you judge how convincing the separation really is.</li>
-<li>
-<code>Perform Batch Correction?</code>,
-<code>Select Batch Column</code>,
-<code>Perform Multilevel Analysis?</code>, and
-<code>Select Repeated Measures Column</code>: matter only when your
-study includes known batch effects or repeated measurements.</li>
+<strong>Show correct and incorrect classifications (confusion
+matrix)</strong> and <code>Plot ROC</code> summarize classification
+performance. <code>Draw Ellipse</code> and <strong>Shade the predicted
+class regions</strong> change how groups are shown on the plot.</li>
+<li>Use <strong>Adjust for experimental batches</strong> with the
+<strong>Experimental batch column</strong> to account for a technical
+source such as a plate or run. Use <strong>Account for repeated
+measurements</strong> with the <strong>Subject ID column</strong> to
+link samples from the same subject.</li>
 </ul>
 <p>For app users, the most practical rule is to avoid changing many of
 these at once. Start with a reasonable number of variables and
@@ -156,6 +158,18 @@ the model is actually supporting the visual separation.</p>
 <p>This plot shows where samples fall after the cytokine data are
 compressed into latent components. Clearer clustering and less overlap
 between groups suggest stronger discrimination.</p>
+<p>The current app gives the score plot a two-line heading. The first
+line identifies the class column and, for separate analyses, the
+subgroup, such as <strong>sPLS-DA Group — Vehicle</strong>. The second
+line shows <strong>Acc (Train)</strong> and <strong>Acc
+(CV)</strong>.</p>
+<p><strong>Acc (Train)</strong> is the percentage correctly classified
+when the fitted model predicts its training samples. <strong>Acc
+(CV)</strong> is the percentage correctly classified during
+cross-validation with the same number of fitted components and the same
+classification rule. When cross-validation is disabled, the heading
+shows <strong>CV not run</strong>. An undefined CV estimate is shown as
+<strong>CV unavailable</strong>.</p>
 <p>In this example, the group separation is only moderate. The displayed
 model accuracy is about 55.6%, which is not strong for a three-class
 problem. That means the visual separation should be interpreted
@@ -180,6 +194,10 @@ the cytokines that are driving the component most strongly.</p>
 influential each cytokine is in the fitted model. A common rule of thumb
 is that VIP values above 1 indicate particularly influential
 variables.</p>
+<p>The <strong>VIP &gt; 1</strong> score plot reports training and CV
+accuracy for its own refitted model. Its CV assesses performance within
+the feature panel selected from the full dataset. An independent dataset
+is needed to assess how that selected panel generalizes.</p>
 <p>VIP is useful because it gives a more model-level view of importance
 than a single loading plot. If the same cytokines appear important in
 both the loadings and VIP views, confidence in their relevance usually
@@ -205,6 +223,10 @@ still modest.</p>
 <p>Cross-validation is one of the most important outputs in supervised
 multivariate analysis. It tells you whether the apparent separation is
 likely to generalize beyond the current dataset.</p>
+<p>The dashed line identifies the number of fitted components. The CV
+accuracy in the score heading and on the error-rate figure uses that
+component count. Each separately fitted subgroup has its own performance
+estimates.</p>
 <p>In the example, the error rate remains fairly high, which matches the
 modest overall accuracy. That agreement is useful: it means the
 validation outputs are reinforcing the same cautious interpretation.</p>
@@ -234,13 +256,16 @@ conclusions by themselves.</li>
 compare.</li>
 <li>Choose
 <code>Sparse Partial Least Squares - Discriminant Analysis (sPLS-DA)</code>.</li>
-<li>Set <code>sPLS-DA Comparison Column</code>,
-<code>Number of Variables</code>, and
-<code>Number of Components</code>.</li>
-<li>Decide whether to turn on <code>Cross-Validation Option</code>,
-<code>Plot ROC</code>, <code>Draw Ellipse</code>,
-<code>Shaded Background Prediction</code>, and
-<code>Confusion Matrix</code>.</li>
+<li>Choose <strong>Class to predict</strong> and set
+<strong>Measurements to keep per component</strong> and
+<code>Number of Components</code>. Leave <strong>Run separately by
+(optional)</strong> at <strong>None — analyze all samples</strong> for
+one model.</li>
+<li>Decide whether to turn on <strong>Check model performance
+(cross-validation)</strong>, <code>Plot ROC</code>,
+<code>Draw Ellipse</code>, <strong>Shade the predicted class
+regions</strong>, and <strong>Show correct and incorrect classifications
+(confusion matrix)</strong>.</li>
 <li>Review the score plot, loadings, VIP scores, and validation metrics
 together.</li>
 </ol>

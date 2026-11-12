@@ -1,10 +1,85 @@
 # Changelog
 
+## CytokineProfileShinyApp 0.0.2
+
+### What’s New
+
+- Transformations now have an Apply/Cancel popup for choosing a method
+  and specific numeric columns. Transformation previews and analyses use
+  only the applied choices.
+- The Impute Missing Values dialog lists only columns with missing data
+  and shows the count for each column. Undo is available in the same
+  dialog and preserves filters, transformations, type overrides, and row
+  deletions.
+- XGBoost now supports a single numeric predictor, stratifies the
+  holdout split by outcome group, and validates predictor types, group
+  sizes, and cross-validation folds before fitting. Validation guidance
+  appears in the app.
+
+### Easier to Use
+
+- Continue straight after uploading data or choosing one Excel sheet.
+  The optional Data Editor lets you discard draft edits with Cancel or
+  apply them with Save & Use. Saving changed data resets preprocessing.
+- Cards in Steps 1–2 stack on narrower screens. Buttons and long
+  filenames wrap, and wide tables scroll inside their cards. The Data
+  Editor and preprocessing dialogs keep footer actions within reach as
+  you scroll.
+- Both Filtered Data Explorer views show a clear message when filters or
+  row exclusions leave zero rows. Applied transformation settings take
+  effect again when matching rows return.
+
+### Better Figures
+
+- Grouped plots stay distinct even when group labels differ only by
+  punctuation or contain Unicode.
+- sPLS-DA score plots show training and cross-validation accuracy on a
+  second heading line. Main models, separate subgroups, VIP \> 1 refits,
+  and PDF exports report their own performance at the fitted component
+  count.
+- PLSR figures identify the response measurement and label training
+  predictions and residuals. Cross-validation figures explain
+  component-wise CV R², Q², and scaled prediction error, with matching
+  summaries for VIP \> 1 refits.
+- PLSR score panels identify measurement and response patterns. Group
+  colors match across score, prediction, residual, and VIP score plots.
+  Ungrouped score plots show observed response values on a shared color
+  scale, and prediction scatterplots use equal axes with room for
+  overlapping samples.
+
+### Bug Fixes
+
+- Replacing a file on Step 1 refreshes the sheet picker, preview, and
+  editor. Switching built-in datasets and replacing uploads verify the
+  staged source before reading it. A source replacement clears previous
+  preprocessing and results.
+- Changing source data, filters, row deletions, applied column types, or
+  transformations now clears stale imputation and asks users to reapply
+  it. Navigation preserves valid imputation.
+- Changing themes preserves the upload and controls in Steps 1–2. Step 2
+  also updates column and type selections in place.
+- Repeated sPLS-DA runs replace obsolete interactive-modal observers.
+- Result displays refresh after an analysis completes, including when
+  the previous cached display was empty.
+
+### Behind the Scenes
+
+- The development and deployment renv environment uses R 4.6.1 and
+  Bioconductor 3.23. The declared R minimum is 4.4. Older R
+  installations need compatible dependency versions and separate
+  compatibility validation.
+- Local browser tests cover the new workflows using the pinned Chrome
+  version and reviewed screenshots. GitHub runs package, server,
+  analysis, coverage, and locked-environment checks.
+- Connect Cloud deployments use `renv.lock` directly. CI checks the
+  locked R and Bioconductor environment. The one-time migration and
+  publishing scripts were removed.
+- Installed apps include the privacy and tutorial pages. Package and
+  deployment bundles exclude generated plot PDFs.
+- Runtime dependencies and test-only dependencies are declared
+  separately. Ordinary startup only activates renv.
+
 ## CytokineProfileShinyApp 0.0.1
-
-*To be updated.*
-
-## CytokineProfileShinyApp 0.0.0.9000
 
 This development build focuses on making the app easier to use, easier
 to read, and more reliable.

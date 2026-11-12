@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CytokineProfileShinyApp</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,7 +70,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Understanding PCA</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/master/vignettes/Understanding-PCA.Rmd" class="external-link"><code>vignettes/Understanding-PCA.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/devel/vignettes/Understanding-PCA.Rmd" class="external-link"><code>vignettes/Understanding-PCA.Rmd</code></a></small>
       <div class="d-none name"><code>Understanding-PCA.Rmd</code></div>
     </div>
 
@@ -173,11 +173,15 @@ patterns</li>
 <p>The most important PCA settings are:</p>
 <ul>
 <li>
-<code>PCA Comparison Column</code>: decides how the main sample
-groups are colored or separated visually.</li>
+<strong>Sample groups</strong> distinguishes groups in the plots.
+For example, choose <code>Group</code> to show Control and Treated
+samples separately on the score plot.</li>
 <li>
-<code>PCA Stratification Column</code>: adds a second visual
-grouping layer when you want shapes within colors.</li>
+<strong>Run separately by (optional)</strong> defaults to
+<strong>None — analyze all samples</strong> and runs one PCA on the
+samples remaining after Step 2. Choose a categorical column such as
+<code>Treatment</code> to run one PCA per treatment level. To split by
+numeric time points, mark the time column as categorical in Step 2.</li>
 <li>
 <code>Number of Components</code>: determines how many components
 are computed and emphasized.</li>
@@ -185,13 +189,13 @@ are computed and emphasized.</li>
 <code>Select Colors for PCA Plot (Optional)</code>: lets you
 override the automatic colors.</li>
 <li>
-<code>Draw Ellipse</code>: adds visual confidence regions to the
-individuals plot.</li>
+<strong>Draw an ellipse around each sample group</strong> adds
+visual confidence regions to the individuals plot.</li>
 <li>
 <code>Plot Style</code>: enables 2D or 3D plotting.</li>
 <li>
-<code>Plotting Symbols</code>: helps distinguish subgroup structure
-when you use a second grouping column.</li>
+<code>Plotting Symbols</code>: helps distinguish the sample groups
+in the score plots.</li>
 </ul>
 <p>For most app users, one of the biggest decisions still happens
 earlier in Step 2. The preprocessing or transformation applied there can
@@ -220,11 +224,13 @@ answer.</li>
 <li>Filter the dataset to the samples and cytokines you want to
 explore.</li>
 <li>Choose <code>Principal Component Analysis (PCA)</code>.</li>
-<li>Set <code>PCA Comparison Column</code>,
-<code>PCA Stratification Column</code>, and
-<code>Number of Components</code>.</li>
-<li>Decide whether to turn on <code>Draw Ellipse</code>, switch
-<code>Plot Style</code>, or adjust <code>Plotting Symbols</code>.</li>
+<li>Choose <strong>Sample groups</strong> and set
+<code>Number of Components</code>. Leave <strong>Run separately by
+(optional)</strong> at <strong>None — analyze all samples</strong> for a
+single PCA.</li>
+<li>Decide whether to turn on <strong>Draw an ellipse around each sample
+group</strong>, switch <code>Plot Style</code>, or adjust
+<code>Plotting Symbols</code>.</li>
 <li>Read the individuals plot together with the scree and loadings
 views.</li>
 </ol>

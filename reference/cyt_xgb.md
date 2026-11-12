@@ -41,13 +41,13 @@ cyt_xgb(
 - data:
 
   A data frame containing numeric predictor variables and one grouping
-  column. Non-numeric predictor columns will be coerced to numeric if
-  possible.
+  column. Remove non-numeric predictor columns before fitting.
 
 - group_col:
 
   Character string naming the column that contains the class labels
-  (target variable). Required.
+  (target variable). Required. All other columns must be numeric; remove
+  categorical metadata columns before fitting.
 
 - train_fraction:
 

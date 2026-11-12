@@ -35,12 +35,12 @@ Depending on the settings, the app can return:
 
 The most important settings are:
 
-- `Response Variable`: the numeric measurement you want to compare
-  against the rest of the dataset.
-- `Stratification Variable`: the optional grouping column used to split
-  the correlations into subgroups.
-- `Per-group Heatmaps`: whether the app should render separate
-  subgroup-specific heatmaps.
+- **Measurement to compare with the others** selects the numeric
+  measurement you want to compare against the rest of the dataset.
+- **Group column for separate correlations** selects the optional
+  grouping column used to split the correlations into subgroups.
+- **Calculate correlations within groups** adds subgroup heatmaps
+  alongside the overall results.
 
 ### Choosing Pearson versus Spearman
 
@@ -64,8 +64,8 @@ A good reading order is:
     overall table.
 2.  Compare the Pearson and Spearman views to see whether the
     relationship looks consistently strong across methods.
-3.  If a `Stratification Variable` is selected, check whether those same
-    relationships are consistent across subgroups.
+3.  If **Calculate correlations within groups** is enabled, check
+    whether the overall relationships are consistent across subgroups.
 
 Interpretation tips:
 
@@ -93,9 +93,10 @@ Important cautions include:
 
 1.  Choose a numeric target variable with biological interest.
 2.  Choose `Correlation Plots`.
-3.  Set `Response Variable`.
-4.  Add a `Stratification Variable` and turn on `Per-group Heatmaps` if
-    you want to compare biological subgroups.
+3.  Set **Measurement to compare with the others**.
+4.  Add a **Group column for separate correlations** and turn on
+    **Calculate correlations within groups** if you want to compare
+    biological subgroups.
 5.  Use the table and the plot together to decide which associations
     deserve follow-up.
 

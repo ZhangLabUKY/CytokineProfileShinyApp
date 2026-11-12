@@ -87,19 +87,23 @@ In general:
 
 The most important PCA settings are:
 
-- `PCA Comparison Column`: decides how the main sample groups are
-  colored or separated visually.
-- `PCA Stratification Column`: adds a second visual grouping layer when
-  you want shapes within colors.
+- **Sample groups** distinguishes groups in the plots. For example,
+  choose `Group` to show Control and Treated samples separately on the
+  score plot.
+- **Run separately by (optional)** defaults to **None — analyze all
+  samples** and runs one PCA on the samples remaining after Step 2.
+  Choose a categorical column such as `Treatment` to run one PCA per
+  treatment level. To split by numeric time points, mark the time column
+  as categorical in Step 2.
 - `Number of Components`: determines how many components are computed
   and emphasized.
 - `Select Colors for PCA Plot (Optional)`: lets you override the
   automatic colors.
-- `Draw Ellipse`: adds visual confidence regions to the individuals
-  plot.
+- **Draw an ellipse around each sample group** adds visual confidence
+  regions to the individuals plot.
 - `Plot Style`: enables 2D or 3D plotting.
-- `Plotting Symbols`: helps distinguish subgroup structure when you use
-  a second grouping column.
+- `Plotting Symbols`: helps distinguish the sample groups in the score
+  plots.
 
 For most app users, one of the biggest decisions still happens earlier
 in Step 2. The preprocessing or transformation applied there can change
@@ -122,10 +126,11 @@ Keep these limits in mind:
 
 1.  Filter the dataset to the samples and cytokines you want to explore.
 2.  Choose `Principal Component Analysis (PCA)`.
-3.  Set `PCA Comparison Column`, `PCA Stratification Column`, and
-    `Number of Components`.
-4.  Decide whether to turn on `Draw Ellipse`, switch `Plot Style`, or
-    adjust `Plotting Symbols`.
+3.  Choose **Sample groups** and set `Number of Components`. Leave **Run
+    separately by (optional)** at **None — analyze all samples** for a
+    single PCA.
+4.  Decide whether to turn on **Draw an ellipse around each sample
+    group**, switch `Plot Style`, or adjust `Plotting Symbols`.
 5.  Read the individuals plot together with the scree and loadings
     views.
 

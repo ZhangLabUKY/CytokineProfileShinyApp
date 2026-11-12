@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CytokineProfileShinyApp</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,7 +70,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Understanding Heatmaps</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/master/vignettes/Understanding-Heatmaps.Rmd" class="external-link"><code>vignettes/Understanding-Heatmaps.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/devel/vignettes/Understanding-Heatmaps.Rmd" class="external-link"><code>vignettes/Understanding-Heatmaps.Rmd</code></a></small>
       <div class="d-none name"><code>Understanding-Heatmaps.Rmd</code></div>
     </div>
 
@@ -119,8 +119,8 @@ the most important choices in this workflow.</p>
 </h2>
 <p>The settings that usually matter most are:</p>
 <ul>
-<li><code>Annotation Column</code></li>
-<li><code>Annotation Side</code></li>
+<li><strong>Color-label samples by (optional)</strong></li>
+<li><strong>Where to put the color strip</strong></li>
 </ul>
 <div class="section level3">
 <h3 id="why-scaling-matters">Why scaling matters<a class="anchor" aria-label="anchor" href="#why-scaling-matters"></a>
@@ -180,8 +180,9 @@ treatment arms, batches, or repeated structures.</li>
 <li>Filter the dataset to the relevant samples and cytokines.</li>
 <li>Choose <code>Heatmap</code>.</li>
 <li>Decide on any Step 2 preprocessing before running the heatmap.</li>
-<li>Set <code>Annotation Column</code> and <code>Annotation Side</code>
-so the clustering can be interpreted in study context.</li>
+<li>Set <strong>Color-label samples by (optional)</strong> and
+<strong>Where to put the color strip</strong> so the clustering can be
+interpreted in study context.</li>
 <li>Inspect the figure both with and without clustering if you want to
 separate raw ordering from similarity structure.</li>
 </ol>

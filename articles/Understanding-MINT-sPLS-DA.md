@@ -48,28 +48,35 @@ The MINT workflow can return:
 - optional `Heatmap (CIM)`
 - optional `ROC Curve`
 
-If a `MINT sPLS-DA Stratification Column` is selected, the app can also
-repeat the analysis within each subgroup and show nested result tabs.
+Choose a categorical column under **Run separately by (optional)** to
+fit a separate model within each level of that column and show separate
+result tabs.
 
 ## Which Step 4 arguments matter most
 
 The controls that most affect interpretation are:
 
-- `MINT sPLS-DA Comparison Column`: the classes the model is trying to
-  separate.
-- `Batch Column`: the study, batch, cohort, or platform identifier used
-  for integration.
-- `MINT sPLS-DA Stratification Column`: optional subgrouping for
-  repeated analyses.
-- `Number of Variables to Select`: how many predictors are kept on each
-  component.
+- **Class to predict** identifies the column the model should learn to
+  predict, such as `Group` for Control vs. Treated.
+- **Study or batch column** selects the study, batch, cohort, or
+  platform identifier used for integration.
+- **Run separately by (optional)** defaults to **None — analyze all
+  samples** and fits one model on the samples remaining after Step 2.
+  Choose a categorical column such as `Treatment` to fit one model per
+  treatment level. To split by numeric time points, mark the time column
+  as categorical in Step 2.
+- **Measurements to keep per component** selects how many predictors are
+  kept on each component.
 - `Number of Components`: how much latent structure is modeled.
-- `Draw a Clustered Image Map?`: adds a selected-feature heatmap.
-- `Draw Ellipse`, `Plot ROC Curve`, and `Draw Background`: optional aids
-  for interpretation and performance checking.
+- **Show a clustered heatmap of selected measurements** adds a
+  selected-feature heatmap.
+- `Draw Ellipse` and **Shade the predicted class regions** change how
+  groups are shown on the plot. `Plot ROC Curve` adds a performance
+  view.
 
-For most users, `MINT sPLS-DA Comparison Column`, `Batch Column`, and
-`Number of Variables to Select` are the settings that matter most.
+For most users, **Class to predict**, **Study or batch column**, and
+**Measurements to keep per component** are the settings that matter
+most.
 
 ## How to read the main outputs
 
@@ -120,7 +127,7 @@ quality rather than trusting the score plots alone.
 
 Important cautions include:
 
-- MINT is only as good as the `Batch Column` you provide
+- MINT is only as good as the **Study or batch column** you provide
 - apparent separation can still reflect residual batch structure if the
   study sources are very different
 - selected features are model-dependent, not final biomarkers by
@@ -136,11 +143,13 @@ Important cautions include:
     compare.
 2.  Choose
     `Multivariate INTegration Sparse Partial Least Squares - Discriminant Analysis (MINT sPLS-DA)`.
-3.  Set `MINT sPLS-DA Comparison Column`.
-4.  Set `Batch Column` to the study or cohort identifier.
-5.  Choose `Number of Variables to Select` and `Number of Components`.
-6.  Optionally add `MINT sPLS-DA Stratification Column`,
-    `Draw a Clustered Image Map?`, `Plot ROC Curve`, or `Draw Ellipse`.
+3.  Choose **Class to predict**.
+4.  Set **Study or batch column** to the study or cohort identifier.
+5.  Choose **Measurements to keep per component** and
+    `Number of Components`.
+6.  Use **Run separately by (optional)** if you need a model for each
+    treatment level. You can also turn on **Show a clustered heatmap of
+    selected measurements**, `Plot ROC Curve`, or `Draw Ellipse`.
 7.  Read the global and partial plots together before trusting the
     selected variables.
 

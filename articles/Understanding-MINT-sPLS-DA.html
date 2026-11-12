@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">CytokineProfileShinyApp</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.0.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,7 +70,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Understanding MINT sPLS-DA</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/master/vignettes/Understanding-MINT-sPLS-DA.Rmd" class="external-link"><code>vignettes/Understanding-MINT-sPLS-DA.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/ZhangLabUKY/CytokineProfileShinyApp/blob/devel/vignettes/Understanding-MINT-sPLS-DA.Rmd" class="external-link"><code>vignettes/Understanding-MINT-sPLS-DA.Rmd</code></a></small>
       <div class="d-none name"><code>Understanding-MINT-sPLS-DA.Rmd</code></div>
     </div>
 
@@ -130,9 +130,9 @@ across those sources.</p>
 <li>optional <code>ROC Curve</code>
 </li>
 </ul>
-<p>If a <code>MINT sPLS-DA Stratification Column</code> is selected, the
-app can also repeat the analysis within each subgroup and show nested
-result tabs.</p>
+<p>Choose a categorical column under <strong>Run separately by
+(optional)</strong> to fit a separate model within each level of that
+column and show separate result tabs.</p>
 </div>
 <div class="section level2">
 <h2 id="which-step-4-arguments-matter-most">Which Step 4 arguments matter most<a class="anchor" aria-label="anchor" href="#which-step-4-arguments-matter-most"></a>
@@ -140,32 +140,35 @@ result tabs.</p>
 <p>The controls that most affect interpretation are:</p>
 <ul>
 <li>
-<code>MINT sPLS-DA Comparison Column</code>: the classes the model
-is trying to separate.</li>
+<strong>Class to predict</strong> identifies the column the model
+should learn to predict, such as <code>Group</code> for Control
+vs. Treated.</li>
 <li>
-<code>Batch Column</code>: the study, batch, cohort, or platform
-identifier used for integration.</li>
+<strong>Study or batch column</strong> selects the study, batch,
+cohort, or platform identifier used for integration.</li>
 <li>
-<code>MINT sPLS-DA Stratification Column</code>: optional
-subgrouping for repeated analyses.</li>
+<strong>Run separately by (optional)</strong> defaults to
+<strong>None — analyze all samples</strong> and fits one model on the
+samples remaining after Step 2. Choose a categorical column such as
+<code>Treatment</code> to fit one model per treatment level. To split by
+numeric time points, mark the time column as categorical in Step 2.</li>
 <li>
-<code>Number of Variables to Select</code>: how many predictors are
-kept on each component.</li>
+<strong>Measurements to keep per component</strong> selects how many
+predictors are kept on each component.</li>
 <li>
 <code>Number of Components</code>: how much latent structure is
 modeled.</li>
 <li>
-<code>Draw a Clustered Image Map?</code>: adds a selected-feature
-heatmap.</li>
+<strong>Show a clustered heatmap of selected measurements</strong>
+adds a selected-feature heatmap.</li>
 <li>
-<code>Draw Ellipse</code>, <code>Plot ROC Curve</code>, and
-<code>Draw Background</code>: optional aids for interpretation and
-performance checking.</li>
+<code>Draw Ellipse</code> and <strong>Shade the predicted class
+regions</strong> change how groups are shown on the plot.
+<code>Plot ROC Curve</code> adds a performance view.</li>
 </ul>
-<p>For most users, <code>MINT sPLS-DA Comparison Column</code>,
-<code>Batch Column</code>, and
-<code>Number of Variables to Select</code> are the settings that matter
-most.</p>
+<p>For most users, <strong>Class to predict</strong>, <strong>Study or
+batch column</strong>, and <strong>Measurements to keep per
+component</strong> are the settings that matter most.</p>
 </div>
 <div class="section level2">
 <h2 id="how-to-read-the-main-outputs">How to read the main outputs<a class="anchor" aria-label="anchor" href="#how-to-read-the-main-outputs"></a>
@@ -224,8 +227,8 @@ quality rather than trusting the score plots alone.</p>
 </h2>
 <p>Important cautions include:</p>
 <ul>
-<li>MINT is only as good as the <code>Batch Column</code> you
-provide</li>
+<li>MINT is only as good as the <strong>Study or batch column</strong>
+you provide</li>
 <li>apparent separation can still reflect residual batch structure if
 the study sources are very different</li>
 <li>selected features are model-dependent, not final biomarkers by
@@ -244,14 +247,15 @@ may still be weak</li>
 compare.</li>
 <li>Choose
 <code>Multivariate INTegration Sparse Partial Least Squares - Discriminant Analysis (MINT sPLS-DA)</code>.</li>
-<li>Set <code>MINT sPLS-DA Comparison Column</code>.</li>
-<li>Set <code>Batch Column</code> to the study or cohort
+<li>Choose <strong>Class to predict</strong>.</li>
+<li>Set <strong>Study or batch column</strong> to the study or cohort
 identifier.</li>
-<li>Choose <code>Number of Variables to Select</code> and
+<li>Choose <strong>Measurements to keep per component</strong> and
 <code>Number of Components</code>.</li>
-<li>Optionally add <code>MINT sPLS-DA Stratification Column</code>,
-<code>Draw a Clustered Image Map?</code>, <code>Plot ROC Curve</code>,
-or <code>Draw Ellipse</code>.</li>
+<li>Use <strong>Run separately by (optional)</strong> if you need a
+model for each treatment level. You can also turn on <strong>Show a
+clustered heatmap of selected measurements</strong>,
+<code>Plot ROC Curve</code>, or <code>Draw Ellipse</code>.</li>
 <li>Read the global and partial plots together before trusting the
 selected variables.</li>
 </ol>
