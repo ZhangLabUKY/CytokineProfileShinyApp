@@ -41,12 +41,13 @@ interpretation-oriented outputs:
 
 - `Scores Plot`
 - `Predicted vs Observed`
+- optional `Cross-validated Predictions` for standard PLSR
 - `Residuals vs Fitted`
 - `Loadings Plots`
 - `VIP Scores`
-- optional `Cross-Validation`
+- optional `Component CV Diagnostics`
 - optional `VIP > 1: Scores`
-- optional `VIP > 1: Cross-Validation`
+- optional `VIP > 1: Component CV Diagnostics`
 
 These views should be read together. A model can produce visually
 interesting components without actually predicting the outcome well.
@@ -174,11 +175,39 @@ useful for prioritization rather than formal hypothesis testing.
 A common rule of thumb is that predictors above 1 are more influential,
 which is why the app can also show `VIP > 1` views.
 
-### Cross-Validation
+### Cross-validated Predictions
 
-The CV figure identifies the validation method and displays **CV R²**,
-**Q² (total)**, and **scaled RMSEP** for the displayed component count.
-Its two panels show Q² (total) and scaled RMSEP across component counts.
+For standard PLSR, each point compares a sample’s outcome with the
+prediction from a model fitted without that sample. Leave-one-out
+cross-validation holds out one sample at a time. M-fold cross-validation
+uses one reproducible split into the chosen number of folds, taking
+turns holding out each fold. The component count stays fixed at the
+value chosen in Step 4.
+
+The plot compares two sets of errors on the same held-out samples.
+**PLSR** uses the predictor measurements. **Training-fold mean**
+predicts the average outcome among the samples used to fit that fold.
+Smaller RMSE and MAE indicate smaller prediction errors. Compare both on
+the outcome scale supplied to the model. For example, if you transformed
+the outcome in Step 2, the errors use that transformed scale.
+
+Step 2 filters, transformations, and imputation are applied before PLSR
+receives the data. The check uses the resulting values, including
+outcomes filled by imputation. Samples without a finite outcome or any
+finite selected predictor are excluded. Predictor screening and model
+fitting then use the training rows in each fold. The split treats rows
+as independent, so measurements from the same subject can appear in both
+training and validation folds. If a fold cannot fit the selected
+component count or predict every held-out sample, the app explains the
+issue and keeps the regular fit available.
+
+### Component CV Diagnostics
+
+This mixOmics figure identifies the validation method and displays **CV
+R²**, **Q² (total)**, and **scaled RMSEP** for the displayed component
+count. Its two panels show Q² (total) and scaled RMSEP across component
+counts. With M-fold CV, it summarizes 100 repeats and can differ from
+the single split in **Cross-validated Predictions**.
 
 - **CV R²** measures the linear association between observed values and
   the cross-validated predictions produced by mixOmics. It ranges from 0
@@ -227,8 +256,10 @@ Important limits to remember:
     smaller selected predictor set.
 6.  Add **Check model performance (cross-validation)** if you want a
     better sense of model stability.
-7.  Read `Predicted vs Observed`, `Residuals vs Fitted`,
-    `Loadings Plots`, and `VIP Scores` together.
+7.  Use `Cross-validated Predictions` to compare standard PLSR with the
+    training-fold mean. Read `Predicted vs Observed`,
+    `Residuals vs Fitted`, `Loadings Plots`, and `VIP Scores` to
+    understand the fitted model.
 
 ## What to read next
 

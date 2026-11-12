@@ -137,7 +137,8 @@ Required if <code>sparse = TRUE</code>.</p></dd>
 <dt id="arg-cv-opt">cv_opt<a class="anchor" aria-label="anchor" href="#arg-cv-opt"></a></dt>
 <dd><p>Character string specifying the cross-validation option:
 "None", "LOOCV" (Leave-One-Out Cross-Validation), or "Mfold" (M-fold
-Cross-Validation).</p></dd>
+Cross-Validation). For standard PLSR, this also evaluates held-out
+predictions using the supplied data after any requested transformation.</p></dd>
 
 
 <dt id="arg-fold-num">fold_num<a class="anchor" aria-label="anchor" href="#arg-fold-num"></a></dt>
@@ -195,6 +196,14 @@ text elements.</p></dd>
 <dt>cv_plot</dt>
 <dd><p>A recorded plot of cross-validation performance (Q2 and RMSEP), if <code>cv_opt</code> is not "None".</p></dd>
 
+<dt>whole_model_cv</dt>
+<dd><p>For standard PLSR with cross-validation enabled, a
+list with <code>plot</code> (recorded plot), <code>predictions</code> (one row per evaluated
+sample with its fold and baseline prediction), <code>metrics</code> (PLSR and
+baseline RMSE and MAE), <code>method</code>, <code>components</code>, <code>evaluated</code>, and
+<code>excluded</code>. An unavailable check returns a list with a <code>reason</code>.
+Otherwise returns <code>NULL</code>.</p></dd>
+
 <dt>loadings</dt>
 <dd><p>A list of recorded plots for loadings of each component.</p></dd>
 
@@ -210,8 +219,8 @@ with VIP &gt; 1, if applicable.</p></dd>
 variables with VIP &gt; 1, if applicable.</p></dd>
 
 <dt>metrics_text</dt>
-<dd><p>Training performance and CV R2, Q2 (total),
-and scaled RMSEP summaries, when cross-validation is enabled.</p></dd>
+<dd><p>Training performance, component CV diagnostics,
+and held-out prediction errors, as available.</p></dd>
 
 <dt>pdf_file</dt>
 <dd><p>The path to the generated PDF file, if <code>output_file</code> was
