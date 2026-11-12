@@ -158,6 +158,18 @@ the model is actually supporting the visual separation.</p>
 <p>This plot shows where samples fall after the cytokine data are
 compressed into latent components. Clearer clustering and less overlap
 between groups suggest stronger discrimination.</p>
+<p>The current app gives the score plot a two-line heading. The first
+line identifies the class column and, for separate analyses, the
+subgroup, such as <strong>sPLS-DA Group — Vehicle</strong>. The second
+line shows <strong>Acc (Train)</strong> and <strong>Acc
+(CV)</strong>.</p>
+<p><strong>Acc (Train)</strong> is the percentage correctly classified
+when the fitted model predicts its training samples. <strong>Acc
+(CV)</strong> is the percentage correctly classified during
+cross-validation with the same number of fitted components and the same
+classification rule. When cross-validation is disabled, the heading
+shows <strong>CV not run</strong>. An undefined CV estimate is shown as
+<strong>CV unavailable</strong>.</p>
 <p>In this example, the group separation is only moderate. The displayed
 model accuracy is about 55.6%, which is not strong for a three-class
 problem. That means the visual separation should be interpreted
@@ -182,6 +194,10 @@ the cytokines that are driving the component most strongly.</p>
 influential each cytokine is in the fitted model. A common rule of thumb
 is that VIP values above 1 indicate particularly influential
 variables.</p>
+<p>The <strong>VIP &gt; 1</strong> score plot reports training and CV
+accuracy for its own refitted model. Its CV assesses performance within
+the feature panel selected from the full dataset. An independent dataset
+is needed to assess how that selected panel generalizes.</p>
 <p>VIP is useful because it gives a more model-level view of importance
 than a single loading plot. If the same cytokines appear important in
 both the loadings and VIP views, confidence in their relevance usually
@@ -207,6 +223,10 @@ still modest.</p>
 <p>Cross-validation is one of the most important outputs in supervised
 multivariate analysis. It tells you whether the apparent separation is
 likely to generalize beyond the current dataset.</p>
+<p>The dashed line identifies the number of fitted components. The CV
+accuracy in the score heading and on the error-rate figure uses that
+component count. Each separately fitted subgroup has its own performance
+estimates.</p>
 <p>In the example, the error rate remains fairly high, which matches the
 modest overall accuracy. That agreement is useful: it means the
 validation outputs are reinforcing the same cautious interpretation.</p>
@@ -279,7 +299,7 @@ Forest</a> and <a href="Understanding-XGBoost.html">Understanding
 XGBoost</a> for alternative classifiers.</li>
 </ul>
 <hr>
-<p><em>Last updated:</em> November 07, 2026</p>
+<p><em>Last updated:</em> November 12, 2026</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

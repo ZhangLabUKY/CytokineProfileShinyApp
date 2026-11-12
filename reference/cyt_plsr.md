@@ -52,8 +52,9 @@ cyt_plsr(
 
 - group_col:
 
-  The name of the column to use for grouping samples in the score plot.
-  If `NULL`, no grouping is applied.
+  Optional column used to color groups consistently across score,
+  prediction, and residual plots. If `NULL`, score plots are colored by
+  observed response values and diagnostic plots use gray points.
 
 - ind_names:
 
@@ -101,7 +102,8 @@ cyt_plsr(
 
 - pls_colors:
 
-  A character vector of colors to use for grouping.
+  A character vector of colors for categorical groups, shared across
+  score, prediction, residual, and VIP score plots.
 
 - output_file:
 
@@ -156,7 +158,8 @@ A list containing:
 
 - metrics_text:
 
-  Text summary of Q2 values, if available.
+  Training performance and CV R2, Q2 (total), and scaled RMSEP
+  summaries, when cross-validation is enabled.
 
 - pdf_file:
 

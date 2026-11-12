@@ -163,10 +163,15 @@ measurements per component</strong> is turned on.</li>
 <code>Number of Folds</code> control how the app holds back samples to
 check predictions.</li>
 <li>
-<strong>Color samples by (optional)</strong> and
-<code>Ellipse</code> help distinguish groups in the score plot. The
-grouping column is excluded from the measurements the model can
-use.</li>
+<strong>Color samples by (optional)</strong> uses the same group
+colors across score, prediction, and residual plots.
+<code>Ellipse</code> adds group ellipses to score plots. The grouping
+column is excluded from the measurements the model can use.</li>
+<li>
+<strong>Colors (optional)</strong> assigns custom colors to the
+selected groups. When no grouping column is selected, score plots use a
+continuous scale for the observed response and the diagnostic plots use
+gray points.</li>
 </ul>
 <p>In practice, <strong>Numeric measurement to predict</strong>,
 <strong>Measurements used to predict</strong>, and
@@ -183,6 +188,30 @@ the predictor set remains.</p>
 <p>This plot shows the samples in the reduced component space. It is
 most useful for asking whether samples with similar response behavior
 also occupy similar positions in the latent space.</p>
+<p>The <strong>Measurement patterns (X)</strong> panel positions samples
+using patterns in the predictor measurements. The <strong>Response
+patterns (Y)</strong> panel shows the response-side scores. The axes
+identify Component 1 and Component 2. A one-component model shows
+samples along Component 1.</p>
+<p>With a grouping column selected, the legend pairs each group with its
+color swatch. Group colors match across the main scores, VIP scores,
+predictions, and residuals. Samples with missing group labels appear in
+gray and remain in the model. Without grouping, the <strong>Observed
+[outcome name]</strong> legend shows a fixed viridis gradient from dark
+purple for low values to yellow for high values. The main and VIP score
+plots use the same low, midpoint, and high values, so a given color
+represents the same observed value in both plots. The midpoint is
+halfway between the displayed limits.</p>
+<p>The heading identifies the response measurement. Beneath it,
+<strong>Training R²</strong> measures the linear association between
+observed and fitted values. It ranges from 0 to 1. Values near 0
+indicate weak association, and values near 1 indicate strong
+association. A high R² can coexist with large prediction errors.
+<strong>Training RMSE</strong> is 0 or higher, with smaller values
+indicating smaller errors on the outcome scale supplied to the model.
+Use the original measurement units when the outcome was left
+untransformed, and the transformed scale when preprocessing changed it.
+Compare RMSE with the error you can tolerate for the measurement.</p>
 <p>Interpretation checklist:</p>
 <ol style="list-style-type: decimal">
 <li>Check whether samples with similar biology or known groups cluster
@@ -194,12 +223,19 @@ loosely together.</li>
 <div class="section level3">
 <h3 id="predicted-vs-observed">Predicted vs Observed<a class="anchor" aria-label="anchor" href="#predicted-vs-observed"></a>
 </h3>
-<p>This is one of the most important plots because it shows how closely
-the fitted values track the true response.</p>
+<p>This figure compares the observed response on the horizontal axis
+with the model’s predictions on the vertical axis. The response column
+is included in both axis labels. These are training predictions from
+samples used to fit the model.</p>
+<p>Both axes use the same limits and scale. The plot includes the full
+range of observed values and finite predictions, including negative
+predictions. Transparent points help show where samples overlap. In
+ungrouped prediction and residual plots, each gray point represents one
+sample.</p>
 <ul>
-<li>points close to the diagonal suggest stronger predictive
-agreement</li>
-<li>wide scatter suggests weaker predictive value</li>
+<li>points close to the dashed diagonal have smaller training
+errors</li>
+<li>wide scatter indicates larger training errors</li>
 <li>systematic curvature or separation can suggest the model is missing
 structure</li>
 </ul>
@@ -210,6 +246,10 @@ should be interpreted cautiously.</p>
 <h3 id="residuals-vs-fitted">Residuals vs Fitted<a class="anchor" aria-label="anchor" href="#residuals-vs-fitted"></a>
 </h3>
 <p>This plot helps you judge model misfit.</p>
+<p>The horizontal axis shows predicted response values. The vertical
+axis shows <strong>Observed − predicted</strong>, so a positive residual
+means the model predicted too low and a negative residual means it
+predicted too high. Points closer to zero have smaller errors.</p>
 <ul>
 <li>a roughly patternless cloud is more reassuring</li>
 <li>strong trends or funnels suggest the model error changes across the
@@ -237,6 +277,40 @@ useful for prioritization rather than formal hypothesis testing.</p>
 <p>A common rule of thumb is that predictors above 1 are more
 influential, which is why the app can also show <code>VIP &gt; 1</code>
 views.</p>
+</div>
+<div class="section level3">
+<h3 id="cross-validation">Cross-Validation<a class="anchor" aria-label="anchor" href="#cross-validation"></a>
+</h3>
+<p>The CV figure identifies the validation method and displays
+<strong>CV R²</strong>, <strong>Q² (total)</strong>, and <strong>scaled
+RMSEP</strong> for the displayed component count. Its two panels show Q²
+(total) and scaled RMSEP across component counts.</p>
+<ul>
+<li>
+<strong>CV R²</strong> measures the linear association between
+observed values and the cross-validated predictions produced by
+mixOmics. It ranges from 0 to 1, from weak to strong linear association.
+Use it alongside prediction error.</li>
+<li>
+<strong>Q² (total)</strong> summarizes predictive performance
+through the displayed number of components relative to the reference
+error used by mixOmics. Its upper limit is 1. Values above 0 indicate
+improvement, values on the dashed zero line indicate no improvement, and
+values below 0 indicate worse performance relative to that
+reference.</li>
+<li>
+<strong>RMSEP (scaled)</strong> is 0 or higher. Lower values
+indicate smaller cross-validated prediction errors on the standardized
+outcome scale. Compare results using the same outcome scaling and
+validation procedure. For repeated M-fold CV, the app takes the square
+root of the mean MSEP across repetitions.</li>
+</ul>
+<p>Interpret the CV summaries alongside the error curves and the number
+of components used. See the <a href="https://raw.githubusercontent.com/mixOmicsTeam/mixOmics/master/R/perf.R" class="external-link">mixOmics
+performance implementation</a> for the metric definitions.</p>
+<p>The <strong>VIP &gt; 1</strong> score and CV figures use metrics from
+their own refitted model. CV for that preview assesses performance
+within the feature panel already selected from the full dataset.</p>
 </div>
 </div>
 <div class="section level2">
@@ -289,7 +363,7 @@ the outcome is categorical rather than numeric.</li>
 sPLS-DA</a> if the study spans multiple batches or cohorts.</li>
 </ul>
 <hr>
-<p><em>Last updated:</em> November 07, 2026</p>
+<p><em>Last updated:</em> November 12, 2026</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -70,6 +70,18 @@ This plot shows where samples fall after the cytokine data are
 compressed into latent components. Clearer clustering and less overlap
 between groups suggest stronger discrimination.
 
+The current app gives the score plot a two-line heading. The first line
+identifies the class column and, for separate analyses, the subgroup,
+such as **sPLS-DA Group — Vehicle**. The second line shows **Acc
+(Train)** and **Acc (CV)**.
+
+**Acc (Train)** is the percentage correctly classified when the fitted
+model predicts its training samples. **Acc (CV)** is the percentage
+correctly classified during cross-validation with the same number of
+fitted components and the same classification rule. When
+cross-validation is disabled, the heading shows **CV not run**. An
+undefined CV estimate is shown as **CV unavailable**.
+
 In this example, the group separation is only moderate. The displayed
 model accuracy is about 55.6%, which is not strong for a three-class
 problem. That means the visual separation should be interpreted
@@ -94,6 +106,11 @@ cytokines that are driving the component most strongly.
 Variable Importance in Projection (VIP) scores summarize how influential
 each cytokine is in the fitted model. A common rule of thumb is that VIP
 values above 1 indicate particularly influential variables.
+
+The **VIP \> 1** score plot reports training and CV accuracy for its own
+refitted model. Its CV assesses performance within the feature panel
+selected from the full dataset. An independent dataset is needed to
+assess how that selected panel generalizes.
 
 VIP is useful because it gives a more model-level view of importance
 than a single loading plot. If the same cytokines appear important in
@@ -121,6 +138,11 @@ modest.
 Cross-validation is one of the most important outputs in supervised
 multivariate analysis. It tells you whether the apparent separation is
 likely to generalize beyond the current dataset.
+
+The dashed line identifies the number of fitted components. The CV
+accuracy in the score heading and on the error-rate figure uses that
+component count. Each separately fitted subgroup has its own performance
+estimates.
 
 In the example, the error rate remains fairly high, which matches the
 modest overall accuracy. That agreement is useful: it means the
@@ -183,4 +205,4 @@ Related articles:
 
 ------------------------------------------------------------------------
 
-*Last updated:* November 07, 2026
+*Last updated:* November 12, 2026

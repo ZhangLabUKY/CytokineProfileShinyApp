@@ -33,6 +33,19 @@
 
 - Grouped plots stay distinct even when group labels differ only by
   punctuation or contain Unicode.
+- sPLS-DA score plots show training and cross-validation accuracy on a
+  second heading line. Main models, separate subgroups, VIP \> 1 refits,
+  and PDF exports report their own performance at the fitted component
+  count.
+- PLSR figures identify the response measurement and label training
+  predictions and residuals. Cross-validation figures explain
+  component-wise CV R², Q², and scaled prediction error, with matching
+  summaries for VIP \> 1 refits.
+- PLSR score panels identify measurement and response patterns. Group
+  colors match across score, prediction, residual, and VIP score plots.
+  Ungrouped score plots show observed response values on a shared color
+  scale, and prediction scatterplots use equal axes with room for
+  overlapping samples.
 
 ### Bug Fixes
 

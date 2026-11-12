@@ -111,8 +111,9 @@ Must be numeric.</p></dd>
 
 
 <dt id="arg-group-col">group_col<a class="anchor" aria-label="anchor" href="#arg-group-col"></a></dt>
-<dd><p>The name of the column to use for grouping samples in the
-score plot. If <code>NULL</code>, no grouping is applied.</p></dd>
+<dd><p>Optional column used to color groups consistently across
+score, prediction, and residual plots. If <code>NULL</code>, score plots are colored
+by observed response values and diagnostic plots use gray points.</p></dd>
 
 
 <dt id="arg-ind-names">ind_names<a class="anchor" aria-label="anchor" href="#arg-ind-names"></a></dt>
@@ -162,7 +163,8 @@ score plot.</p></dd>
 
 
 <dt id="arg-pls-colors">pls_colors<a class="anchor" aria-label="anchor" href="#arg-pls-colors"></a></dt>
-<dd><p>A character vector of colors to use for grouping.</p></dd>
+<dd><p>A character vector of colors for categorical groups,
+shared across score, prediction, residual, and VIP score plots.</p></dd>
 
 
 <dt id="arg-output-file">output_file<a class="anchor" aria-label="anchor" href="#arg-output-file"></a></dt>
@@ -208,7 +210,8 @@ with VIP &gt; 1, if applicable.</p></dd>
 variables with VIP &gt; 1, if applicable.</p></dd>
 
 <dt>metrics_text</dt>
-<dd><p>Text summary of Q2 values, if available.</p></dd>
+<dd><p>Training performance and CV R2, Q2 (total),
+and scaled RMSEP summaries, when cross-validation is enabled.</p></dd>
 
 <dt>pdf_file</dt>
 <dd><p>The path to the generated PDF file, if <code>output_file</code> was
