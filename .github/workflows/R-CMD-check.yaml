@@ -32,6 +32,8 @@ jobs:
     env:
       RENV_CONFIG_AUTOLOADER_ENABLED: 'false'
       CYTOKINEPROFILE_RUN_APPDRIVER: 'false'
+      CYTOKINEPROFILE_STREAM_TESTS: 'true'
+      TESTTHAT_PARALLEL: ${{ matrix.config.os == 'ubuntu-latest' && matrix.config.r == 'devel' && 'false' || 'true' }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
 
@@ -64,9 +66,23 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
+      - name: Stream testthat.Rout
+        id: stream-tests
+        background: true
+        shell: bash
+        run: |
+          log="check/CytokineProfileShinyApp.Rcheck/tests/testthat.Rout"
+          echo "Waiting for $log"
+          while [[ ! -f "$log" ]]; do
+            sleep 1
+          done
+          exec tail -n +1 -f "$log"
+
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
           upload-results: true
           args: 'c("--no-manual", "--as-cran", "--ignore-vignettes")'
           build_args: 'c("--no-manual", "--no-build-vignettes")'
+
+      - cancel: stream-tests

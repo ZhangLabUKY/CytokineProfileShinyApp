@@ -175,12 +175,10 @@ test_that("PLSR identifies CV metrics by response and component and explains the
   expect_match(result$metrics_text, "within the selected VIP > 1 panel", fixed = TRUE)
   expect_false(grepl("CV R2 (99|88)", result$metrics_text))
   expect_true(file.exists(output_file))
-  pdf_connection <- file(output_file, open = "rb")
-  pdf_lines <- readLines(pdf_connection, warn = FALSE, skipNul = TRUE, encoding = "latin1")
-  close(pdf_connection)
+  pdf_bytes <- readBin(output_file, what = "raw", n = file.size(output_file))
   expect_true(
-    any(grepl("/Count [1-9][0-9]*", pdf_lines)),
-    info = paste(grep("/Count", pdf_lines, value = TRUE), collapse = "\n")
+    length(grepRaw("/Count[[:space:]]+[1-9][0-9]*", pdf_bytes)) > 0L,
+    info = "The exported PDF should contain at least one page."
   )
 })
 
