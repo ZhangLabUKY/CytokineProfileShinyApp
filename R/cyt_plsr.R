@@ -14,8 +14,9 @@
 #' @param response_col The name of the column containing the response variable.
 #'   Must be numeric.
 #' @param predictor_cols Character vector of column names to use as predictors.
-#' @param group_col The name of the column to use for grouping samples in the
-#'   score plot. If `NULL`, no grouping is applied.
+#' @param group_col Optional column used to color groups consistently across
+#'   score, prediction, and residual plots. If `NULL`, score plots are colored
+#'   by observed response values and diagnostic plots use gray points.
 #' @param ind_names Logical, or a character vector. If `TRUE`, sample names are
 #'   displayed on the plot. If a character vector, these names are used.
 #' @param comp_num The number of components to use in the PLSR model.
@@ -35,7 +36,8 @@
 #'   \code{scale = "custom"}.
 #' @param ellipse Logical. If `TRUE`, draws 95% confidence ellipses on the
 #'   score plot.
-#' @param pls_colors A character vector of colors to use for grouping.
+#' @param pls_colors A character vector of colors for categorical groups,
+#'   shared across score, prediction, residual, and VIP score plots.
 #' @param output_file Optional. A file path to save the plots as a PDF.
 #' @param font_settings Optional named list of font sizes for supported plot
 #'   text elements.
@@ -51,7 +53,8 @@
 #'     with VIP > 1, if applicable.}
 #'   \item{vip_cv_plot}{A recorded plot of cross-validation performance for
 #'     variables with VIP > 1, if applicable.}
-#'   \item{metrics_text}{Text summary of Q2 values, if available.}
+#'   \item{metrics_text}{Training performance and CV R2, Q2 (total),
+#'     and scaled RMSEP summaries, when cross-validation is enabled.}
 #'   \item{pdf_file}{The path to the generated PDF file, if `output_file` was
 #'     provided.}
 #'
@@ -80,6 +83,9 @@ cyt_plsr <- function(
 ) {
   # normalize cv_opt input to lowercase for consistent handling
   cv_opt <- if (!is.null(cv_opt)) tolower(cv_opt) else NULL
+  if (identical(cv_opt, "none")) {
+    cv_opt <- NULL
+  }
 
   `%notin%` <- function(x, y) !(x %in% y)
   .nzchar <- function(x) !is.null(x) && length(x) && !identical(x, "")
@@ -298,7 +304,8 @@ cyt_plsr <- function(
   }
 
   # --- grouping & colors (colors map to levels of group_col)
-  grp <- if (!is.null(group_col) && group_col %in% names(data)) {
+  has_group <- !is.null(group_col) && group_col %in% names(data)
+  grp <- if (has_group) {
     factor(data[[group_col]])
   } else {
     factor(rep("All", nrow(data)))
@@ -317,6 +324,40 @@ cyt_plsr <- function(
     rep(pls_colors, length.out = length(levs))
   }
   names(cols) <- levs
+  if (has_group && anyNA(groups)) {
+    missing_group <- utils::tail(make.unique(c(levs, "Missing group")), 1L)
+    group_labels <- as.character(groups)
+    group_labels[is.na(group_labels)] <- missing_group
+    groups <- factor(group_labels, levels = c(levs, missing_group))
+    cols <- c(cols, stats::setNames("#888888", missing_group))
+  }
+  sample_ids <- rownames(X)
+  response_by_id <- stats::setNames(y, sample_ids)
+  group_by_id <- stats::setNames(as.character(groups), sample_ids)
+  response_range <- range(y)
+  group_colour_scale <- ggplot2::scale_colour_manual(
+    values = cols, limits = names(cols), drop = FALSE, name = group_col,
+    guide = ggplot2::guide_legend(ncol = 2, override.aes = list(shape = 15, alpha = 1))
+  )
+  score_colour_mapping <- if (has_group) {
+    ggplot2::aes(colour = .data[["Group"]])
+  } else {
+    ggplot2::aes(colour = .data[["Response"]])
+  }
+  score_colour_scale <- if (has_group) {
+    group_colour_scale
+  } else {
+    response_breaks <- c(response_range[1], mean(response_range), response_range[2])
+    ggplot2::scale_colour_viridis_c(
+      name = paste("Observed", response_col), limits = response_range, option = "D",
+      breaks = response_breaks,
+      labels = paste(c("Low", "Mid", "High"),
+                     trimws(formatC(response_breaks, digits = 6, format = "g")), sep = "\n"),
+      guide = ggplot2::guide_colourbar(theme = ggplot2::theme(
+        legend.key.width = grid::unit(2.1, "in")
+      ))
+    )
+  }
 
   .resolve_ind_names <- function(df_ok, ind_names, parent_n, parent_rownm) {
     if (isTRUE(ind_names)) {
@@ -601,75 +642,272 @@ cyt_plsr <- function(
     stop(conditionMessage(pred), call. = FALSE)
   }
 
-  .plot_indiv <- function(model, groups, title, ind_names_resolved) {
+  metric_theme <- ggplot2::theme(
+    plot.title = ggplot2::element_text(size = 12),
+    plot.subtitle = ggplot2::element_text(
+      size = if (is.null(resolved_fonts)) 9 else resolved_fonts$strip_text
+    ),
+    plot.title.position = "plot",
+    plot.caption.position = "plot",
+    plot.margin = ggplot2::margin(5.5, 12, 5.5, 5.5)
+  )
+  sample_legend_theme <- ggplot2::theme(
+    legend.position = "bottom", legend.title.position = "top"
+  )
+
+  .plot_indiv <- function(model, title, ind_names_resolved, subtitle = NULL) {
+    score_ids <- rownames(model$variates$X)
+    score_groups <- factor(group_by_id[score_ids], levels = names(cols))
     comp_available <- tryCatch(
       ncol(model$variates$X),
       error = function(e) 0L
     )
 
     if (is.null(comp_available) || comp_available < 2L) {
-      scores <- as.numeric(model$variates$X[, 1])
-      point_cols <- cols[as.character(groups)]
-      point_cols[is.na(point_cols)] <- "black"
-      y_pos <- rep(0, length(scores))
-
-      graphics::plot(
-        x = scores,
-        y = y_pos,
-        col = point_cols,
-        pch = 19,
-        xlab = "Component 1",
-        ylab = "",
-        yaxt = "n",
-        main = title
+      score_data <- data.frame(
+        Sample = score_ids,
+        Score = as.numeric(model$variates$X[, 1]),
+        Group = score_groups,
+        Response = unname(response_by_id[score_ids])
       )
-      graphics::abline(h = 0, lty = 2, col = "gray80")
-
-      if (isTRUE(ind_names_resolved)) {
-        labels_use <- rownames(model$variates$X)
-        if (is.null(labels_use)) {
-          labels_use <- as.character(seq_along(scores))
-        }
-        graphics::text(scores, y_pos, labels = labels_use, pos = 3, cex = 0.7)
-      } else if (is.character(ind_names_resolved)) {
-        graphics::text(
-          scores,
-          y_pos,
-          labels = ind_names_resolved,
-          pos = 3,
-          cex = 0.7
+      graph <- ggplot2::ggplot(
+        score_data, ggplot2::aes(x = .data[["Score"]], y = 0)
+      ) +
+        ggplot2::geom_hline(yintercept = 0, linetype = 2, colour = "gray80") +
+        ggplot2::geom_point(
+          size = font_settings_mixomics_indiv_cex(resolved_fonts$point_labels),
+          show.legend = if (has_group) TRUE else NA
+        ) +
+        ggplot2::scale_y_continuous(breaks = NULL) +
+        ggplot2::theme_minimal()
+      if (isTRUE(ind_names_resolved) || is.character(ind_names_resolved)) {
+        graph$data$Label <- if (isTRUE(ind_names_resolved)) score_ids else ind_names_resolved
+        graph <- graph + ggplot2::geom_text(
+          ggplot2::aes(label = .data[["Label"]]), vjust = -0.5,
+          size = if (is.null(resolved_fonts)) 3 else resolved_fonts$point_labels / ggplot2::.pt
         )
       }
-
-      graphics::legend(
-        "topright",
-        legend = levels(groups),
-        col = cols[levels(groups)],
-        pch = 19,
-        bty = "n",
-        title = if (!is.null(group_col)) group_col else "Group"
-      )
+      graph <- graph + score_colour_mapping + score_colour_scale +
+        ggplot2::labs(title = title, subtitle = subtitle, x = "Component 1", y = NULL) +
+        metric_theme + sample_legend_theme
+      graph <- apply_font_settings_ggplot(graph, resolved_fonts)
+      print(graph)
       return(invisible(NULL))
     }
 
+    plot_groups <- droplevels(score_groups)
     args <- c(
       list(
         model,
-        group = groups,
-        legend = TRUE,
-        col = cols[levels(groups)],
+        group = plot_groups,
+        legend = has_group,
+        col = cols[levels(plot_groups)],
         title = title,
-        legend.title = if (!is.null(group_col)) group_col else "Group",
-        ellipse = isTRUE(ellipse)
+        subtitle = c("Measurement\npatterns (X)", "Response\npatterns (Y)"),
+        X.label = "Component 1",
+        Y.label = "Component 2",
+        legend.title = if (has_group) group_col else response_col,
+        ellipse = has_group && isTRUE(ellipse)
       ),
       mixomics_indiv_args
     )
-    if (isTRUE(ind_names_resolved) || is.character(ind_names_resolved)) {
-      args$ind.names <- ind_names_resolved
-    } else {
-      args$ind.names <- FALSE
+    # Carry sample identity through mixOmics' panel and layer data.
+    args$ind.names <- score_ids
+    # mixOmics uses subtitle for block labels. Add the figure subtitle to its graph.
+    # Draw off-screen first so exports contain only the completed figure.
+    target_device <- grDevices::dev.cur()
+    grDevices::pdf(file = NULL)
+    plotted <- tryCatch(
+      do.call(mixOmics::plotIndiv, args),
+      finally = {
+        grDevices::dev.off()
+        grDevices::dev.set(target_device)
+      }
+    )
+    graph <- plotted$graph
+    show_labels <- isTRUE(ind_names_resolved) || is.character(ind_names_resolved)
+    display_labels <- if (isTRUE(ind_names_resolved)) score_ids else ind_names_resolved
+    labels_by_id <- if (show_labels) stats::setNames(display_labels, score_ids) else NULL
+    annotate_scores <- function(plot_data) {
+      if (!is.data.frame(plot_data)) {
+        return(plot_data)
+      }
+      if ("group" %in% names(plot_data)) {
+        plot_data$Group <- factor(as.character(plot_data$group), levels = names(cols))
+      }
+      if ("names" %in% names(plot_data)) {
+        plot_data$Sample <- as.character(plot_data$names)
+        plot_data$Response <- unname(response_by_id[plot_data$Sample])
+        if (show_labels) plot_data$names <- unname(labels_by_id[plot_data$Sample])
+      }
+      plot_data
     }
-    do.call(mixOmics::plotIndiv, args)
+    graph$data <- annotate_scores(graph$data)
+    for (layer in graph$layers) {
+      layer$data <- annotate_scores(layer$data)
+      if (inherits(layer$geom, "GeomText")) layer$aes_params$colour <- NULL
+    }
+    # mixOmics hides its points when sample names are supplied and uses fixed
+    # colors in extra point layers. Draw one mapped layer for both score panels.
+    graph$layers <- Filter(function(layer) !inherits(layer$geom, "GeomPoint"), graph$layers)
+    score_points <- ggplot2::geom_point(
+      size = font_settings_mixomics_indiv_cex(resolved_fonts$point_labels),
+      show.legend = if (has_group) TRUE else NA
+    )
+    if (!has_group) score_points$aes_params$shape <- 16
+    graph <- graph + score_points
+    if (!show_labels) {
+      graph$layers <- Filter(function(layer) !inherits(layer$geom, "GeomText"), graph$layers)
+    }
+    if (!has_group) {
+      graph <- graph + ggplot2::guides(shape = "none")
+    }
+    graph$scales$scales <- Filter(
+      function(scale) !"colour" %in% scale$aesthetics,
+      graph$scales$scales
+    )
+    graph <- graph + score_colour_mapping + score_colour_scale +
+      ggplot2::labs(title = title, subtitle = subtitle) +
+      metric_theme + sample_legend_theme +
+      ggplot2::theme(strip.text = ggplot2::element_text(size = 10))
+    graph <- apply_font_settings_ggplot(graph, resolved_fonts)
+    print(graph)
+  }
+
+  .format_metric <- function(value) {
+    label <- trimws(formatC(value, format = "g", digits = 3))
+    label[!is.finite(value)] <- "unavailable"
+    label
+  }
+
+  association_guidance <- paste(
+    "(0 to 1) measures linear association.",
+    "Near 0 is weak and near 1 is strong.",
+    "High R\u00b2 can coexist with large errors."
+  )
+  training_guidance <- c(
+    paste("Training R\u00b2 uses fitted values. R\u00b2", association_guidance),
+    paste(
+      "RMSE (0 or higher). Lower means smaller errors on the supplied outcome scale.",
+      "Compare it with an acceptable error."
+    )
+  )
+  .training_subtitle <- function(r2, rmse) {
+    paste(c(
+      "Training predictions",
+      paste0("R\u00b2 ", .format_metric(r2), " | RMSE ", .format_metric(rmse)),
+      strwrap(training_guidance, width = 46)
+    ), collapse = "\n")
+  }
+
+  .cv_summary <- function(cv_res, model, method_label, vip = FALSE) {
+    components <- seq_len(model$ncomp)
+    metrics <- data.frame(
+      Component = components, R2 = NA_real_, Q2 = NA_real_, RMSEP = NA_real_
+    )
+    response_feature <- model$names$colnames$Y[[1L]]
+    measure_names <- c(R2 = "R2", Q2 = "Q2.total", RMSEP = "MSEP")
+    for (metric in names(measure_names)) {
+      summary <- cv_res$measures[[measure_names[[metric]]]]$summary
+      if (is.null(summary) ||
+          !all(c("feature", "comp", "mean") %in% names(summary))) {
+        next
+      }
+      summary <- summary[
+        !is.na(summary$feature) & as.character(summary$feature) == response_feature,
+        , drop = FALSE
+      ]
+      values <- summary$mean[match(components, summary$comp)]
+      if (identical(metric, "RMSEP")) {
+        values[values < 0 & !is.na(values)] <- NA_real_
+        values <- sqrt(values)
+      }
+      metrics[[metric]] <- values
+    }
+
+    selected <- metrics[metrics$Component == model$ncomp, , drop = FALSE]
+    q2_label <- "Q\u00b2 (total)"
+    cv_r2_guidance <- paste(
+      "CV R\u00b2 uses cross-validated predictions. R\u00b2", association_guidance
+    )
+    cv_error_guidance <- c(
+      paste(
+        q2_label, "summarizes prediction through the displayed components.",
+        "Its maximum is 1. Above 0 is better, 0 is no improvement,",
+        "and below 0 is worse relative to the reference error."
+      ),
+      paste(
+        "RMSEP (0 or higher) measures cross-validation error on the standardized outcome scale.",
+        "Lower is better. Compare on the same outcome scale and validation setup."
+      )
+    )
+    subtitle <- paste(c(method_label, paste0(
+      "Component ", model$ncomp,
+      " | CV R\u00b2 ", .format_metric(selected$R2), "\n",
+      q2_label, " ", .format_metric(selected$Q2),
+      " | RMSEP ", .format_metric(selected$RMSEP), " (scaled)"
+    ), strwrap(cv_r2_guidance, width = 48)), collapse = "\n")
+    facet_labels <- c(q2_label, "RMSEP (scaled)")
+    vip_note <- if (vip) "Cross-validation within the selected VIP > 1 panel."
+    df_perf <- data.frame(
+      Component = rep(components, 2),
+      value = c(metrics$Q2, metrics$RMSEP),
+      metric = factor(
+        rep(facet_labels, each = length(components)), levels = facet_labels
+      )
+    )
+    df_perf <- df_perf[is.finite(df_perf$value), , drop = FALSE]
+    plot_title <- paste0(
+      "Cross-validation", if (vip) " (VIP > 1)" else "", " \u2014 ", response_col
+    )
+    g <- ggplot2::ggplot(df_perf, ggplot2::aes(Component, value)) +
+      ggplot2::geom_point(size = 3) +
+      ggplot2::facet_wrap(~metric, scales = "free_y", nrow = 1, drop = FALSE) +
+      ggplot2::scale_x_continuous(breaks = components) +
+      ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = c(0.05, 0.15))) +
+      ggplot2::labs(
+        title = plot_title,
+        subtitle = subtitle,
+        x = "Components", y = NULL,
+        caption = paste(strwrap(c(cv_error_guidance, vip_note), width = 52), collapse = "\n")
+      ) +
+      ggplot2::theme_minimal() + metric_theme +
+      ggplot2::theme(plot.caption = ggplot2::element_text(hjust = 0))
+    if (length(components) > 1L) {
+      line_data <- df_perf[
+        stats::ave(df_perf$Component, df_perf$metric, FUN = length) > 1,
+        , drop = FALSE
+      ]
+      g <- g + ggplot2::geom_line(data = line_data)
+    }
+    reference <- data.frame(
+      metric = factor(q2_label, levels = facet_labels),
+      Component = max(components), yint = 0
+    )
+    g <- g +
+      ggplot2::geom_hline(
+        data = reference, ggplot2::aes(yintercept = yint),
+        linetype = "dashed", colour = "gray40"
+      ) +
+      ggplot2::geom_label(
+        data = reference, ggplot2::aes(x = Component, y = yint),
+        label = "Q\u00b2 = 0 (reference)", inherit.aes = FALSE,
+        hjust = 1.04, vjust = -0.15, size = 9 / ggplot2::.pt, linewidth = 0
+      )
+    g <- apply_font_settings_ggplot(g, resolved_fonts)
+
+    text <- c(
+      paste(plot_title, method_label),
+      sprintf(
+        "Component %d | CV R2 %s | Q\u00b2 (total) %s | RMSEP (scaled) %s",
+        metrics$Component, .format_metric(metrics$R2),
+        .format_metric(metrics$Q2), .format_metric(metrics$RMSEP)
+      ),
+      cv_r2_guidance,
+      cv_error_guidance,
+      vip_note
+    )
+    list(plot = .record_plot(print(g)), text = text)
   }
 
   # --- fit model
@@ -725,46 +963,77 @@ cyt_plsr <- function(
   if (!is.null(progress)) {
     progress$inc(0.15, detail = "Building score and diagnostic plots")
   }
+  model_label <- if (isTRUE(sparse)) "Sparse PLSR" else "PLSR"
+  scores_title <- paste0(model_label, " scores \u2014 ", response_col)
+  training_subtitle <- .training_subtitle(r2_train, rmse_train)
+  sample_caption <- if (!has_group) "Each gray point represents one sample."
   scores_plot <- .record_plot(.plot_indiv(
     mdl,
-    groups,
-    sprintf(
-      "Scores (Comp 1-%d) R-Squared(train)=%.2f  RMSE=%.3g",
-      comp_num_eff,
-      r2_train,
-      rmse_train
-    ),
-    ind_names_resolved = lab_res
+    scores_title,
+    ind_names_resolved = lab_res,
+    subtitle = training_subtitle
   ))
 
   pvo <- .record_plot({
-    dfp <- data.frame(Observed = y, Predicted = yhat)
-    p <- ggplot2::ggplot(dfp, ggplot2::aes(Observed, Predicted)) +
-      ggplot2::geom_point() +
-      ggplot2::geom_abline(slope = 1, intercept = 0, linetype = 2) +
-      ggplot2::labs(
-        title = "Predicted vs Observed",
-        subtitle = sprintf(
-          "R-Squared(train)=%.2f  RMSE=%.3g",
-          r2_train,
-          rmse_train
-        )
+    dfp <- data.frame(
+      Sample = sample_ids, Observed = y, Predicted = yhat,
+      Group = factor(group_by_id[sample_ids], levels = names(cols))
+    )
+    prediction_range <- range(c(y, yhat), finite = TRUE)
+    prediction_padding <- diff(prediction_range) * 0.05
+    prediction_limits <- prediction_range + c(-prediction_padding, prediction_padding)
+    diagnostic_points <- if (has_group) {
+      ggplot2::geom_point(
+        ggplot2::aes(colour = .data[["Group"]]), alpha = 0.65, show.legend = TRUE
       )
+    } else {
+      ggplot2::geom_point(colour = "#555555", alpha = 0.65)
+    }
+    p <- ggplot2::ggplot(dfp, ggplot2::aes(Observed, Predicted)) +
+      diagnostic_points +
+      ggplot2::geom_abline(slope = 1, intercept = 0, linetype = 2) +
+      ggplot2::coord_fixed(
+        ratio = 1, xlim = prediction_limits, ylim = prediction_limits, expand = FALSE
+      ) +
+      ggplot2::labs(
+        title = paste0("Predicted vs observed \u2014 ", response_col),
+        subtitle = training_subtitle,
+        x = paste("Observed", response_col),
+        y = paste("Predicted", response_col),
+        caption = paste(c(
+          "Dashed line = exact prediction.",
+          "Closer points have smaller errors.",
+          sample_caption
+        ), collapse = "\n")
+      ) +
+      metric_theme
+    if (has_group) p <- p + group_colour_scale + sample_legend_theme
     p <- apply_font_settings_ggplot(p, resolved_fonts)
     print(p)
   })
   res_plot <- .record_plot({
-    dfr <- data.frame(Fitted = yhat, Residuals = y - yhat)
+    dfr <- data.frame(
+      Sample = sample_ids, Fitted = yhat, Residuals = y - yhat,
+      Group = factor(group_by_id[sample_ids], levels = names(cols))
+    )
     p <- ggplot2::ggplot(dfr, ggplot2::aes(Fitted, Residuals)) +
-      ggplot2::geom_point() +
+      diagnostic_points +
       ggplot2::geom_hline(yintercept = 0, linetype = 2) +
-      ggplot2::labs(title = "Residuals vs Fitted")
+      ggplot2::labs(
+        title = paste0("Residuals vs fitted \u2014 ", response_col),
+        subtitle = "Training residuals\nPoints closer to zero have smaller errors.",
+        x = paste("Predicted", response_col),
+        y = paste("Observed \u2212 predicted", response_col),
+        caption = sample_caption
+      )
+    if (has_group) p <- p + group_colour_scale + sample_legend_theme
     p <- apply_font_settings_ggplot(p, resolved_fonts)
     print(p)
   })
 
   # --- CV performance (optional)
   cv_plot <- NULL
+  cv_metrics_text <- vip_cv_metrics_text <- character(0)
 
   if (!is.null(cv_opt)) {
     if (!is.null(progress)) {
@@ -788,72 +1057,14 @@ cyt_plsr <- function(
     }
 
     if (!is.null(cv_res)) {
-      K <- comp_num_eff
       cv_title <- if (identical(cv_opt, "loocv")) {
         "LOOCV"
       } else {
         sprintf("M-fold (k=%d, nrepeat=100)", folds_safe)
       }
-
-      # 2) Extract the mean values from the '$summary$mean' column
-      q2_vals <- as.numeric(cv_res$measures$Q2.total$summary$mean)
-      msep_vals <- as.numeric(cv_res$measures$MSEP$summary$mean)
-
-      # 3) Calculate RMSEP and handle cases where perf includes a "comp 0"
-      rmsep_vals <- sqrt(tail(msep_vals, K))
-      q2_vals <- tail(q2_vals, K)
-
-      # 4) Build a tidy data frame for plotting
-      df_perf <- data.frame(
-        Component = c(seq_along(q2_vals), seq_along(rmsep_vals)),
-        value = c(q2_vals, rmsep_vals),
-        metric = factor(
-          c(
-            rep("Q-Squared", length(q2_vals)),
-            rep("RMSEP", length(rmsep_vals))
-          ),
-          levels = c("Q-Squared", "RMSEP")
-        )
-      )
-      df_perf <- df_perf[is.finite(df_perf$value), , drop = FALSE]
-
-      # 5) Generate plot from the tidy data frame
-      cv_plot <- .record_plot({
-        if (nrow(df_perf) > 0) {
-          g <- ggplot2::ggplot(
-            df_perf,
-            ggplot2::aes(x = Component, y = value)
-          ) +
-            ggplot2::geom_line() +
-            ggplot2::geom_point(size = 3) +
-            ggplot2::facet_wrap(~metric, scales = "free_y", nrow = 1) +
-            ggplot2::scale_x_continuous(breaks = seq_len(K)) +
-            ggplot2::labs(
-              title = paste("Cross-validation:", cv_title),
-              x = "Components",
-              y = NULL
-            ) +
-            ggplot2::theme_minimal() +
-            ggplot2::geom_hline(
-              data = data.frame(
-                metric = factor("Q-Squared", levels = c("Q-Squared", "RMSEP")),
-                yint = 0
-              ),
-              ggplot2::aes(yintercept = yint),
-              linetype = "dashed",
-              color = "gray40"
-            )
-          g <- apply_font_settings_ggplot(g, resolved_fonts)
-
-          print(g)
-        } else {
-          empty_plot <- ggplot2::ggplot() +
-            ggplot2::theme_minimal() +
-            ggplot2::labs(title = "CV results not available.")
-          empty_plot <- apply_font_settings_ggplot(empty_plot, resolved_fonts)
-          print(empty_plot)
-        }
-      })
+      cv_summary <- .cv_summary(cv_res, mdl, cv_title)
+      cv_plot <- cv_summary$plot
+      cv_metrics_text <- cv_summary$text
     }
   }
 
@@ -881,9 +1092,6 @@ cyt_plsr <- function(
   })
 
   # --- VIP & optional VIP>1 refit preview
-  q2_vals_vip <- numeric(0)
-  rmsep_vals_vip <- numeric(0)
-
   vip_scores <- vip_indiv_plot <- vip_cv_plot <- NULL
   vip_all <- try(mixOmics::vip(mdl), silent = TRUE)
   if (!inherits(vip_all, "try-error")) {
@@ -976,9 +1184,11 @@ cyt_plsr <- function(
         )
         vip_indiv_plot <- .record_plot(.plot_indiv(
           mdl_vip,
-          droplevels(factor(groups[vip_row_keep])),
-          sprintf("Scores (VIP>1) R-Squared(train)=%.2f", r2_vip),
-          ind_names_resolved = .subset_ind_names(lab_res, vip_row_keep)
+          paste0(model_label, " scores (VIP > 1) \u2014 ", response_col),
+          ind_names_resolved = .subset_ind_names(lab_res, vip_row_keep),
+          subtitle = .training_subtitle(
+            r2_vip, sqrt(mean((y_vip - yhat_vip)^2, na.rm = TRUE))
+          )
         ))
         if (!is.null(cv_opt)) {
           set.seed(123)
@@ -1007,73 +1217,9 @@ cyt_plsr <- function(
           }
 
           if (!is.null(per2)) {
-            K <- comp_num_eff_vip
-
-            # Extract metrics using '$measures$METRIC$summary$mean'
-            q2_vals_vip <- as.numeric(per2$measures$Q2.total$summary$mean)
-            msep_vals_vip <- as.numeric(per2$measures$MSEP$summary$mean)
-
-            # Calculate RMSEP and handle cases where perf includes a "comp 0"
-            rmsep_vals_vip <- sqrt(tail(msep_vals_vip, K))
-            q2_vals_vip <- tail(q2_vals_vip, K)
-
-            # Build a tidy data frame for plotting
-            df_vip_perf <- data.frame(
-              Component = c(seq_along(q2_vals_vip), seq_along(rmsep_vals_vip)),
-              value = c(q2_vals_vip, rmsep_vals_vip),
-              metric = factor(
-                c(
-                  rep("Q-Squared", length(q2_vals_vip)),
-                  rep("RMSEP", length(rmsep_vals_vip))
-                ),
-                levels = c("Q-Squared", "RMSEP")
-              )
-            )
-            df_vip_perf <- df_vip_perf[
-              is.finite(df_vip_perf$value),
-              ,
-              drop = FALSE
-            ]
-
-            vip_cv_plot <- .record_plot({
-              if (nrow(df_vip_perf) > 0) {
-                g <- ggplot2::ggplot(
-                  df_vip_perf,
-                  ggplot2::aes(x = Component, y = value)
-                ) +
-                  ggplot2::geom_line(na.rm = TRUE) +
-                  ggplot2::geom_point(size = 2, na.rm = TRUE) +
-                  ggplot2::facet_wrap(~metric, scales = "free_y", nrow = 1) +
-                  ggplot2::scale_x_continuous(breaks = seq_len(K)) +
-                  ggplot2::labs(
-                    title = paste("Cross-validation (VIP > 1):", cv_title),
-                    x = "Components",
-                    y = NULL
-                  ) +
-                  ggplot2::theme_minimal(base_size = 12) +
-                  ggplot2::geom_hline(
-                    data = data.frame(
-                      metric = factor(
-                        "Q-Squared",
-                        levels = c("Q-Squared", "RMSEP")
-                      ),
-                      yint = 0
-                    ),
-                    ggplot2::aes(yintercept = yint),
-                    linetype = "dashed",
-                    color = "gray40"
-                  )
-                g <- apply_font_settings_ggplot(g, resolved_fonts)
-                print(g)
-              } else {
-                empty_plot <- ggplot2::ggplot() + ggplot2::theme_minimal()
-                empty_plot <- apply_font_settings_ggplot(
-                  empty_plot,
-                  resolved_fonts
-                )
-                print(empty_plot)
-              }
-            })
+            cv_summary <- .cv_summary(per2, mdl_vip, cv_title, vip = TRUE)
+            vip_cv_plot <- cv_summary$plot
+            vip_cv_metrics_text <- cv_summary$text
           }
         }
       }
@@ -1086,17 +1232,13 @@ cyt_plsr <- function(
       progress$inc(0.05, detail = "Writing output file")
     }
     grDevices::pdf(output_file, width = 10, height = 8)
-    on.exit(grDevices::dev.off(), add = TRUE)
+    output_device <- grDevices::dev.cur()
+    on.exit(grDevices::dev.off(output_device), add = TRUE)
     .plot_indiv(
       mdl,
-      groups,
-      sprintf(
-        "Scores (Comp 1-%d) R-Squared(train)=%.2f RMSE=%.3g",
-        comp_num_eff,
-        r2_train,
-        rmse_train
-      ),
-      ind_names_resolved = lab_res
+      scores_title,
+      ind_names_resolved = lab_res,
+      subtitle = training_subtitle
     )
     print(grDevices::replayPlot(pvo))
     print(grDevices::replayPlot(res_plot))
@@ -1129,29 +1271,20 @@ cyt_plsr <- function(
     progress$inc(0.1, detail = "Formatting results")
   }
   # --- build metrics text ---
-  metrics_text <- if (!is.null(cv_opt)) {
-    paste(
-      sprintf("Q2 (comp %d): %.3f", seq_along(q2_vals), q2_vals),
-      sprintf("RMSEP (comp %d): %.3f", seq_along(rmsep_vals), rmsep_vals),
-      if (length(q2_vals_vip)) {
-        sprintf("Q2 VIP>1 (comp %d): %.3f", seq_along(q2_vals_vip), q2_vals_vip)
-      },
-      if (length(rmsep_vals_vip)) {
-        sprintf(
-          "RMSEP VIP>1 (comp %d): %.3f",
-          seq_along(rmsep_vals_vip),
-          rmsep_vals_vip
-        )
-      },
-      unique(metrics_notes),
-      collapse = "\n"
-    )
-  } else {
-    paste(
-      c("No cross-validation performed.", unique(metrics_notes)),
-      collapse = "\n"
-    )
-  }
+  metrics_text <- paste(
+    c(
+      paste(model_label, response_col),
+      sprintf(
+        "Training R2 %s | RMSE %s on the supplied outcome scale.",
+        .format_metric(r2_train), .format_metric(rmse_train)
+      ),
+      training_guidance,
+      if (is.null(cv_opt)) "No cross-validation performed." else cv_metrics_text,
+      vip_cv_metrics_text,
+      unique(metrics_notes)
+    ),
+    collapse = "\n"
+  )
   if (!is.null(progress)) {
     progress$set(message = analysis_label, value = 1, detail = "Finished")
   }

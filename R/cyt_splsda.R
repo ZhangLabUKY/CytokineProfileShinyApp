@@ -112,6 +112,10 @@ cyt_splsda <- function(
   progress = NULL
 ) {
   `%notin%` <- function(x, y) !(x %in% y)
+  cv_opt <- if (!is.null(cv_opt)) tolower(cv_opt) else NULL
+  if (identical(cv_opt, "none")) {
+    cv_opt <- NULL
+  }
 
   if (!is.null(progress)) {
     progress$set(message = "Running sPLS-DA...", value = 0)
@@ -445,6 +449,94 @@ cyt_splsda <- function(
     do.call(mixOmics::plotIndiv, args)
   }
 
+  .cv_performance <- function(model, predictors, label) {
+    if (is.null(cv_opt)) {
+      return(list(plot = NULL, accuracy = NA_real_))
+    }
+
+    cv_res <- if (identical(cv_opt, "loocv")) {
+      mixOmics::perf(model, validation = "loo", seed = seed)
+    } else if (identical(cv_opt, "mfold")) {
+      mixOmics::perf(
+        model,
+        validation = "Mfold",
+        folds = max(2, min(fold_num, nrow(predictors))),
+        nrepeat = 100,
+        seed = seed
+      )
+    } else {
+      return(list(plot = NULL, accuracy = NA_real_))
+    }
+
+    error_rates <- cv_res$error.rate$overall
+    if (is.null(error_rates) || !"max.dist" %in% colnames(error_rates)) {
+      components <- seq_len(model$ncomp)
+      errors <- rep(NA_real_, model$ncomp)
+    } else {
+      errors <- error_rates[, "max.dist", drop = TRUE]
+      components <- if (is.null(rownames(error_rates))) {
+        seq_along(errors)
+      } else {
+        as.integer(gsub("[^0-9]", "", rownames(error_rates)))
+      }
+    }
+    fitted_error <- errors[match(model$ncomp, components)]
+    accuracy <- if (length(fitted_error) == 1L && is.finite(fitted_error)) {
+      100 * (1 - fitted_error)
+    } else {
+      NA_real_
+    }
+    accuracy_text <- if (is.finite(accuracy)) {
+      sprintf("%.1f%%", accuracy)
+    } else {
+      "unavailable"
+    }
+
+    cv_plot <- ggplot2::ggplot(
+      data.frame(Component = components, ErrorRate = errors),
+      ggplot2::aes(Component, ErrorRate)
+    ) +
+      ggplot2::geom_line(na.rm = TRUE) +
+      ggplot2::geom_point(size = 3, na.rm = TRUE) +
+      ggplot2::geom_vline(xintercept = model$ncomp, linetype = 2) +
+      ggplot2::labs(
+        title = paste(if (identical(cv_opt, "loocv")) "LOOCV" else "Mfold",
+                      "Error Rate:", label),
+        x = "Components",
+        y = "Error rate",
+        subtitle = sprintf(
+          "Fitted components = %d | CV accuracy: %s",
+          model$ncomp, accuracy_text
+        )
+      ) +
+      ggplot2::theme_minimal()
+
+    list(
+      plot = apply_font_settings_ggplot(cv_plot, resolved_fonts),
+      accuracy = accuracy
+    )
+  }
+
+  .score_title <- function(label, training_accuracy, cv_accuracy, vip = FALSE) {
+    heading <- paste(if (vip) "sPLS-DA (VIP > 1)" else "sPLS-DA", group_col)
+    if (!is.null(group_col2) && !identical(group_col, group_col2)) {
+      heading <- paste(heading, label, sep = " \u2014 ")
+    }
+    cv_text <- if (is.null(cv_opt)) {
+      "CV not run"
+    } else if (is.finite(cv_accuracy)) {
+      sprintf("Acc (CV): %.1f%%", cv_accuracy)
+    } else {
+      "CV unavailable"
+    }
+    training_text <- if (is.finite(training_accuracy)) {
+      sprintf("Acc (Train): %.1f%%", training_accuracy)
+    } else {
+      "Acc (Train): unavailable"
+    }
+    paste0(heading, "\n", training_text, " | ", cv_text)
+  }
+
   # record base graphics into replayable plot objects
   .record_plot <- function(expr) {
     if (grDevices::dev.cur() == 1) {
@@ -523,6 +615,16 @@ cyt_splsda <- function(
     pred_class <- pred$class$max.dist[, comp_num_eff]
     acc1 <- .acc_pct(pred_class, Y)
 
+    if (!is.null(progress) && !is.null(cv_opt)) {
+      progress$inc(
+        progress_share * stage_weights$cross_validation,
+        detail = paste("Running cross-validation for", label)
+      )
+    }
+    cv_main <- .cv_performance(mdl, X, label)
+    indiv_CV <- cv_main$plot
+    indiv_title <- .score_title(label, acc1, cv_main$accuracy)
+
     # plots (interactive)
     if (!is.null(progress)) {
       progress$inc(
@@ -540,7 +642,7 @@ cyt_splsda <- function(
     indiv_plot <- .record_plot(.plot_indiv(
       mdl,
       Y,
-      sprintf("%s With Accuracy: %s %%", label, round(acc1, 1)),
+      indiv_title,
       ind_names_resolved = lab_res
     ))
 
@@ -634,83 +736,6 @@ cyt_splsda <- function(
       })
     }
 
-    # CV (optional)
-    indiv_CV <- NULL
-    if (!is.null(cv_opt)) {
-      if (!is.null(progress)) {
-        progress$inc(
-          progress_share * stage_weights$cross_validation,
-          detail = paste("Running cross-validation for", label)
-        )
-      }
-      if (identical(cv_opt, "loocv")) {
-        cv_res <- mixOmics::perf(mdl, validation = "loo", seed = seed)
-        dist_use <- "max.dist"
-        er <- cv_res$error.rate$overall[, dist_use, drop = TRUE]
-        k_star <- tryCatch(
-          cv_res$choice.ncomp[[dist_use]],
-          error = function(e) {
-            length(er)
-          }
-        )
-        indiv_CV <- ggplot2::ggplot(
-          data.frame(Component = seq_along(er), ErrorRate = er),
-          ggplot2::aes(Component, ErrorRate)
-        ) +
-          ggplot2::geom_line() +
-          ggplot2::geom_point(size = 3) +
-          ggplot2::labs(
-            title = paste("LOOCV Error Rate:", label),
-            x = "Components",
-            y = "Error rate",
-            subtitle = sprintf(
-              "Chosen components = %d | CV accuracy: %.1f%%",
-              k_star,
-              100 * (1 - er[k_star])
-            )
-          ) +
-          ggplot2::geom_vline(xintercept = k_star, linetype = 2) +
-          ggplot2::theme_minimal()
-        indiv_CV <- apply_font_settings_ggplot(indiv_CV, resolved_fonts)
-      } else if (identical(cv_opt, "mfold")) {
-        folds_safe <- max(2, min(fold_num, nrow(X)))
-        cv_res <- mixOmics::perf(
-          mdl,
-          validation = "Mfold",
-          folds = folds_safe,
-          nrepeat = 100,
-          seed = seed
-        )
-        dist_use <- "max.dist"
-        er <- cv_res$error.rate$overall[, dist_use, drop = TRUE]
-        k_star <- tryCatch(
-          cv_res$choice.ncomp[[dist_use]],
-          error = function(e) {
-            length(er)
-          }
-        )
-        indiv_CV <- ggplot2::ggplot(
-          data.frame(Component = seq_along(er), ErrorRate = er),
-          ggplot2::aes(Component, ErrorRate)
-        ) +
-          ggplot2::geom_line() +
-          ggplot2::geom_point(size = 3) +
-          ggplot2::labs(
-            title = paste("Mfold Error Rate:", label),
-            x = "Components",
-            y = "Error rate",
-            subtitle = sprintf(
-              "Chosen components = %d | CV accuracy: %.1f%%",
-              k_star,
-              100 * (1 - er[k_star])
-            )
-          ) +
-          ggplot2::geom_vline(xintercept = k_star, linetype = 2) +
-          ggplot2::theme_minimal()
-        indiv_CV <- apply_font_settings_ggplot(indiv_CV, resolved_fonts)
-      }
-    }
-
     # loadings + VIP
     if (!is.null(progress)) {
       progress$inc(
@@ -788,14 +813,14 @@ cyt_splsda <- function(
       vip_class <- vip_pred$class$max.dist[, comp_num_eff]
       acc2 <- .acc_pct(vip_class, Y)
 
+      cv_vip <- .cv_performance(mdl_vip, Xvip, paste("VIP > 1:", label))
+      vip_CV <- cv_vip$plot
+      vip_title <- .score_title(label, acc2, cv_vip$accuracy, vip = TRUE)
+
       vip_indiv_plot <- .record_plot(.plot_indiv(
         mdl_vip,
         Y,
-        sprintf(
-          "sPLS-DA (VIP > 1): %s With Accuracy: %s %%",
-          label,
-          round(acc2, 1)
-        ),
+        vip_title,
         ind_names_resolved = lab_res
       ))
       vip_loadings <- lapply(seq_len(comp_num_eff), function(k) {
@@ -891,68 +916,6 @@ cyt_splsda <- function(
           )
         })
       }
-      if (!is.null(cv_opt)) {
-        if (identical(cv_opt, "loocv")) {
-          cv2 <- mixOmics::perf(mdl_vip, validation = "loo", seed = seed)
-          dist_use <- "max.dist"
-          er <- cv2$error.rate$overall[, dist_use, drop = TRUE]
-          k_star <- tryCatch(cv2$choice.ncomp[[dist_use]], error = function(e) {
-            length(er)
-          })
-          vip_CV <- ggplot2::ggplot(
-            data.frame(Component = seq_along(er), ErrorRate = er),
-            ggplot2::aes(Component, ErrorRate)
-          ) +
-            ggplot2::geom_line() +
-            ggplot2::geom_point(size = 3) +
-            ggplot2::labs(
-              title = paste("LOOCV Error Rate (VIP>1):", label),
-              x = "Components",
-              y = "Error rate",
-              subtitle = sprintf(
-                "Chosen components = %d | CV accuracy: %.1f%%",
-                k_star,
-                100 * (1 - er[k_star])
-              )
-            ) +
-            ggplot2::geom_vline(xintercept = k_star, linetype = 2) +
-            ggplot2::theme_minimal()
-          vip_CV <- apply_font_settings_ggplot(vip_CV, resolved_fonts)
-        } else if (identical(cv_opt, "mfold")) {
-          folds_safe <- max(2, min(fold_num, nrow(Xvip)))
-          cv2 <- mixOmics::perf(
-            mdl_vip,
-            validation = "Mfold",
-            folds = folds_safe,
-            nrepeat = 100,
-            seed = seed
-          )
-          dist_use <- "max.dist"
-          er <- cv2$error.rate$overall[, dist_use, drop = TRUE]
-          k_star <- tryCatch(cv2$choice.ncomp[[dist_use]], error = function(e) {
-            length(er)
-          })
-          vip_CV <- ggplot2::ggplot(
-            data.frame(Component = seq_along(er), ErrorRate = er),
-            ggplot2::aes(Component, ErrorRate)
-          ) +
-            ggplot2::geom_line() +
-            ggplot2::geom_point(size = 3) +
-            ggplot2::labs(
-              title = paste("Mfold Error Rate (VIP>1):", label),
-              x = "Components",
-              y = "Error rate",
-              subtitle = sprintf(
-                "Chosen components = %d | CV accuracy: %.1f%%",
-                k_star,
-                100 * (1 - er[k_star])
-              )
-            ) +
-            ggplot2::geom_vline(xintercept = k_star, linetype = 2) +
-            ggplot2::theme_minimal()
-          vip_CV <- apply_font_settings_ggplot(vip_CV, resolved_fonts)
-        }
-      }
     } else if (vip_count > 0) {
       warning(
         sprintf(
@@ -1030,7 +993,7 @@ cyt_splsda <- function(
       .plot_indiv(
         mdl,
         Y,
-        sprintf("%s With Accuracy: %s %%", label, round(acc1, 1)),
+        indiv_title,
         ind_names_resolved = lab_res
       )
       # 3D (if any)
@@ -1103,11 +1066,7 @@ cyt_splsda <- function(
         .plot_indiv(
           mdl_vip,
           Y,
-          sprintf(
-            "sPLS-DA (VIP > 1): %s With Accuracy: %s %%",
-            label,
-            round(acc2, 1)
-          ),
+          vip_title,
           ind_names_resolved = lab_res
         )
         if (!is.null(style) && tolower(style) == "3d" && comp_num_eff == 3) {

@@ -32,8 +32,9 @@ Must be numeric.}
 
 \item{predictor_cols}{Character vector of column names to use as predictors.}
 
-\item{group_col}{The name of the column to use for grouping samples in the
-score plot. If \code{NULL}, no grouping is applied.}
+\item{group_col}{Optional column used to color groups consistently across
+score, prediction, and residual plots. If \code{NULL}, score plots are colored
+by observed response values and diagnostic plots use gray points.}
 
 \item{ind_names}{Logical, or a character vector. If \code{TRUE}, sample names are
 displayed on the plot. If a character vector, these names are used.}
@@ -63,7 +64,8 @@ transformation), \code{"none"}, \code{"log2"}, \code{"log10"},
 \item{ellipse}{Logical. If \code{TRUE}, draws 95\% confidence ellipses on the
 score plot.}
 
-\item{pls_colors}{A character vector of colors to use for grouping.}
+\item{pls_colors}{A character vector of colors for categorical groups,
+shared across score, prediction, residual, and VIP score plots.}
 
 \item{output_file}{Optional. A file path to save the plots as a PDF.}
 
@@ -84,7 +86,8 @@ A list containing:
 with VIP > 1, if applicable.}
 \item{vip_cv_plot}{A recorded plot of cross-validation performance for
 variables with VIP > 1, if applicable.}
-\item{metrics_text}{Text summary of Q2 values, if available.}
+\item{metrics_text}{Training performance and CV R2, Q2 (total),
+and scaled RMSEP summaries, when cross-validation is enabled.}
 \item{pdf_file}{The path to the generated PDF file, if \code{output_file} was
 provided.}
 }

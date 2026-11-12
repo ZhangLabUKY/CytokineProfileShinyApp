@@ -344,7 +344,7 @@ test_that("cyt_splsda uses comparison-column and split labels in plot titles", {
 
     expect_true(startsWith(
       title_capture$plot_indiv[[1]],
-      "Group With Accuracy:"
+      "sPLS-DA Group\nAcc (Train):"
     ))
     expect_true(
       any(grepl(
@@ -384,7 +384,7 @@ test_that("cyt_splsda uses comparison-column and split labels in plot titles", {
     expect_true(
       startsWith(
         title_capture$plot_indiv[[1]],
-        paste(split_label, "With Accuracy:")
+        paste0("sPLS-DA Group \u2014 ", split_label, "\nAcc (Train):")
       )
     )
     expect_true(any(grepl(
@@ -1279,6 +1279,17 @@ test_that("cyt_plsr supports CV, font settings, named labels, and PDF output", {
   on.exit(unlink(output_file), add = TRUE)
   progress <- make_progress_recorder()
 
+  cv_results <- list()
+  original_perf <- mixOmics::perf
+  testthat::local_mocked_bindings(
+    perf = function(object, validation, ...) {
+      result <- original_perf(object, validation = validation, ...)
+      if (is.null(cv_results[[validation]])) cv_results[[validation]] <<- result
+      result
+    },
+    .package = "mixOmics"
+  )
+
   mfold_result <- cyt_plsr(
     plsr_df,
     response_col = "IL.10",
@@ -1311,9 +1322,22 @@ test_that("cyt_plsr supports CV, font settings, named labels, and PDF output", {
   expect_true(file.exists(output_file))
   expect_equal(mfold_result$pdf_file, output_file)
   expect_true(inherits(mfold_result$cv_plot, "recordedplot"))
-  expect_true(grepl("Q2", mfold_result$metrics_text, fixed = TRUE))
   expect_true(inherits(loocv_result$cv_plot, "recordedplot"))
-  expect_true(grepl("Q2", loocv_result$metrics_text, fixed = TRUE))
+  for (validation in c("Mfold", "loo")) {
+    measures <- cv_results[[validation]]$measures
+    component_2 <- function(measure) {
+      summary <- measures[[measure]]$summary
+      summary$mean[summary$feature == "Y" & summary$comp == 2]
+    }
+    values <- c(component_2("R2"), component_2("Q2.total"), sqrt(component_2("MSEP")))
+    formatted <- trimws(formatC(values, digits = 3, format = "g"))
+    expected <- sprintf(
+      "Component 2 | CV R2 %s | Q\u00b2 (total) %s | RMSEP (scaled) %s",
+      formatted[1], formatted[2], formatted[3]
+    )
+    result <- if (validation == "Mfold") mfold_result else loocv_result
+    expect_match(result$metrics_text, expected, fixed = TRUE)
+  }
   expect_gt(length(progress$get_log()$inc), 0)
 })
 

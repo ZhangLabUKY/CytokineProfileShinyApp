@@ -65,7 +65,8 @@ The highest-value controls are:
 * **Use fewer measurements per component** selects whether the model keeps all predictors or enforces variable selection.
 * **Measurements to keep per component** selects how many predictors are retained per component when **Use fewer measurements per component** is turned on.
 * **Check model performance (cross-validation)** and `Number of Folds` control how the app holds back samples to check predictions.
-* **Color samples by (optional)** and `Ellipse` help distinguish groups in the score plot. The grouping column is excluded from the measurements the model can use.
+* **Color samples by (optional)** uses the same group colors across score, prediction, and residual plots. `Ellipse` adds group ellipses to score plots. The grouping column is excluded from the measurements the model can use.
+* **Colors (optional)** assigns custom colors to the selected groups. When no grouping column is selected, score plots use a continuous scale for the observed response and the diagnostic plots use gray points.
 
 In practice, **Numeric measurement to predict**, **Measurements used to predict**, and `Number of Components` define the model, while **Use fewer measurements per component** changes how simple or dense the predictor set remains.
 
@@ -75,6 +76,12 @@ In practice, **Numeric measurement to predict**, **Measurements used to predict*
 
 This plot shows the samples in the reduced component space. It is most useful for asking whether samples with similar response behavior also occupy similar positions in the latent space.
 
+The **Measurement patterns (X)** panel positions samples using patterns in the predictor measurements. The **Response patterns (Y)** panel shows the response-side scores. The axes identify Component 1 and Component 2. A one-component model shows samples along Component 1.
+
+With a grouping column selected, the legend pairs each group with its color swatch. Group colors match across the main scores, VIP scores, predictions, and residuals. Samples with missing group labels appear in gray and remain in the model. Without grouping, the **Observed [outcome name]** legend shows a fixed viridis gradient from dark purple for low values to yellow for high values. The main and VIP score plots use the same low, midpoint, and high values, so a given color represents the same observed value in both plots. The midpoint is halfway between the displayed limits.
+
+The heading identifies the response measurement. Beneath it, **Training R²** measures the linear association between observed and fitted values. It ranges from 0 to 1. Values near 0 indicate weak association, and values near 1 indicate strong association. A high R² can coexist with large prediction errors. **Training RMSE** is 0 or higher, with smaller values indicating smaller errors on the outcome scale supplied to the model. Use the original measurement units when the outcome was left untransformed, and the transformed scale when preprocessing changed it. Compare RMSE with the error you can tolerate for the measurement.
+
 Interpretation checklist:
 
 1. Check whether samples with similar biology or known groups cluster loosely together.
@@ -83,10 +90,12 @@ Interpretation checklist:
 
 ### Predicted vs Observed
 
-This is one of the most important plots because it shows how closely the fitted values track the true response.
+This figure compares the observed response on the horizontal axis with the model's predictions on the vertical axis. The response column is included in both axis labels. These are training predictions from samples used to fit the model.
 
-* points close to the diagonal suggest stronger predictive agreement
-* wide scatter suggests weaker predictive value
+Both axes use the same limits and scale. The plot includes the full range of observed values and finite predictions, including negative predictions. Transparent points help show where samples overlap. In ungrouped prediction and residual plots, each gray point represents one sample.
+
+* points close to the dashed diagonal have smaller training errors
+* wide scatter indicates larger training errors
 * systematic curvature or separation can suggest the model is missing structure
 
 If this plot looks weak, then attractive scores or loadings plots should be interpreted cautiously.
@@ -94,6 +103,8 @@ If this plot looks weak, then attractive scores or loadings plots should be inte
 ### Residuals vs Fitted
 
 This plot helps you judge model misfit.
+
+The horizontal axis shows predicted response values. The vertical axis shows **Observed − predicted**, so a positive residual means the model predicted too low and a negative residual means it predicted too high. Points closer to zero have smaller errors.
 
 * a roughly patternless cloud is more reassuring
 * strong trends or funnels suggest the model error changes across the fitted range
@@ -112,6 +123,18 @@ These plots show which cytokines contribute most strongly to each component.
 VIP scores summarize predictor importance across the model. They are useful for prioritization rather than formal hypothesis testing.
 
 A common rule of thumb is that predictors above 1 are more influential, which is why the app can also show `VIP > 1` views.
+
+### Cross-Validation
+
+The CV figure identifies the validation method and displays **CV R²**, **Q² (total)**, and **scaled RMSEP** for the displayed component count. Its two panels show Q² (total) and scaled RMSEP across component counts.
+
+* **CV R²** measures the linear association between observed values and the cross-validated predictions produced by mixOmics. It ranges from 0 to 1, from weak to strong linear association. Use it alongside prediction error.
+* **Q² (total)** summarizes predictive performance through the displayed number of components relative to the reference error used by mixOmics. Its upper limit is 1. Values above 0 indicate improvement, values on the dashed zero line indicate no improvement, and values below 0 indicate worse performance relative to that reference.
+* **RMSEP (scaled)** is 0 or higher. Lower values indicate smaller cross-validated prediction errors on the standardized outcome scale. Compare results using the same outcome scaling and validation procedure. For repeated M-fold CV, the app takes the square root of the mean MSEP across repetitions.
+
+Interpret the CV summaries alongside the error curves and the number of components used. See the [mixOmics performance implementation](https://raw.githubusercontent.com/mixOmicsTeam/mixOmics/master/R/perf.R) for the metric definitions.
+
+The **VIP > 1** score and CV figures use metrics from their own refitted model. CV for that preview assesses performance within the feature panel already selected from the full dataset.
 
 ## Common cautions
 

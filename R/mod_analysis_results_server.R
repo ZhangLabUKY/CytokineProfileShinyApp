@@ -1879,14 +1879,14 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
               shiny::tabPanel(
                 "Scores Plot",
                 shinycssloaders::withSpinner(
-                  shiny::plotOutput("plsr_indivPlot", height = "400px"),
+                  shiny::plotOutput("plsr_indivPlot", height = "440px"),
                   type = 8
                 )
               ),
               shiny::tabPanel(
                 "Predicted vs Observed",
                 shinycssloaders::withSpinner(
-                  shiny::plotOutput("plsr_predPlot", height = "400px"),
+                  shiny::plotOutput("plsr_predPlot", height = "520px"),
                   type = 8
                 )
               ),
@@ -1915,7 +1915,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                 shiny::tabPanel(
                   "Cross-Validation",
                   shinycssloaders::withSpinner(
-                    shiny::plotOutput("plsr_cvPlot", height = "400px"),
+                    shiny::plotOutput("plsr_cvPlot", height = "460px"),
                     type = 8
                   )
                 )
@@ -1924,7 +1924,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                 shiny::tabPanel(
                   "VIP > 1: Scores",
                   shinycssloaders::withSpinner(
-                    shiny::plotOutput("plsr_vipIndivPlot", height = "400px"),
+                    shiny::plotOutput("plsr_vipIndivPlot", height = "440px"),
                     type = 8
                   )
                 )
@@ -1933,7 +1933,7 @@ mod_analysis_results_server <- function(input, output, session, app_ctx) {
                 shiny::tabPanel(
                   "VIP > 1: Cross-Validation",
                   shinycssloaders::withSpinner(
-                    shiny::plotOutput("plsr_vipCVPlot", height = "400px"),
+                    shiny::plotOutput("plsr_vipCVPlot", height = "460px"),
                     type = 8
                   )
                 )

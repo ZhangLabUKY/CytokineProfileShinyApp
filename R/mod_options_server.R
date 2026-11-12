@@ -1948,7 +1948,7 @@ mod_options_server <- function(input, output, session, app_ctx) {
                   shiny_tag = shiny::HTML(
                     "<span style='margin-right: 15px;'>Color samples by (optional)</span>"
                   ),
-                  content = "Choose a column such as Treatment to color the score plot. The model excludes that column from its predictors. Leave blank to show the scores without group colors.",
+                  content = "Choose a column such as Treatment to use the same group colors across score, prediction, and residual plots. The model excludes that column from its predictors. Leave blank to color score plots by the observed response value and show prediction and residual plots in gray.",
                   colour = if (input$theme_choice %in% c("darkly", "cyborg")) {
                     "red"
                   } else {
@@ -1993,7 +1993,7 @@ mod_options_server <- function(input, output, session, app_ctx) {
                   shiny_tag = shiny::HTML(
                     "<span style='margin-right: 15px;'>Colors (optional)</span>"
                   ),
-                  content = "Choose custom colors for the PLSR score plot groups. If you leave this empty, the app will assign colors automatically. Set them manually when you need consistent group colors across several figures or reports.",
+                  content = "Choose custom colors for the groups selected under Color samples by. The same group colors are used across score, prediction, residual, and VIP score plots. Leave this empty to assign group colors automatically. Ungrouped score plots use a continuous response-value color scale.",
                   colour = if (input$theme_choice %in% c("darkly", "cyborg")) {
                     "red"
                   } else {
